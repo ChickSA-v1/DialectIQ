@@ -20,7 +20,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// ═══════════════════════════════════════════════════════════\n// Configure your businesses here.\n// Works for ANY institution: restaurants, clinics, banks,\n// telecom, malls, government services, etc.\n// ═══════════════════════════════════════════════════════════\n\nconst businesses = [\n  {\n    place_id: 'ChIJN1t_tDeuEmsRUsoyG83frY4',   // Replace with real place_id\n    business_name: 'My Business'                  // Replace with real name\n  },\n  // Add more businesses below:\n  // {\n  //   place_id: 'ChIJ...',\n  //   business_name: 'Another Business'\n  // },\n];\n\nreturn businesses.map(b => ({ json: b }));"
+        "jsCode": "// ═══════════════════════════════════════════════════════════\n// Configure your businesses here.\n// Works for ANY institution: restaurants, clinics, banks,\n// telecom, malls, government services, etc.\n// ═══════════════════════════════════════════════════════════\n\nconst businesses = [\n  {\n    place_id: 'ChIJp7SmRtD9Lj4RwTc9dyuAZPQ',\n    business_name: 'فندق نسيمة للشقق الفندقية'\n  },\n  // Add more businesses below:\n  // {\n  //   place_id: 'ChIJ...',\n  //   business_name: 'Another Business'\n  // },\n];\n\nreturn businesses.map(b => ({ json: b }));"
       },
       "id": "list-businesses",
       "name": "List Businesses",
