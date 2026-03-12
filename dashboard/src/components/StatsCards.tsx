@@ -1,6 +1,7 @@
 "use client";
 
 import { DashboardStats } from "@/lib/types";
+import { useI18n } from "@/lib/i18n";
 import {
   MessageSquareText,
   TrendingUp,
@@ -13,18 +14,19 @@ interface Props {
 }
 
 export default function StatsCards({ stats }: Props) {
+  const { t } = useI18n();
   const highUrgency = stats.urgency_breakdown["High"] ?? 0;
 
   const cards = [
     {
-      label: "Total Reviews",
+      label: t("stats.totalReviews"),
       value: stats.total_reviews.toLocaleString(),
       icon: MessageSquareText,
       color: "text-indigo-600",
       bg: "bg-indigo-50",
     },
     {
-      label: "Avg Sentiment",
+      label: t("stats.avgSentiment"),
       value: stats.avg_sentiment !== null ? `${stats.avg_sentiment}/10` : "—",
       icon: TrendingUp,
       color:
@@ -41,7 +43,7 @@ export default function StatsCards({ stats }: Props) {
             : "bg-red-50",
     },
     {
-      label: "Avg Rating",
+      label: t("stats.avgRating"),
       value:
         stats.avg_rating !== null
           ? `${stats.avg_rating} ★`
@@ -51,7 +53,7 @@ export default function StatsCards({ stats }: Props) {
       bg: "bg-amber-50",
     },
     {
-      label: "High Urgency",
+      label: t("stats.highUrgency"),
       value: highUrgency.toString(),
       icon: AlertTriangle,
       color: highUrgency > 0 ? "text-red-600" : "text-emerald-600",
@@ -61,9 +63,9 @@ export default function StatsCards({ stats }: Props) {
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      {cards.map((c) => (
+      {cards.map((c, i) => (
         <div
-          key={c.label}
+          key={i}
           className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow"
         >
           <div className="flex items-center justify-between">

@@ -1,6 +1,7 @@
 "use client";
 
 import { DashboardStats } from "@/lib/types";
+import { useI18n } from "@/lib/i18n";
 import { CHART_COLORS } from "@/lib/utils";
 import {
   PieChart,
@@ -27,16 +28,28 @@ const URGENCY_COLORS: Record<string, string> = {
 };
 
 export default function BreakdownCharts({ stats }: Props) {
+  const { t, locale } = useI18n();
+
   const urgencyData = Object.entries(stats.urgency_breakdown).map(
-    ([name, value]) => ({ name, value }),
+    ([name, value]) => ({
+      name: t(`urgency.${name}` as any),
+      value,
+      key: name,
+    }),
   );
 
   const categoryData = Object.entries(stats.category_breakdown)
-    .map(([name, value]) => ({ name, value }))
+    .map(([name, value]) => ({
+      name: t(`cat.${name}` as any),
+      value,
+    }))
     .sort((a, b) => b.value - a.value);
 
   const dialectData = Object.entries(stats.dialect_breakdown)
-    .map(([name, value]) => ({ name, value }))
+    .map(([name, value]) => ({
+      name: t(`dialect.${name}` as any),
+      value,
+    }))
     .sort((a, b) => b.value - a.value);
 
   const isEmpty =
@@ -47,7 +60,7 @@ export default function BreakdownCharts({ stats }: Props) {
   if (isEmpty) {
     return (
       <div className="bg-white rounded-xl border border-gray-200 p-8 text-center text-gray-400">
-        No analysis data yet. Send reviews through the API to see charts.
+        {t("chart.noAnalysis")}
       </div>
     );
   }
@@ -57,7 +70,7 @@ export default function BreakdownCharts({ stats }: Props) {
       {/* Urgency Pie */}
       <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
         <h3 className="text-sm font-semibold text-gray-700 mb-3">
-          Urgency Breakdown
+          {t("chart.urgencyBreakdown")}
         </h3>
         {urgencyData.length > 0 ? (
           <ResponsiveContainer width="100%" height={220}>
@@ -76,8 +89,8 @@ export default function BreakdownCharts({ stats }: Props) {
               >
                 {urgencyData.map((entry) => (
                   <Cell
-                    key={entry.name}
-                    fill={URGENCY_COLORS[entry.name] || "#94a3b8"}
+                    key={entry.key}
+                    fill={URGENCY_COLORS[entry.key] || "#94a3b8"}
                   />
                 ))}
               </Pie>
@@ -85,23 +98,29 @@ export default function BreakdownCharts({ stats }: Props) {
             </PieChart>
           </ResponsiveContainer>
         ) : (
-          <p className="text-gray-400 text-sm text-center py-10">No data</p>
+          <p className="text-gray-400 text-sm text-center py-10">
+            {t("chart.noData")}
+          </p>
         )}
       </div>
 
       {/* Category Bar */}
       <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
         <h3 className="text-sm font-semibold text-gray-700 mb-3">
-          Categories
+          {t("chart.categories")}
         </h3>
         {categoryData.length > 0 ? (
           <ResponsiveContainer width="100%" height={220}>
-            <BarChart data={categoryData} layout="vertical" margin={{ left: 10 }}>
+            <BarChart
+              data={categoryData}
+              layout="vertical"
+              margin={{ left: locale === "ar" ? 0 : 10, right: locale === "ar" ? 10 : 0 }}
+            >
               <XAxis type="number" allowDecimals={false} fontSize={12} />
               <YAxis
                 type="category"
                 dataKey="name"
-                width={90}
+                width={100}
                 fontSize={11}
                 tick={{ fill: "#6b7280" }}
               />
@@ -117,14 +136,16 @@ export default function BreakdownCharts({ stats }: Props) {
             </BarChart>
           </ResponsiveContainer>
         ) : (
-          <p className="text-gray-400 text-sm text-center py-10">No data</p>
+          <p className="text-gray-400 text-sm text-center py-10">
+            {t("chart.noData")}
+          </p>
         )}
       </div>
 
       {/* Dialect Pie */}
       <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
         <h3 className="text-sm font-semibold text-gray-700 mb-3">
-          Dialect Distribution
+          {t("chart.dialectDistribution")}
         </h3>
         {dialectData.length > 0 ? (
           <ResponsiveContainer width="100%" height={220}>
@@ -153,7 +174,9 @@ export default function BreakdownCharts({ stats }: Props) {
             </PieChart>
           </ResponsiveContainer>
         ) : (
-          <p className="text-gray-400 text-sm text-center py-10">No data</p>
+          <p className="text-gray-400 text-sm text-center py-10">
+            {t("chart.noData")}
+          </p>
         )}
       </div>
     </div>

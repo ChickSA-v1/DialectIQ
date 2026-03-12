@@ -42,8 +42,8 @@ export function ratingStars(rating: number | null): string {
   return "★".repeat(rating) + "☆".repeat(5 - rating);
 }
 
-export function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString("en-SA", {
+export function formatDate(iso: string, locale: string = "en"): string {
+  return new Date(iso).toLocaleDateString(locale === "ar" ? "ar-SA" : "en-SA", {
     year: "numeric",
     month: "short",
     day: "numeric",

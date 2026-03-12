@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { DashboardResponse, Filters } from "@/lib/types";
+import { useI18n } from "@/lib/i18n";
 import { fetchDashboard } from "@/lib/api";
 import StatsCards from "./StatsCards";
 import BreakdownCharts from "./BreakdownCharts";
@@ -11,6 +12,7 @@ import Pagination from "./Pagination";
 import { RefreshCw, AlertCircle } from "lucide-react";
 
 export default function DashboardShell() {
+  const { t } = useI18n();
   const [data, setData] = useState<DashboardResponse | null>(null);
   const [filters, setFilters] = useState<Filters>({});
   const [page, setPage] = useState(1);
@@ -24,11 +26,11 @@ export default function DashboardShell() {
       const res = await fetchDashboard(filters, page);
       setData(res);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load data");
+      setError(err instanceof Error ? err.message : t("error.fallback"));
     } finally {
       setLoading(false);
     }
-  }, [filters, page]);
+  }, [filters, page, t]);
 
   useEffect(() => {
     load();
@@ -50,7 +52,7 @@ export default function DashboardShell() {
           <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
           <div className="flex-1">
             <p className="text-sm text-red-700 font-medium">
-              Failed to load dashboard
+              {t("error.title")}
             </p>
             <p className="text-xs text-red-500 mt-0.5">{error}</p>
           </div>
@@ -58,7 +60,7 @@ export default function DashboardShell() {
             onClick={load}
             className="px-3 py-1.5 bg-red-100 text-red-700 rounded-lg text-xs font-medium hover:bg-red-200 transition-colors"
           >
-            Retry
+            {t("error.retry")}
           </button>
         </div>
       )}
@@ -95,9 +97,9 @@ export default function DashboardShell() {
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold text-gray-800">
-                Reviews
-                <span className="text-sm font-normal text-gray-400 ml-2">
-                  ({data.stats.total_reviews} total)
+                {t("reviews.title")}
+                <span className="text-sm font-normal text-gray-400 ms-2">
+                  ({data.stats.total_reviews} {t("reviews.total")})
                 </span>
               </h2>
               <button
@@ -108,15 +110,14 @@ export default function DashboardShell() {
                 <RefreshCw
                   className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`}
                 />
-                Refresh
+                {t("reviews.refresh")}
               </button>
             </div>
 
             {data.reviews.length === 0 ? (
               <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
                 <p className="text-gray-400 text-sm">
-                  No reviews found. Adjust your filters or send reviews through
-                  the API.
+                  {t("reviews.noResults")}
                 </p>
               </div>
             ) : (

@@ -1,6 +1,7 @@
 "use client";
 
 import { ReviewDetail } from "@/lib/types";
+import { useI18n } from "@/lib/i18n";
 import {
   sentimentColor,
   sentimentBg,
@@ -16,6 +17,7 @@ interface Props {
 }
 
 export default function ReviewCard({ review }: Props) {
+  const { t, locale } = useI18n();
   const [expanded, setExpanded] = useState(false);
   const ub = urgencyBadge(review.urgency_level);
 
@@ -28,7 +30,7 @@ export default function ReviewCard({ review }: Props) {
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="font-semibold text-gray-800 text-sm">
-              {review.author ?? "Anonymous"}
+              {review.author ?? t("reviews.anonymous")}
             </span>
             <span className="text-xs text-gray-400">•</span>
             <span className="text-amber-500 text-sm">
@@ -39,12 +41,12 @@ export default function ReviewCard({ review }: Props) {
                 className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${ub.bg} ${ub.text}`}
               >
                 <span className={`w-1.5 h-1.5 rounded-full ${ub.dot}`} />
-                {review.urgency_level}
+                {t(`urgency.${review.urgency_level}` as any)}
               </span>
             )}
           </div>
           <p className="text-xs text-gray-400 mt-0.5">
-            {review.business_name} • {formatDate(review.created_at)}
+            {review.business_name} • {formatDate(review.created_at, locale)}
           </p>
         </div>
         {review.sentiment_score !== null && (
@@ -70,12 +72,12 @@ export default function ReviewCard({ review }: Props) {
         <div className="flex flex-wrap gap-2 mt-3">
           {review.category && (
             <span className="px-2 py-0.5 bg-indigo-50 text-indigo-700 rounded text-xs font-medium">
-              {review.category}
+              {t(`cat.${review.category}` as any)}
             </span>
           )}
           {review.dialect_detected && (
             <span className="px-2 py-0.5 bg-purple-50 text-purple-700 rounded text-xs font-medium">
-              {review.dialect_detected}
+              {t(`dialect.${review.dialect_detected}` as any)}
             </span>
           )}
           {review.source && (
@@ -98,7 +100,7 @@ export default function ReviewCard({ review }: Props) {
             ) : (
               <ChevronDown className="w-3 h-3" />
             )}
-            {expanded ? "Hide details" : "Show intent & reply"}
+            {expanded ? t("reviews.hideDetails") : t("reviews.showDetails")}
           </button>
 
           {expanded && (
@@ -106,7 +108,7 @@ export default function ReviewCard({ review }: Props) {
               {review.translated_intent && (
                 <div className="bg-gray-50 rounded-lg p-3">
                   <p className="text-xs font-semibold text-gray-500 mb-1">
-                    Translated Intent
+                    {t("reviews.translatedIntent")}
                   </p>
                   <p className="text-sm text-gray-700">
                     {review.translated_intent}
@@ -118,7 +120,7 @@ export default function ReviewCard({ review }: Props) {
                   <div className="flex items-center gap-1 mb-1">
                     <MessageSquare className="w-3 h-3 text-indigo-600" />
                     <p className="text-xs font-semibold text-indigo-600">
-                      Suggested Reply
+                      {t("reviews.suggestedReply")}
                     </p>
                   </div>
                   <p
