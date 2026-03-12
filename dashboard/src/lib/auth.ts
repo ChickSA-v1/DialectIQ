@@ -224,7 +224,7 @@ export async function activateTenant(
 
 export async function createCheckout(
   invoiceId: string
-): Promise<{ checkout_id: string; redirect_url: string }> {
+): Promise<{ checkout_id: string; redirect_url: string; is_mock: boolean }> {
   const res = await authFetch("/api/v1/payments/checkout", {
     method: "POST",
     body: JSON.stringify({ invoice_id: invoiceId }),
@@ -282,6 +282,16 @@ export async function confirmPlaceId(
     throw new Error(err.detail || "Place ID confirmation failed");
   }
   return res.json();
+}
+
+// ── Document Viewer ──────────────────────────────────────────────────
+
+export async function viewDocument(documentId: string): Promise<void> {
+  const res = await authFetch(`/api/v1/admin/documents/${documentId}/view`);
+  if (!res.ok) throw new Error("Failed to load document");
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  window.open(url, "_blank");
 }
 
 export function logout(): void {

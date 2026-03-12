@@ -45,7 +45,27 @@ async def upload_document(
     blob = bucket.blob(blob_name)
     blob.upload_from_string(file_content, content_type=content_type)
 
-    # Make publicly readable (or use signed URLs for production)
     url = f"https://storage.googleapis.com/{settings.gcs_bucket_name}/{blob_name}"
     log.info("document_uploaded", tenant_id=tenant_id, doc_type=doc_type, blob=blob_name)
     return url
+
+
+def download_blob(file_url: str) -> tuple[bytes, str]:
+    """
+    Download a blob from GCS by its stored URL.
+    Returns (content_bytes, content_type).
+    """
+    prefix = f"https://storage.googleapis.com/{settings.gcs_bucket_name}/"
+    if not file_url.startswith(prefix):
+        raise ValueError(f"Invalid GCS URL: {file_url}")
+
+    blob_name = file_url[len(prefix):]
+    client = _get_client()
+    bucket = client.bucket(settings.gcs_bucket_name)
+    blob = bucket.blob(blob_name)
+
+    content = blob.download_as_bytes()
+    content_type = blob.content_type or "application/octet-stream"
+
+    log.info("document_downloaded", blob=blob_name)
+    return content, content_type

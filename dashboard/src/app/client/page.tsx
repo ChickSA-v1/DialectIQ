@@ -43,6 +43,7 @@ function ClientDashboard() {
   // Payment state
   const [payLoading, setPayLoading] = useState(false);
   const [checkoutId, setCheckoutId] = useState<string | null>(null);
+  const [isMockPayment, setIsMockPayment] = useState(false);
   const [payError, setPayError] = useState<string | null>(null);
   const paymentFormRef = useRef<HTMLDivElement>(null);
 
@@ -63,9 +64,9 @@ function ClientDashboard() {
     loadProfile();
   }, [router]);
 
-  // Load HyperPay widget script when checkoutId is set
+  // Load HyperPay widget script when checkoutId is set (skip for mock)
   useEffect(() => {
-    if (!checkoutId) return;
+    if (!checkoutId || isMockPayment) return;
 
     // Remove any existing HyperPay scripts
     const existingScripts = document.querySelectorAll(
@@ -82,7 +83,7 @@ function ClientDashboard() {
     return () => {
       script.remove();
     };
-  }, [checkoutId]);
+  }, [checkoutId, isMockPayment]);
 
   const loadProfile = async () => {
     try {
@@ -96,20 +97,21 @@ function ClientDashboard() {
   };
 
   const handlePayNow = async () => {
-    // Find the pending invoice
-    const pendingInvoice = profile?.invoices?.find(
-      (inv: InvoiceInfo) => inv.status === "pending"
+    // Find the payable invoice (pending or failed — backend allows retry)
+    const payableInvoice = profile?.invoices?.find(
+      (inv: InvoiceInfo) => inv.status === "pending" || inv.status === "failed"
     );
-    if (!pendingInvoice) {
-      setPayError("No pending invoice found");
+    if (!payableInvoice) {
+      setPayError("No payable invoice found");
       return;
     }
 
     setPayLoading(true);
     setPayError(null);
     try {
-      const result = await createCheckout(pendingInvoice.id);
+      const result = await createCheckout(payableInvoice.id);
       setCheckoutId(result.checkout_id);
+      setIsMockPayment(result.is_mock);
     } catch (err: any) {
       setPayError(err.message);
     } finally {
@@ -150,7 +152,7 @@ function ClientDashboard() {
   const tenant = profile?.tenant;
   const status = tenant?.status;
   const pendingInvoice = profile?.invoices?.find(
-    (inv: InvoiceInfo) => inv.status === "pending"
+    (inv: InvoiceInfo) => inv.status === "pending" || inv.status === "failed"
   );
 
   return (
@@ -252,19 +254,71 @@ function ClientDashboard() {
                 </div>
               )}
 
-              {/* HyperPay widget OR Pay button */}
+              {/* Payment widget OR Pay button */}
               {checkoutId ? (
-                <div ref={paymentFormRef}>
-                  <form
-                    action="/client/payment-result"
-                    className="paymentWidgets"
-                    data-brands="VISA MASTER MADA"
-                  />
-                  <div className="flex items-center justify-center gap-2 mt-4 text-xs text-gray-400">
-                    <ShieldCheck className="w-4 h-4" />
-                    {t("payment.securePayment")}
+                isMockPayment ? (
+                  /* ── Mock payment: simple confirm card ── */
+                  <div className="space-y-4">
+                    <div className="bg-gray-50 rounded-xl p-5 space-y-3">
+                      <p className="text-xs font-semibold text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-3 py-1.5 text-center">
+                        Mock Payment Gateway
+                      </p>
+                      <div>
+                        <label className="block text-xs text-gray-500 mb-1">Card Number</label>
+                        <input
+                          readOnly
+                          value="4200 0000 0000 0000"
+                          className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm font-mono text-gray-700"
+                          dir="ltr"
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-xs text-gray-500 mb-1">Expiry</label>
+                          <input
+                            readOnly
+                            value="12/30"
+                            className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm font-mono text-gray-700"
+                            dir="ltr"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs text-gray-500 mb-1">CVV</label>
+                          <input
+                            readOnly
+                            value="123"
+                            className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm font-mono text-gray-700"
+                            dir="ltr"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => {
+                        router.push(
+                          `/client/payment-result?id=${encodeURIComponent(checkoutId)}&resourcePath=${encodeURIComponent("/mock/payment")}`
+                        );
+                      }}
+                      className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-emerald-600 text-white rounded-xl text-base font-semibold hover:bg-emerald-700 transition-colors"
+                    >
+                      <ShieldCheck className="w-5 h-5" />
+                      {t("payment.payNow")}
+                    </button>
                   </div>
-                </div>
+                ) : (
+                  /* ── Real HyperPay widget ── */
+                  <div ref={paymentFormRef}>
+                    <form
+                      action="/client/payment-result"
+                      className="paymentWidgets"
+                      data-brands="VISA MASTER MADA"
+                    />
+                    <div className="flex items-center justify-center gap-2 mt-4 text-xs text-gray-400">
+                      <ShieldCheck className="w-4 h-4" />
+                      {t("payment.securePayment")}
+                    </div>
+                  </div>
+                )
               ) : (
                 <button
                   onClick={handlePayNow}

@@ -226,6 +226,7 @@ class CheckoutRequest(BaseModel):
 class CheckoutResponse(BaseModel):
     checkout_id: str
     redirect_url: str
+    is_mock: bool = False
 
 
 class PaymentStatusResponse(BaseModel):

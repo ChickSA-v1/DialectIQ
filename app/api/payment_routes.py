@@ -80,6 +80,13 @@ async def checkout(
     if invoice.status == "paid":
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Invoice already paid")
 
+    # Allow retry: if previous payment failed, reset to pending
+    if invoice.status == "failed":
+        invoice.status = "pending"
+        invoice.hyperpay_checkout_id = None
+        invoice.hyperpay_resource_path = None
+        log.info("invoice_reset_for_retry", invoice_id=str(invoice.id))
+
     # Get tenant email
     t_result = await db.execute(select(Tenant).where(Tenant.id == user.tenant_id))
     tenant = t_result.scalar_one_or_none()
@@ -106,7 +113,11 @@ async def checkout(
 
     redirect_url = f"{settings.hyperpay_base_url}/v1/paymentWidgets.js?checkoutId={checkout_id}"
 
-    return CheckoutResponse(checkout_id=checkout_id, redirect_url=redirect_url)
+    return CheckoutResponse(
+        checkout_id=checkout_id,
+        redirect_url=redirect_url,
+        is_mock=settings.hyperpay_mock,
+    )
 
 
 # ── HyperPay webhook / callback ───────────────────────────────────────

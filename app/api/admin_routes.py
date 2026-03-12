@@ -3,9 +3,11 @@ Admin endpoints: manage registrations, tenants, and activations.
 """
 
 import math
+import uuid as _uuid
 
 import structlog
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi.responses import Response
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -24,6 +26,7 @@ from app.schemas import (
     UserProfile,
 )
 from app.security import generate_api_key
+from app.services.storage import download_blob
 
 log = structlog.get_logger()
 router = APIRouter(prefix="/api/v1/admin", tags=["admin"])
@@ -113,7 +116,6 @@ async def get_registration(
     db: AsyncSession = Depends(get_db),
 ):
     """Get full detail for a registration."""
-    import uuid as _uuid
     result = await db.execute(select(Tenant).where(Tenant.id == _uuid.UUID(tenant_id)))
     tenant = result.scalar_one_or_none()
     if not tenant:
@@ -181,7 +183,6 @@ async def approve_registration(
     db: AsyncSession = Depends(get_db),
 ):
     """Approve a registration: creates subscription + invoice."""
-    import uuid as _uuid
     result = await db.execute(select(Tenant).where(Tenant.id == _uuid.UUID(tenant_id)))
     tenant = result.scalar_one_or_none()
     if not tenant:
@@ -230,7 +231,6 @@ async def reject_registration(
     db: AsyncSession = Depends(get_db),
 ):
     """Reject a registration with reason."""
-    import uuid as _uuid
     result = await db.execute(select(Tenant).where(Tenant.id == _uuid.UUID(tenant_id)))
     tenant = result.scalar_one_or_none()
     if not tenant:
@@ -312,7 +312,6 @@ async def activate_tenant(
     db: AsyncSession = Depends(get_db),
 ):
     """Final activation: generate API key, enable user, set tenant active."""
-    import uuid as _uuid
     result = await db.execute(select(Tenant).where(Tenant.id == _uuid.UUID(tenant_id)))
     tenant = result.scalar_one_or_none()
     if not tenant:
@@ -354,3 +353,41 @@ async def activate_tenant(
         "tenant_id": tenant_id,
         "status": "active",
     }
+
+
+# ── Document proxy (secure access) ──────────────────────────────────
+@router.get("/documents/{document_id}/view")
+async def view_document(
+    document_id: str,
+    _admin: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Proxy-serve a document from GCS. Admin-only.
+    The browser receives the file content directly — no public GCS access needed.
+    """
+    result = await db.execute(
+        select(Document).where(Document.id == _uuid.UUID(document_id))
+    )
+    doc = result.scalar_one_or_none()
+    if not doc:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Document not found")
+
+    try:
+        content, content_type = download_blob(doc.file_url)
+    except Exception as e:
+        log.error("document_download_failed", document_id=document_id, error=str(e))
+        raise HTTPException(status.HTTP_502_BAD_GATEWAY, "Failed to retrieve document from storage")
+
+    # RFC 5987 encoding for non-ASCII filenames
+    from urllib.parse import quote
+    filename_encoded = quote(doc.file_name)
+
+    return Response(
+        content=content,
+        media_type=content_type,
+        headers={
+            "Content-Disposition": f"inline; filename*=UTF-8''{filename_encoded}",
+            "Cache-Control": "private, max-age=300",
+        },
+    )

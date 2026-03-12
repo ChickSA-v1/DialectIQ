@@ -6,6 +6,7 @@ import {
   fetchRegistrations,
   approveRegistration,
   rejectRegistration,
+  viewDocument,
 } from "@/lib/auth";
 import { RegistrationDetail } from "@/lib/types";
 import {
@@ -149,16 +150,14 @@ export default function RegistrationsPage() {
                     </p>
                     <div className="space-y-1">
                       {reg.documents.map((doc) => (
-                        <a
+                        <button
                           key={doc.id}
-                          href={doc.file_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-2 text-sm text-indigo-600 hover:text-indigo-700"
+                          onClick={() => viewDocument(doc.id)}
+                          className="flex items-center gap-2 text-sm text-indigo-600 hover:text-indigo-700 cursor-pointer"
                         >
                           <FileText className="w-4 h-4" />
                           {t(`document.${doc.doc_type}` as any)} — {doc.file_name}
-                        </a>
+                        </button>
                       ))}
                       {reg.documents.length === 0 && (
                         <p className="text-xs text-gray-400">

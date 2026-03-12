@@ -34,6 +34,7 @@ class Settings(BaseSettings):
     hyperpay_entity_id: str = ""
     hyperpay_access_token: str = ""
     hyperpay_base_url: str = "https://eu-test.oppwa.com"  # test; prod = https://eu-prod.oppwa.com
+    hyperpay_mock: bool = False  # Set True to use mock payment gateway
 
     # --- Dashboard ---
     dashboard_url: str = "http://localhost:3000"  # set via env in production
