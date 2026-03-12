@@ -271,8 +271,19 @@ async def list_tenants(
     )
     tenants = result.scalars().all()
 
-    return TenantListResponse(
-        tenants=[
+    # Build tenant list with latest invoice status
+    tenant_list = []
+    for t in tenants:
+        # Get latest invoice status for this tenant
+        inv_r = await db.execute(
+            select(Invoice)
+            .where(Invoice.tenant_id == t.id)
+            .order_by(Invoice.created_at.desc())
+            .limit(1)
+        )
+        latest_inv = inv_r.scalar_one_or_none()
+
+        tenant_list.append(
             TenantInfo(
                 id=t.id, name_ar=t.name_ar, name_en=t.name_en,
                 email=t.email, phone=t.phone, status=t.status,
@@ -280,10 +291,15 @@ async def list_tenants(
                 max_businesses=t.max_businesses,
                 max_reviews_per_month=t.max_reviews_per_month,
                 reviews_used_this_month=t.reviews_used_this_month,
-                api_key=t.api_key, created_at=t.created_at,
+                api_key=t.api_key,
+                rejection_reason=t.rejection_reason,
+                latest_invoice_status=latest_inv.status if latest_inv else None,
+                created_at=t.created_at,
             )
-            for t in tenants
-        ],
+        )
+
+    return TenantListResponse(
+        tenants=tenant_list,
         total=total, page=page, total_pages=total_pages,
     )
 

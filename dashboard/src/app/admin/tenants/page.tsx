@@ -107,6 +107,9 @@ export default function TenantsPage() {
                   {t("admin.status")}
                 </th>
                 <th className="text-start px-4 py-3 font-medium text-gray-600">
+                  {t("payment.status")}
+                </th>
+                <th className="text-start px-4 py-3 font-medium text-gray-600">
                   {t("admin.reviewsUsed")}
                 </th>
                 <th className="text-start px-4 py-3 font-medium text-gray-600">
@@ -144,6 +147,25 @@ export default function TenantsPage() {
                     >
                       {t(`tenant.${tenant.status}` as any)}
                     </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    {tenant.latest_invoice_status ? (
+                      <span
+                        className={`px-2 py-0.5 rounded text-xs font-medium ${
+                          tenant.latest_invoice_status === "paid"
+                            ? "bg-emerald-100 text-emerald-700"
+                            : tenant.latest_invoice_status === "failed"
+                              ? "bg-red-100 text-red-700"
+                              : "bg-amber-100 text-amber-700"
+                        }`}
+                      >
+                        {t(`payment.${tenant.latest_invoice_status}` as any)}
+                      </span>
+                    ) : (
+                      <span className="text-xs text-gray-400">
+                        {t("payment.none")}
+                      </span>
+                    )}
                   </td>
                   <td className="px-4 py-3 text-gray-600">
                     {tenant.reviews_used_this_month} / {tenant.max_reviews_per_month}

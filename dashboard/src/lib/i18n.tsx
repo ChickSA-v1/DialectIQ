@@ -180,6 +180,25 @@ const translations = {
     "client.placeIds": "Place IDs",
     "client.placeIdPlaceholder": "Enter Google Place ID (ChIJ...)",
     "client.addPlaceId": "Add Place ID",
+
+    // Payment
+    "payment.payNow": "Pay Now",
+    "payment.processing": "Processing...",
+    "payment.invoiceAmount": "Invoice Amount",
+    "payment.completePayment": "Complete your payment to activate your account",
+    "payment.securePayment": "Secure payment via HyperPay",
+    "payment.successTitle": "Payment Successful!",
+    "payment.successDesc": "Your account has been activated. You can now access your dashboard.",
+    "payment.failedTitle": "Payment Failed",
+    "payment.failedDesc": "Something went wrong with your payment. Please try again.",
+    "payment.tryAgain": "Try Again",
+    "payment.backToDashboard": "Back to Dashboard",
+    "payment.verifying": "Verifying payment...",
+    "payment.status": "Payment",
+    "payment.pending": "Pending",
+    "payment.paid": "Paid",
+    "payment.failed": "Failed",
+    "payment.none": "—",
   },
   ar: {
     // Header
@@ -356,6 +375,25 @@ const translations = {
     "client.placeIds": "معرفات الأماكن",
     "client.placeIdPlaceholder": "أدخل معرف المكان (ChIJ...)",
     "client.addPlaceId": "إضافة معرف المكان",
+
+    // Payment
+    "payment.payNow": "ادفع الآن",
+    "payment.processing": "جاري المعالجة...",
+    "payment.invoiceAmount": "مبلغ الفاتورة",
+    "payment.completePayment": "أكمل الدفع لتفعيل حسابك",
+    "payment.securePayment": "دفع آمن عبر HyperPay",
+    "payment.successTitle": "تم الدفع بنجاح!",
+    "payment.successDesc": "تم تفعيل حسابك. يمكنك الآن الوصول إلى لوحة المعلومات.",
+    "payment.failedTitle": "فشل الدفع",
+    "payment.failedDesc": "حدث خطأ في عملية الدفع. يرجى المحاولة مرة أخرى.",
+    "payment.tryAgain": "حاول مرة أخرى",
+    "payment.backToDashboard": "العودة للوحة المعلومات",
+    "payment.verifying": "جاري التحقق من الدفع...",
+    "payment.status": "الدفع",
+    "payment.pending": "معلق",
+    "payment.paid": "مدفوع",
+    "payment.failed": "فشل",
+    "payment.none": "—",
   },
 } as const;
 

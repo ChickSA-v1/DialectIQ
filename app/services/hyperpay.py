@@ -17,6 +17,7 @@ async def create_checkout(
     currency: str = "SAR",
     merchant_transaction_id: str = "",
     customer_email: str = "",
+    shopper_result_url: str = "",
 ) -> dict:
     """
     Create a HyperPay checkout session.
@@ -31,6 +32,8 @@ async def create_checkout(
         "merchantTransactionId": merchant_transaction_id,
         "customer.email": customer_email,
     }
+    if shopper_result_url:
+        data["shopperResultUrl"] = shopper_result_url
     headers = {
         "Authorization": f"Bearer {settings.hyperpay_access_token}",
         "Content-Type": "application/x-www-form-urlencoded",

@@ -150,6 +150,8 @@ class TenantInfo(BaseModel):
     max_reviews_per_month: int
     reviews_used_this_month: int
     api_key: str | None = None
+    rejection_reason: str | None = None
+    latest_invoice_status: str | None = None
     created_at: datetime
 
 
@@ -168,6 +170,7 @@ class UserProfile(BaseModel):
     role: str
     is_active: bool
     tenant: TenantInfo | None = None
+    invoices: list["InvoiceInfo"] | None = None
 
 
 # ── Admin schemas ──────────────────────────────────────────────────────

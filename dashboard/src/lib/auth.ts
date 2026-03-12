@@ -247,6 +247,27 @@ export async function getPaymentStatus(invoiceId: string): Promise<{
   return res.json();
 }
 
+export async function verifyPaymentResult(
+  checkoutId: string,
+  resourcePath: string
+): Promise<{
+  invoice_id: string;
+  status: string;
+  amount_sar: number;
+  paid_at: string | null;
+}> {
+  const params = new URLSearchParams({ id: checkoutId, resourcePath });
+  const res = await fetch(
+    `${API_BASE}/api/v1/payments/result?${params}`,
+    { cache: "no-store" }
+  );
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || "Payment verification failed");
+  }
+  return res.json();
+}
+
 // ── Place ID API ──────────────────────────────────────────────────────
 
 export async function confirmPlaceId(

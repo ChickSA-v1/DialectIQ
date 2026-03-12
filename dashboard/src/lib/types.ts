@@ -61,6 +61,7 @@ export interface UserProfile {
   role: string;
   is_active: boolean;
   tenant: TenantInfo | null;
+  invoices?: InvoiceInfo[] | null;
 }
 
 export interface TenantInfo {
@@ -73,6 +74,7 @@ export interface TenantInfo {
   package: string;
   place_ids: string[] | null;
   rejection_reason?: string | null;
+  latest_invoice_status?: string | null;
   max_businesses: number;
   max_reviews_per_month: number;
   reviews_used_this_month: number;

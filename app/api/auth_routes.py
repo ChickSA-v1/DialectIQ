@@ -11,8 +11,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
 from app.deps import get_current_user, require_owner
-from app.models import Document, Tenant, User
+from app.models import Document, Invoice, Tenant, User
 from app.schemas import (
+    InvoiceInfo,
     ConfirmPlaceIdRequest,
     ConfirmPlaceIdResponse,
     DocumentUploadResponse,
@@ -182,12 +183,22 @@ async def get_profile(
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    """Get current user profile with tenant info."""
+    """Get current user profile with tenant info and invoices."""
     tenant_info = None
+    invoices_list = None
     if user.tenant_id:
         result = await db.execute(select(Tenant).where(Tenant.id == user.tenant_id))
         tenant = result.scalar_one_or_none()
         if tenant:
+            # Get latest invoice status
+            inv_r = await db.execute(
+                select(Invoice)
+                .where(Invoice.tenant_id == tenant.id)
+                .order_by(Invoice.created_at.desc())
+            )
+            invoices = inv_r.scalars().all()
+            latest_invoice_status = invoices[0].status if invoices else None
+
             tenant_info = TenantInfo(
                 id=tenant.id,
                 name_ar=tenant.name_ar,
@@ -201,8 +212,22 @@ async def get_profile(
                 max_reviews_per_month=tenant.max_reviews_per_month,
                 reviews_used_this_month=tenant.reviews_used_this_month,
                 api_key=tenant.api_key,
+                rejection_reason=tenant.rejection_reason,
+                latest_invoice_status=latest_invoice_status,
                 created_at=tenant.created_at,
             )
+
+            invoices_list = [
+                InvoiceInfo(
+                    id=inv.id,
+                    amount_sar=inv.amount_sar,
+                    status=inv.status,
+                    hyperpay_checkout_id=inv.hyperpay_checkout_id,
+                    paid_at=inv.paid_at,
+                    created_at=inv.created_at,
+                )
+                for inv in invoices
+            ]
 
     return UserProfile(
         id=user.id,
@@ -211,6 +236,7 @@ async def get_profile(
         role=user.role,
         is_active=user.is_active,
         tenant=tenant_info,
+        invoices=invoices_list,
     )
 
 

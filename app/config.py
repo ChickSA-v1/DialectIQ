@@ -35,6 +35,9 @@ class Settings(BaseSettings):
     hyperpay_access_token: str = ""
     hyperpay_base_url: str = "https://eu-test.oppwa.com"  # test; prod = https://eu-prod.oppwa.com
 
+    # --- Dashboard ---
+    dashboard_url: str = "http://localhost:3000"  # set via env in production
+
     # --- Limits ---
     max_batch_size: int = 50
 
