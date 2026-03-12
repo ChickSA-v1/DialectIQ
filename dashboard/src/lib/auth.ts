@@ -10,6 +10,7 @@ import {
   TenantListResponse,
   DocumentInfo,
   InvoiceInfo,
+  PlaceSearchResponse,
 } from "./types";
 
 const API_BASE =
@@ -280,6 +281,22 @@ export async function confirmPlaceId(
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
     throw new Error(err.detail || "Place ID confirmation failed");
+  }
+  return res.json();
+}
+
+// ── Place Search API ─────────────────────────────────────────────────
+
+export async function searchPlaces(
+  query: string
+): Promise<PlaceSearchResponse> {
+  const res = await authFetch("/api/v1/tenant/search-places", {
+    method: "POST",
+    body: JSON.stringify({ query }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || "Place search failed");
   }
   return res.json();
 }

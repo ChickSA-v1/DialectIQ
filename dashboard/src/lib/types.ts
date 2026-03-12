@@ -127,3 +127,21 @@ export interface SubscriptionInfo {
   expires_at: string | null;
   created_at: string;
 }
+
+// ── Place Search types ────────────────────────────────────────────────
+
+export interface PlaceSearchResult {
+  place_id: string;
+  name: string;
+  address: string | null;
+  rating: number | null;
+  user_ratings_total: number | null;
+  types: string[] | null;
+  maps_url: string | null;
+}
+
+export interface PlaceSearchResponse {
+  results: PlaceSearchResult[];
+  query: string;
+  source: "text_search" | "url_resolve";
+}

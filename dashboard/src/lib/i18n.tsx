@@ -180,6 +180,16 @@ const translations = {
     "client.placeIds": "Place IDs",
     "client.placeIdPlaceholder": "Enter Google Place ID (ChIJ...)",
     "client.addPlaceId": "Add Place ID",
+    "client.searchBusiness": "Search for your business",
+    "client.searchPlaceholder": "Type business name or paste Google Maps link...",
+    "client.searching": "Searching...",
+    "client.noResults": "No businesses found. Try a different name.",
+    "client.selectBusiness": "Select",
+    "client.rating": "Rating",
+    "client.reviews": "reviews",
+    "client.placeIdAdded": "Business added successfully!",
+    "client.businessLimit": "Business limit reached for your package",
+    "client.alreadyAdded": "Already added",
 
     // Payment
     "payment.payNow": "Pay Now",
@@ -375,6 +385,16 @@ const translations = {
     "client.placeIds": "معرفات الأماكن",
     "client.placeIdPlaceholder": "أدخل معرف المكان (ChIJ...)",
     "client.addPlaceId": "إضافة معرف المكان",
+    "client.searchBusiness": "ابحث عن منشأتك",
+    "client.searchPlaceholder": "اكتب اسم المنشأة أو الصق رابط خرائط قوقل...",
+    "client.searching": "جاري البحث...",
+    "client.noResults": "لم يتم العثور على منشآت. جرب اسماً مختلفاً.",
+    "client.selectBusiness": "اختيار",
+    "client.rating": "التقييم",
+    "client.reviews": "تقييمات",
+    "client.placeIdAdded": "تمت إضافة المنشأة بنجاح!",
+    "client.businessLimit": "تم الوصول للحد الأقصى من المنشآت لباقتك",
+    "client.alreadyAdded": "مضاف مسبقاً",
 
     // Payment
     "payment.payNow": "ادفع الآن",

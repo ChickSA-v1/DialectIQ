@@ -19,12 +19,16 @@ from app.schemas import (
     DocumentUploadResponse,
     LoginRequest,
     LoginResponse,
+    PlaceSearchRequest,
+    PlaceSearchResponse,
+    PlaceSearchResult,
     RegisterRequest,
     RegisterResponse,
     TenantInfo,
     UserProfile,
 )
 from app.security import create_access_token, hash_password, verify_password
+from app.services.places import get_place_details, resolve_maps_url, search_places
 from app.services.storage import upload_document
 
 log = structlog.get_logger()
@@ -262,11 +266,9 @@ async def confirm_place_id(
     # Validate place_id via Google Places API (optional, best-effort)
     place_name = None
     try:
-        import httpx
-        from app.config import get_settings
-        settings = get_settings()
-        if settings.api_key:  # reuse the Google API key if available
-            pass  # Skip Google Places validation for now — will be added when Google API key is configured
+        details = await get_place_details(req.place_id)
+        if details:
+            place_name = details.get("name")
     except Exception:
         pass  # Non-fatal — place ID validation is optional
 
@@ -292,3 +294,33 @@ async def confirm_place_id(
         place_name=place_name,
         message="Place ID confirmed successfully",
     )
+
+
+# ── Search Places ────────────────────────────────────────────────────
+
+@place_router.post("/search-places", response_model=PlaceSearchResponse)
+async def search_places_endpoint(
+    req: PlaceSearchRequest,
+    user: User = Depends(require_owner),
+):
+    """Search for businesses by name or resolve a Google Maps URL."""
+    query = req.query.strip()
+
+    # Detect if input is a Google Maps URL
+    is_url = any(s in query for s in ("google.com/maps", "goo.gl", "maps.app", "maps.google"))
+
+    if is_url:
+        resolved = await resolve_maps_url(query)
+        if resolved:
+            source = resolved.pop("source", "url_resolve")
+            return PlaceSearchResponse(
+                results=[PlaceSearchResult(**resolved)],
+                query=query,
+                source=source,
+            )
+        return PlaceSearchResponse(results=[], query=query, source="url_resolve")
+
+    # Text search
+    raw_results = await search_places(query)
+    results = [PlaceSearchResult(**r) for r in raw_results]
+    return PlaceSearchResponse(results=results, query=query, source="text_search")

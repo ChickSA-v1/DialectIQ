@@ -30,6 +30,9 @@ class Settings(BaseSettings):
     # --- Google Cloud Storage ---
     gcs_bucket_name: str = "dialectiq-documents"
 
+    # --- Google Places ---
+    google_places_api_key: str = ""
+
     # --- HyperPay ---
     hyperpay_entity_id: str = ""
     hyperpay_access_token: str = ""

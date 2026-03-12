@@ -8,12 +8,12 @@ import {
   getProfile,
   isLoggedIn,
   logout,
-  confirmPlaceId,
   createCheckout,
 } from "@/lib/auth";
 import { UserProfile, InvoiceInfo } from "@/lib/types";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import DashboardShell from "@/components/DashboardShell";
+import BusinessSearch from "@/components/BusinessSearch";
 import {
   Clock,
   CheckCircle,
@@ -36,8 +36,6 @@ function ClientDashboard() {
   const router = useRouter();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [placeId, setPlaceId] = useState("");
-  const [placeLoading, setPlaceLoading] = useState(false);
   const [copiedKey, setCopiedKey] = useState(false);
 
   // Payment state
@@ -116,20 +114,6 @@ function ClientDashboard() {
       setPayError(err.message);
     } finally {
       setPayLoading(false);
-    }
-  };
-
-  const handleConfirmPlace = async () => {
-    if (!placeId.trim()) return;
-    setPlaceLoading(true);
-    try {
-      await confirmPlaceId(placeId.trim());
-      setPlaceId("");
-      await loadProfile();
-    } catch (err: any) {
-      alert(err.message);
-    } finally {
-      setPlaceLoading(false);
     }
   };
 
@@ -380,11 +364,14 @@ function ClientDashboard() {
                 <h3 className="font-semibold text-gray-800">
                   {t("client.placeIds")}
                 </h3>
+                <span className="text-xs text-gray-400">
+                  ({tenant?.place_ids?.length || 0} / {tenant?.max_businesses})
+                </span>
               </div>
 
               {/* Existing place IDs */}
               {tenant?.place_ids && tenant.place_ids.length > 0 && (
-                <div className="flex flex-wrap gap-2 mb-3">
+                <div className="flex flex-wrap gap-2 mb-4">
                   {tenant.place_ids.map((pid) => (
                     <span
                       key={pid}
@@ -397,28 +384,12 @@ function ClientDashboard() {
                 </div>
               )}
 
-              {/* Add new */}
-              <div className="flex gap-2">
-                <input
-                  value={placeId}
-                  onChange={(e) => setPlaceId(e.target.value)}
-                  placeholder={t("client.placeIdPlaceholder")}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none font-mono"
-                  dir="ltr"
-                />
-                <button
-                  onClick={handleConfirmPlace}
-                  disabled={!placeId.trim() || placeLoading}
-                  className="flex items-center gap-1 px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors disabled:opacity-50"
-                >
-                  {placeLoading ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <MapPin className="w-4 h-4" />
-                  )}
-                  {t("client.addPlaceId")}
-                </button>
-              </div>
+              {/* Business search */}
+              <BusinessSearch
+                currentPlaceIds={tenant?.place_ids || []}
+                maxBusinesses={tenant?.max_businesses || 1}
+                onPlaceAdded={loadProfile}
+              />
             </div>
 
             {/* Dashboard */}

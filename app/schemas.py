@@ -246,3 +246,23 @@ class ConfirmPlaceIdResponse(BaseModel):
     place_id: str
     place_name: str | None = None
     message: str
+
+
+class PlaceSearchRequest(BaseModel):
+    query: str = Field(..., min_length=1, max_length=500)
+
+
+class PlaceSearchResult(BaseModel):
+    place_id: str
+    name: str
+    address: str | None = None
+    rating: float | None = None
+    user_ratings_total: int | None = None
+    types: list[str] | None = None
+    maps_url: str | None = None
+
+
+class PlaceSearchResponse(BaseModel):
+    results: list[PlaceSearchResult]
+    query: str
+    source: str = "text_search"
