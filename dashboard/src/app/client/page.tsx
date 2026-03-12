@@ -9,8 +9,9 @@ import {
   isLoggedIn,
   logout,
   createCheckout,
+  fetchReviews,
 } from "@/lib/auth";
-import { UserProfile, InvoiceInfo } from "@/lib/types";
+import { UserProfile, InvoiceInfo, FetchReviewsResult } from "@/lib/types";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import DashboardShell from "@/components/DashboardShell";
 import BusinessSearch from "@/components/BusinessSearch";
@@ -25,6 +26,8 @@ import {
   LogOut,
   Loader2,
   ShieldCheck,
+  RefreshCw,
+  MessageSquareText,
 } from "lucide-react";
 
 const HYPERPAY_SCRIPT_URL =
@@ -37,6 +40,11 @@ function ClientDashboard() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [copiedKey, setCopiedKey] = useState(false);
+
+  // Fetch reviews state
+  const [fetchLoading, setFetchLoading] = useState(false);
+  const [fetchResults, setFetchResults] = useState<FetchReviewsResult[] | null>(null);
+  const [fetchError, setFetchError] = useState<string | null>(null);
 
   // Payment state
   const [payLoading, setPayLoading] = useState(false);
@@ -390,6 +398,77 @@ function ClientDashboard() {
                 maxBusinesses={tenant?.max_businesses || 1}
                 onPlaceAdded={loadProfile}
               />
+            </div>
+
+            {/* Fetch Reviews */}
+            <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <MessageSquareText className="w-5 h-5 text-indigo-600" />
+                  <h3 className="font-semibold text-gray-800">
+                    {t("client.fetchReviews")}
+                  </h3>
+                </div>
+                <button
+                  onClick={async () => {
+                    setFetchLoading(true);
+                    setFetchError(null);
+                    setFetchResults(null);
+                    try {
+                      const results = await fetchReviews();
+                      setFetchResults(results);
+                      // Reload profile to update review count
+                      loadProfile();
+                    } catch (err: any) {
+                      setFetchError(err.message || "Failed to fetch reviews");
+                    } finally {
+                      setFetchLoading(false);
+                    }
+                  }}
+                  disabled={fetchLoading || !tenant?.place_ids?.length}
+                  className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-sm font-medium transition-colors"
+                >
+                  {fetchLoading ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <RefreshCw className="w-4 h-4" />
+                  )}
+                  {fetchLoading
+                    ? t("client.fetchingReviews")
+                    : t("client.fetchReviews")}
+                </button>
+              </div>
+
+              {!tenant?.place_ids?.length && (
+                <p className="text-xs text-gray-400 mt-2">
+                  {t("client.noPlaceIds")}
+                </p>
+              )}
+
+              {fetchError && (
+                <div className="mt-3 p-3 bg-red-50 text-red-700 rounded-lg text-sm">
+                  {fetchError}
+                </div>
+              )}
+
+              {fetchResults && (
+                <div className="mt-3 space-y-2">
+                  {fetchResults.map((r) => (
+                    <div
+                      key={r.place_id}
+                      className="p-3 bg-emerald-50 border border-emerald-200 rounded-lg text-sm"
+                    >
+                      <p className="font-medium text-emerald-800">
+                        {r.business_name}
+                      </p>
+                      <p className="text-emerald-600 text-xs mt-1">
+                        {r.reviews_fetched} {t("client.reviewsFetched")} •{" "}
+                        {r.reviews_analyzed} {t("client.newAnalyzed")}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Dashboard */}

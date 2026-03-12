@@ -132,6 +132,66 @@ async def resolve_maps_url(url: str) -> dict | None:
         return None
 
 
+async def fetch_place_reviews(place_id: str) -> list[dict]:
+    """
+    Fetch reviews for a Google Place ID via Places API (New).
+    Returns up to 5 most recent reviews (API limit).
+    """
+    if not settings.google_places_api_key:
+        log.warning("google_places_api_key_not_set")
+        return []
+
+    url = f"{PLACES_BASE}/places/{place_id}"
+    headers = {
+        "X-Goog-Api-Key": settings.google_places_api_key,
+        "X-Goog-FieldMask": (
+            "id,displayName,reviews.text,reviews.rating,"
+            "reviews.authorAttribution,reviews.publishTime,"
+            "reviews.originalText"
+        ),
+    }
+
+    try:
+        async with httpx.AsyncClient(timeout=15) as client:
+            resp = await client.get(url, headers=headers)
+
+        if resp.status_code != 200:
+            log.error("fetch_reviews_failed", place_id=place_id, status=resp.status_code)
+            return []
+
+        data = resp.json()
+        business_name = data.get("displayName", {}).get("text", "Unknown")
+        raw_reviews = data.get("reviews", [])
+
+        reviews = []
+        for r in raw_reviews:
+            # Prefer originalText (native language), fallback to text (translated)
+            text_obj = r.get("originalText") or r.get("text", {})
+            text = text_obj.get("text", "")
+            if not text:
+                continue
+
+            author = r.get("authorAttribution", {}).get("displayName", "Anonymous")
+            rating = r.get("rating", 0)
+            publish_time = r.get("publishTime", "")
+
+            reviews.append({
+                "business_name": business_name,
+                "place_id": place_id,
+                "text": text,
+                "rating": rating,
+                "author_name": author,
+                "publish_time": publish_time,
+            })
+
+        log.info("fetch_reviews_ok", place_id=place_id, count=len(reviews))
+        return reviews
+
+    except Exception as e:
+        log.error("fetch_reviews_exception", place_id=place_id, error=str(e))
+        return []
+
+
 async def get_place_details(place_id: str) -> dict | None:
     """
     Fetch basic details for a single Place ID.

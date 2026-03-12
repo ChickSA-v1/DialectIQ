@@ -274,3 +274,14 @@ class PlaceSearchResponse(BaseModel):
     results: list[PlaceSearchResult]
     query: str
     source: str = "text_search"
+
+
+# ── Fetch Reviews schemas ─────────────────────────────────────────────
+
+class FetchReviewsResponse(BaseModel):
+    place_id: str
+    business_name: str
+    reviews_fetched: int
+    reviews_new: int
+    reviews_analyzed: int
+    message: str

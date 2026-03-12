@@ -17,6 +17,7 @@ from app.schemas import (
     ConfirmPlaceIdRequest,
     ConfirmPlaceIdResponse,
     DocumentUploadResponse,
+    FetchReviewsResponse,
     LoginRequest,
     LoginResponse,
     PlaceSearchRequest,
@@ -28,7 +29,12 @@ from app.schemas import (
     UserProfile,
 )
 from app.security import create_access_token, hash_password, verify_password
-from app.services.places import get_place_details, resolve_maps_url, search_places
+from app.services.places import (
+    fetch_place_reviews,
+    get_place_details,
+    resolve_maps_url,
+    search_places,
+)
 from app.services.storage import upload_document
 
 log = structlog.get_logger()
@@ -272,8 +278,8 @@ async def confirm_place_id(
     except Exception:
         pass  # Non-fatal — place ID validation is optional
 
-    # Add to list
-    current_places = tenant.place_ids or []
+    # Add to list (create NEW list to trigger SQLAlchemy JSON change detection)
+    current_places = list(tenant.place_ids or [])
     if req.place_id in current_places:
         raise HTTPException(status.HTTP_409_CONFLICT, "Place ID already confirmed")
 
@@ -286,6 +292,8 @@ async def confirm_place_id(
 
     current_places.append(req.place_id)
     tenant.place_ids = current_places
+    from sqlalchemy.orm.attributes import flag_modified
+    flag_modified(tenant, "place_ids")
     await db.commit()
 
     log.info("place_id_confirmed", tenant_id=str(tenant.id), place_id=req.place_id)
@@ -324,3 +332,159 @@ async def search_places_endpoint(
     raw_results = await search_places(query)
     results = [PlaceSearchResult(**r) for r in raw_results]
     return PlaceSearchResponse(results=results, query=query, source="text_search")
+
+
+# ── Fetch Reviews On-Demand ──────────────────────────────────────────
+
+@place_router.post("/fetch-reviews", response_model=list[FetchReviewsResponse])
+async def fetch_reviews_endpoint(
+    user: User = Depends(require_owner),
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Fetch Google Maps reviews for all of the tenant's confirmed place IDs.
+    Deduplicates against existing reviews, runs sentiment analysis + auto-reply.
+    """
+    import uuid as _uuid
+
+    from app.models import AnalysisResult, Review
+    from app.services.sentiment import analyze_reviews
+    from app.services.reply import generate_reply
+
+    if not user.tenant_id:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "No tenant associated")
+
+    result = await db.execute(select(Tenant).where(Tenant.id == user.tenant_id))
+    tenant = result.scalar_one_or_none()
+    if not tenant:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Tenant not found")
+    if tenant.status != "active":
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Tenant is not active")
+
+    place_ids = tenant.place_ids or []
+    if not place_ids:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "No Place IDs configured")
+
+    # Resolve any URLs to proper Place IDs
+    resolved_place_ids = []
+    for pid in place_ids:
+        if "goo.gl" in pid or "google.com" in pid or "maps.app" in pid:
+            resolved = await resolve_maps_url(pid)
+            if resolved and resolved.get("place_id"):
+                real_pid = resolved["place_id"]
+                resolved_place_ids.append(real_pid)
+                # Update tenant's stored place_id if it was a URL
+                if pid in (tenant.place_ids or []):
+                    updated = [real_pid if p == pid else p for p in tenant.place_ids]
+                    tenant.place_ids = updated
+                    from sqlalchemy.orm.attributes import flag_modified
+                    flag_modified(tenant, "place_ids")
+                    log.info("place_id_resolved", old=pid, new=real_pid)
+            else:
+                log.warning("place_id_url_unresolved", url=pid)
+        else:
+            resolved_place_ids.append(pid)
+
+    responses = []
+
+    for place_id in resolved_place_ids:
+        # Fetch reviews from Google
+        raw_reviews = await fetch_place_reviews(place_id)
+        if not raw_reviews:
+            responses.append(FetchReviewsResponse(
+                place_id=place_id,
+                business_name="Unknown",
+                reviews_fetched=0,
+                reviews_new=0,
+                reviews_analyzed=0,
+                message="No reviews found on Google Maps",
+            ))
+            continue
+
+        business_name = raw_reviews[0]["business_name"]
+
+        # Deduplicate: check which reviews we already have
+        existing = await db.execute(
+            select(Review.raw_text).where(
+                Review.tenant_uuid == tenant.id,
+                Review.place_id == place_id,
+            )
+        )
+        existing_texts = {row[0] for row in existing.fetchall()}
+
+        new_reviews = [r for r in raw_reviews if r["text"] not in existing_texts]
+        analyzed_count = 0
+
+        for rev in new_reviews:
+            # Check quota
+            if tenant.reviews_used_this_month >= tenant.max_reviews_per_month:
+                log.warning("quota_exceeded_during_fetch", tenant_id=str(tenant.id))
+                break
+
+            # Persist raw review
+            review_row = Review(
+                id=_uuid.uuid4(),
+                business_name=rev["business_name"],
+                place_id=place_id,
+                source="google_maps",
+                author=rev["author_name"],
+                raw_text=rev["text"],
+                rating=rev["rating"],
+                tenant_id=str(tenant.id),
+                tenant_uuid=tenant.id,
+            )
+            db.add(review_row)
+            await db.flush()
+
+            # Sentiment analysis
+            try:
+                analyses, latency = await analyze_reviews([rev["text"]])
+                sentiment = analyses[0]
+            except Exception as e:
+                log.error("fetch_review_analysis_failed", error=str(e))
+                continue
+
+            # Auto-reply
+            suggested_reply = None
+            try:
+                suggested_reply, _ = await generate_reply(
+                    review_text=rev["text"],
+                    sentiment_score=sentiment.sentiment_score,
+                    category=sentiment.category,
+                    urgency_level=sentiment.urgency_level,
+                    dialect_detected=sentiment.dialect_detected,
+                    translated_intent=sentiment.translated_intent,
+                    author_name=rev["author_name"],
+                    business_name=rev["business_name"],
+                )
+            except Exception:
+                pass
+
+            # Persist analysis
+            analysis_row = AnalysisResult(
+                review_id=review_row.id,
+                sentiment_score=sentiment.sentiment_score,
+                category=sentiment.category,
+                urgency_level=sentiment.urgency_level,
+                dialect_detected=sentiment.dialect_detected,
+                translated_intent=sentiment.translated_intent,
+                suggested_reply=suggested_reply,
+                model_version="gpt-4o",
+                latency_ms=latency,
+            )
+            db.add(analysis_row)
+            tenant.reviews_used_this_month += 1
+            analyzed_count += 1
+
+        await db.commit()
+
+        responses.append(FetchReviewsResponse(
+            place_id=place_id,
+            business_name=business_name,
+            reviews_fetched=len(raw_reviews),
+            reviews_new=len(new_reviews),
+            reviews_analyzed=analyzed_count,
+            message=f"Fetched {len(raw_reviews)} reviews, {analyzed_count} new analyzed",
+        ))
+
+    return responses

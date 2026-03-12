@@ -145,3 +145,14 @@ export interface PlaceSearchResponse {
   query: string;
   source: "text_search" | "url_resolve";
 }
+
+// ── Fetch Reviews types ──────────────────────────────────────────────
+
+export interface FetchReviewsResult {
+  place_id: string;
+  business_name: string;
+  reviews_fetched: number;
+  reviews_new: number;
+  reviews_analyzed: number;
+  message: string;
+}

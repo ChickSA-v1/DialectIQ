@@ -202,6 +202,12 @@ const translations = {
     "client.placeIdAdded": "Business added successfully!",
     "client.businessLimit": "Business limit reached for your package",
     "client.alreadyAdded": "Already added",
+    "client.fetchReviews": "Fetch Reviews",
+    "client.fetchingReviews": "Fetching & analyzing reviews...",
+    "client.reviewsFetched": "reviews fetched",
+    "client.newAnalyzed": "new analyzed",
+    "client.noPlaceIds": "Add a business first to fetch reviews",
+    "client.fetchSuccess": "Reviews fetched successfully!",
 
     // Payment
     "payment.payNow": "Pay Now",
@@ -419,6 +425,12 @@ const translations = {
     "client.placeIdAdded": "تمت إضافة المنشأة بنجاح!",
     "client.businessLimit": "تم الوصول للحد الأقصى من المنشآت لباقتك",
     "client.alreadyAdded": "مضاف مسبقاً",
+    "client.fetchReviews": "جلب التقييمات",
+    "client.fetchingReviews": "جاري جلب وتحليل التقييمات...",
+    "client.reviewsFetched": "تقييمات تم جلبها",
+    "client.newAnalyzed": "جديدة تم تحليلها",
+    "client.noPlaceIds": "أضف منشأة أولاً لجلب التقييمات",
+    "client.fetchSuccess": "تم جلب التقييمات بنجاح!",
 
     // Payment
     "payment.payNow": "ادفع الآن",

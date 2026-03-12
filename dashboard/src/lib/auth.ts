@@ -11,6 +11,7 @@ import {
   DocumentInfo,
   InvoiceInfo,
   PlaceSearchResponse,
+  FetchReviewsResult,
 } from "./types";
 
 const API_BASE =
@@ -344,6 +345,19 @@ export async function searchPlaces(
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
     throw new Error(err.detail || "Place search failed");
+  }
+  return res.json();
+}
+
+// ── Fetch Reviews API ────────────────────────────────────────────────
+
+export async function fetchReviews(): Promise<FetchReviewsResult[]> {
+  const res = await authFetch("/api/v1/tenant/fetch-reviews", {
+    method: "POST",
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || "Failed to fetch reviews");
   }
   return res.json();
 }
