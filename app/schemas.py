@@ -98,3 +98,147 @@ class DashboardResponse(BaseModel):
     page: int
     page_size: int
     total_pages: int
+
+
+# ── Auth schemas ───────────────────────────────────────────────────────
+
+class RegisterRequest(BaseModel):
+    email: str = Field(..., max_length=255)
+    password: str = Field(..., min_length=8, max_length=128)
+    full_name: str = Field(..., min_length=1, max_length=255)
+    phone: str = Field(..., min_length=9, max_length=20)
+    business_name_ar: str = Field(..., min_length=1, max_length=255)
+    business_name_en: str | None = Field(None, max_length=255)
+    package: str = Field(..., pattern=r"^(basic|advanced|enterprise)$")
+
+
+class RegisterResponse(BaseModel):
+    tenant_id: UUID
+    message: str
+
+
+class LoginRequest(BaseModel):
+    email: str = Field(..., max_length=255)
+    password: str = Field(..., min_length=1, max_length=128)
+
+
+class LoginResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    role: str
+    tenant_id: UUID | None = None
+    tenant_status: str | None = None
+
+
+class DocumentUploadResponse(BaseModel):
+    document_id: UUID
+    file_name: str
+    doc_type: str
+    file_url: str
+
+
+class TenantInfo(BaseModel):
+    id: UUID
+    name_ar: str
+    name_en: str | None
+    email: str
+    phone: str
+    status: str
+    package: str
+    place_ids: list[str] | None = None
+    max_businesses: int
+    max_reviews_per_month: int
+    reviews_used_this_month: int
+    api_key: str | None = None
+    created_at: datetime
+
+
+class DocumentInfo(BaseModel):
+    id: UUID
+    doc_type: str
+    file_name: str
+    file_url: str
+    uploaded_at: datetime
+
+
+class UserProfile(BaseModel):
+    id: UUID
+    email: str
+    full_name: str
+    role: str
+    is_active: bool
+    tenant: TenantInfo | None = None
+
+
+# ── Admin schemas ──────────────────────────────────────────────────────
+
+class RegistrationDetail(BaseModel):
+    tenant: TenantInfo
+    documents: list[DocumentInfo]
+    owner: UserProfile | None = None
+
+
+class RegistrationListResponse(BaseModel):
+    registrations: list[RegistrationDetail]
+    total: int
+    page: int
+    total_pages: int
+
+
+class RejectRequest(BaseModel):
+    reason: str = Field(..., min_length=1, max_length=1000)
+
+
+class TenantListResponse(BaseModel):
+    tenants: list[TenantInfo]
+    total: int
+    page: int
+    total_pages: int
+
+
+# ── Subscription & Invoice schemas ────────────────────────────────────
+
+class SubscriptionInfo(BaseModel):
+    id: UUID
+    package: str
+    status: str
+    starts_at: datetime | None
+    expires_at: datetime | None
+    created_at: datetime
+
+
+class InvoiceInfo(BaseModel):
+    id: UUID
+    amount_sar: float
+    status: str
+    hyperpay_checkout_id: str | None = None
+    paid_at: datetime | None
+    created_at: datetime
+
+
+class CheckoutRequest(BaseModel):
+    invoice_id: UUID
+
+
+class CheckoutResponse(BaseModel):
+    checkout_id: str
+    redirect_url: str
+
+
+class PaymentStatusResponse(BaseModel):
+    invoice_id: UUID
+    status: str
+    amount_sar: float
+    paid_at: datetime | None = None
+
+
+# ── Place ID schemas ──────────────────────────────────────────────────
+
+class ConfirmPlaceIdRequest(BaseModel):
+    place_id: str = Field(..., min_length=1, max_length=255)
+
+
+class ConfirmPlaceIdResponse(BaseModel):
+    place_id: str
+    place_name: str | None = None
+    message: str

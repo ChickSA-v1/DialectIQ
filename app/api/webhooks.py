@@ -27,7 +27,14 @@ async def receive_google_review(
     """
     Receive a Google Maps review from n8n, run sentiment analysis + auto-reply
     via GPT-4o, persist to DB, and return the combined result.
+
+    Enforces:
+    - Place ID must be in tenant's allowed list (for DB tenants)
+    - Monthly review quota
     """
+    from app.models import Tenant  # local import to avoid circular
+    from sqlalchemy import select as _select
+
     logger.info(
         "review_received",
         business=payload.business_name,
@@ -36,6 +43,33 @@ async def receive_google_review(
         rating=payload.rating,
         text_preview=payload.text[:80],
     )
+
+    # --- Quota & place_id enforcement for DB tenants ---
+    tenant_uuid = None
+    if tenant_id != settings.default_tenant_id:
+        try:
+            _tid = uuid.UUID(tenant_id)
+            result = await db.execute(_select(Tenant).where(Tenant.id == _tid))
+            tenant = result.scalar_one_or_none()
+            if tenant:
+                tenant_uuid = tenant.id
+                # Check place_id is allowed
+                allowed = tenant.place_ids or []
+                if allowed and payload.place_id not in allowed:
+                    raise HTTPException(
+                        status_code=403,
+                        detail=f"Place ID {payload.place_id} not in allowed list for this tenant",
+                    )
+                # Check monthly quota
+                if tenant.reviews_used_this_month >= tenant.max_reviews_per_month:
+                    raise HTTPException(
+                        status_code=429,
+                        detail=f"Monthly review quota exceeded ({tenant.max_reviews_per_month})",
+                    )
+                # Increment counter
+                tenant.reviews_used_this_month += 1
+        except (ValueError, AttributeError):
+            pass  # Legacy string tenant_id — no enforcement
 
     # --- Persist raw review ---
     review_row = Review(
@@ -47,6 +81,7 @@ async def receive_google_review(
         raw_text=payload.text,
         rating=payload.rating,
         tenant_id=tenant_id,
+        tenant_uuid=tenant_uuid,
     )
     db.add(review_row)
     await db.flush()

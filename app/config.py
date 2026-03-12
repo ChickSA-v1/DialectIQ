@@ -19,8 +19,21 @@ class Settings(BaseSettings):
     openai_max_tokens: int = 4096
 
     # --- Auth ---
-    api_key: str = ""  # shared secret for MVP; multi-key later
+    api_key: str = ""  # legacy shared key (still accepted for backward compat)
     default_tenant_id: str = "default"
+
+    # --- JWT ---
+    jwt_secret_key: str = "change-me-in-production-use-openssl-rand-hex-32"
+    jwt_algorithm: str = "HS256"
+    jwt_expire_minutes: int = 1440  # 24 hours
+
+    # --- Google Cloud Storage ---
+    gcs_bucket_name: str = "dialectiq-documents"
+
+    # --- HyperPay ---
+    hyperpay_entity_id: str = ""
+    hyperpay_access_token: str = ""
+    hyperpay_base_url: str = "https://eu-test.oppwa.com"  # test; prod = https://eu-prod.oppwa.com
 
     # --- Limits ---
     max_batch_size: int = 50

@@ -5,7 +5,15 @@ from sqlalchemy import engine_from_config, pool
 
 from app.config import get_settings
 from app.database import Base
-from app.models import AnalysisResult, Review  # noqa: F401 — register models
+from app.models import (  # noqa: F401 — register models
+    AnalysisResult,
+    Document,
+    Invoice,
+    Review,
+    Subscription,
+    Tenant,
+    User,
+)
 
 config = context.config
 settings = get_settings()
