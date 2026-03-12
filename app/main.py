@@ -5,6 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import ORJSONResponse
 
+from app.api.dashboard import router as dashboard_router
 from app.api.routes import router
 from app.api.webhooks import router as webhooks_router
 from app.config import get_settings
@@ -41,6 +42,7 @@ app.add_middleware(
 
 app.include_router(router)
 app.include_router(webhooks_router)
+app.include_router(dashboard_router)
 
 
 @app.get("/health", tags=["infra"])

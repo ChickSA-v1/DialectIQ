@@ -7,6 +7,7 @@ from sqlalchemy import (
     Float,
     ForeignKey,
     Index,
+    Integer,
     String,
     Text,
     func,
@@ -23,10 +24,18 @@ class Review(Base):
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
-    source: Mapped[str | None] = mapped_column(String(50), nullable=True, comment="twitter, google, app_store, manual")
+    business_name: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
+    place_id: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
+    source: Mapped[str | None] = mapped_column(
+        String(50), nullable=True, default="google_maps",
+        comment="google_maps, twitter, whatsapp, manual",
+    )
     author: Mapped[str | None] = mapped_column(String(255), nullable=True)
     raw_text: Mapped[str] = mapped_column(Text, nullable=False)
-    tenant_id: Mapped[str] = mapped_column(String(100), nullable=False, index=True, comment="B2B tenant isolation")
+    rating: Mapped[int | None] = mapped_column(Integer, nullable=True, comment="1-5 star rating")
+    tenant_id: Mapped[str] = mapped_column(
+        String(100), nullable=False, index=True, comment="B2B tenant isolation"
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
@@ -37,6 +46,7 @@ class Review(Base):
 
     __table_args__ = (
         Index("ix_reviews_tenant_created", "tenant_id", "created_at"),
+        Index("ix_reviews_place_created", "place_id", "created_at"),
     )
 
 
@@ -47,7 +57,8 @@ class AnalysisResult(Base):
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
     review_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("reviews.id", ondelete="CASCADE"), unique=True, nullable=False
+        UUID(as_uuid=True), ForeignKey("reviews.id", ondelete="CASCADE"),
+        unique=True, nullable=False,
     )
     sentiment_score: Mapped[float] = mapped_column(Float, nullable=False, comment="1-10 scale")
     category: Mapped[str] = mapped_column(String(100), nullable=False)
@@ -57,6 +68,9 @@ class AnalysisResult(Base):
     )
     dialect_detected: Mapped[str] = mapped_column(String(50), nullable=False)
     translated_intent: Mapped[str] = mapped_column(Text, nullable=False)
+    suggested_reply: Mapped[str | None] = mapped_column(
+        Text, nullable=True, comment="AI-generated culturally appropriate reply"
+    )
     model_version: Mapped[str] = mapped_column(String(50), nullable=False, comment="Claude model used")
     latency_ms: Mapped[int | None] = mapped_column(nullable=True, comment="API call latency")
     created_at: Mapped[datetime] = mapped_column(
@@ -68,5 +82,6 @@ class AnalysisResult(Base):
     __table_args__ = (
         Index("ix_analysis_category", "category"),
         Index("ix_analysis_urgency", "urgency_level"),
-        Index("ix_analysis_tenant_time", "created_at"),
+        Index("ix_analysis_sentiment", "sentiment_score"),
+        Index("ix_analysis_created", "created_at"),
     )

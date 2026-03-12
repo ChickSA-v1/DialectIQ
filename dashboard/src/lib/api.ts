@@ -1,0 +1,33 @@
+import { DashboardResponse, Filters } from "./types";
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://dialectiq-api-297578317935.me-central1.run.app";
+const API_KEY = process.env.NEXT_PUBLIC_API_KEY || "";
+
+export async function fetchDashboard(
+  filters: Filters = {},
+  page = 1,
+  pageSize = 20,
+): Promise<DashboardResponse> {
+  const params = new URLSearchParams();
+  params.set("page", String(page));
+  params.set("page_size", String(pageSize));
+
+  if (filters.place_id) params.set("place_id", filters.place_id);
+  if (filters.business_name) params.set("business_name", filters.business_name);
+  if (filters.category) params.set("category", filters.category);
+  if (filters.urgency) params.set("urgency", filters.urgency);
+
+  const res = await fetch(`${API_BASE}/api/v1/dashboard?${params.toString()}`, {
+    headers: {
+      "X-API-Key": API_KEY,
+      "Content-Type": "application/json",
+    },
+    cache: "no-store",
+  });
+
+  if (!res.ok) {
+    throw new Error(`API error: ${res.status} ${res.statusText}`);
+  }
+
+  return res.json();
+}

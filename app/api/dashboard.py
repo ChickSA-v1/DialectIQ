@@ -1,0 +1,144 @@
+import math
+
+import structlog
+from fastapi import APIRouter, Depends, Query
+from sqlalchemy import func, select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.auth import verify_api_key
+from app.database import get_db
+from app.models import AnalysisResult, Review
+from app.schemas import DashboardResponse, DashboardStats, ReviewDetail
+
+logger = structlog.get_logger()
+
+router = APIRouter(prefix="/api/v1/dashboard", tags=["dashboard"])
+
+
+@router.get("", response_model=DashboardResponse)
+async def get_dashboard(
+    place_id: str | None = Query(None, description="Filter by Google place_id"),
+    business_name: str | None = Query(None, description="Filter by business name"),
+    category: str | None = Query(None, description="Filter by category"),
+    urgency: str | None = Query(None, description="Filter by urgency level"),
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+    tenant_id: str = Depends(verify_api_key),
+    db: AsyncSession = Depends(get_db),
+) -> DashboardResponse:
+    """Dashboard endpoint — returns stats + paginated reviews with analysis."""
+
+    # --- Base filter ---
+    base_filter = [Review.tenant_id == tenant_id]
+    if place_id:
+        base_filter.append(Review.place_id == place_id)
+    if business_name:
+        base_filter.append(Review.business_name.ilike(f"%{business_name}%"))
+
+    analysis_filter = []
+    if category:
+        analysis_filter.append(AnalysisResult.category == category)
+    if urgency:
+        analysis_filter.append(AnalysisResult.urgency_level == urgency)
+
+    # --- Stats ---
+    count_q = select(func.count(Review.id)).where(*base_filter)
+    if analysis_filter:
+        count_q = count_q.join(AnalysisResult).where(*analysis_filter)
+    total_reviews = (await db.execute(count_q)).scalar() or 0
+
+    avg_q = (
+        select(
+            func.avg(AnalysisResult.sentiment_score),
+            func.avg(Review.rating),
+        )
+        .join(Review)
+        .where(*base_filter)
+    )
+    if analysis_filter:
+        avg_q = avg_q.where(*analysis_filter)
+    avg_row = (await db.execute(avg_q)).one_or_none()
+    avg_sentiment = round(float(avg_row[0]), 2) if avg_row and avg_row[0] else None
+    avg_rating = round(float(avg_row[1]), 2) if avg_row and avg_row[1] else None
+
+    # Urgency breakdown
+    urgency_q = (
+        select(AnalysisResult.urgency_level, func.count())
+        .join(Review)
+        .where(*base_filter)
+        .group_by(AnalysisResult.urgency_level)
+    )
+    urgency_rows = (await db.execute(urgency_q)).all()
+    urgency_breakdown = {row[0]: row[1] for row in urgency_rows}
+
+    # Category breakdown
+    cat_q = (
+        select(AnalysisResult.category, func.count())
+        .join(Review)
+        .where(*base_filter)
+        .group_by(AnalysisResult.category)
+    )
+    cat_rows = (await db.execute(cat_q)).all()
+    category_breakdown = {row[0]: row[1] for row in cat_rows}
+
+    # Dialect breakdown
+    dialect_q = (
+        select(AnalysisResult.dialect_detected, func.count())
+        .join(Review)
+        .where(*base_filter)
+        .group_by(AnalysisResult.dialect_detected)
+    )
+    dialect_rows = (await db.execute(dialect_q)).all()
+    dialect_breakdown = {row[0]: row[1] for row in dialect_rows}
+
+    # --- Paginated reviews ---
+    offset = (page - 1) * page_size
+    reviews_q = (
+        select(Review)
+        .where(*base_filter)
+        .order_by(Review.created_at.desc())
+        .offset(offset)
+        .limit(page_size)
+    )
+    if analysis_filter:
+        reviews_q = reviews_q.join(AnalysisResult).where(*analysis_filter)
+
+    result = await db.execute(reviews_q)
+    review_rows = result.scalars().all()
+
+    reviews = []
+    for r in review_rows:
+        a = r.analysis  # loaded via selectin
+        reviews.append(
+            ReviewDetail(
+                id=r.id,
+                business_name=r.business_name,
+                place_id=r.place_id,
+                author=r.author,
+                raw_text=r.raw_text,
+                rating=r.rating,
+                source=r.source,
+                sentiment_score=a.sentiment_score if a else None,
+                category=a.category if a else None,
+                urgency_level=a.urgency_level if a else None,
+                dialect_detected=a.dialect_detected if a else None,
+                translated_intent=a.translated_intent if a else None,
+                suggested_reply=a.suggested_reply if a else None,
+                created_at=r.created_at,
+            )
+        )
+
+    return DashboardResponse(
+        stats=DashboardStats(
+            total_reviews=total_reviews,
+            avg_sentiment=avg_sentiment,
+            avg_rating=avg_rating,
+            urgency_breakdown=urgency_breakdown,
+            category_breakdown=category_breakdown,
+            dialect_breakdown=dialect_breakdown,
+        ),
+        reviews=reviews,
+        page=page,
+        page_size=page_size,
+        total_pages=max(1, math.ceil(total_reviews / page_size)),
+    )

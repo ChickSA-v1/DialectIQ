@@ -18,6 +18,10 @@ class Settings(BaseSettings):
     claude_model: str = "claude-3-5-sonnet-latest"
     claude_max_tokens: int = 4096
 
+    # --- Auth ---
+    api_key: str = ""  # shared secret for MVP; multi-key later
+    default_tenant_id: str = "default"
+
     # --- Limits ---
     max_batch_size: int = 50
 

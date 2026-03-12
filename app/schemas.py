@@ -1,3 +1,4 @@
+from datetime import datetime
 from uuid import UUID
 
 from pydantic import BaseModel, Field
@@ -59,4 +60,41 @@ class GoogleReviewResponse(BaseModel):
     rating: int
     text: str
     sentiment: SentimentOutput | None = None
+    suggested_reply: str | None = None
     latency_ms: int | None = None
+
+
+# --- Dashboard API ---
+
+class ReviewDetail(BaseModel):
+    id: UUID
+    business_name: str
+    place_id: str
+    author: str | None
+    raw_text: str
+    rating: int | None
+    source: str | None
+    sentiment_score: float | None = None
+    category: str | None = None
+    urgency_level: str | None = None
+    dialect_detected: str | None = None
+    translated_intent: str | None = None
+    suggested_reply: str | None = None
+    created_at: datetime
+
+
+class DashboardStats(BaseModel):
+    total_reviews: int
+    avg_sentiment: float | None
+    avg_rating: float | None
+    urgency_breakdown: dict[str, int]
+    category_breakdown: dict[str, int]
+    dialect_breakdown: dict[str, int]
+
+
+class DashboardResponse(BaseModel):
+    stats: DashboardStats
+    reviews: list[ReviewDetail]
+    page: int
+    page_size: int
+    total_pages: int
