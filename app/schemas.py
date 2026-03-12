@@ -192,6 +192,14 @@ class RejectRequest(BaseModel):
     reason: str = Field(..., min_length=1, max_length=1000)
 
 
+class EditTenantRequest(BaseModel):
+    name_ar: str | None = Field(None, min_length=1, max_length=255)
+    name_en: str | None = Field(None, max_length=255)
+    email: str | None = Field(None, max_length=255)
+    phone: str | None = Field(None, max_length=20)
+    package: str | None = Field(None, pattern=r"^(basic|advanced|enterprise)$")
+
+
 class TenantListResponse(BaseModel):
     tenants: list[TenantInfo]
     total: int

@@ -221,6 +221,53 @@ export async function activateTenant(
   return res.json();
 }
 
+export async function deactivateTenant(
+  tenantId: string
+): Promise<{ message: string }> {
+  const res = await authFetch(`/api/v1/admin/tenants/${tenantId}/deactivate`, {
+    method: "POST",
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || "Deactivation failed");
+  }
+  return res.json();
+}
+
+export async function reactivateTenant(
+  tenantId: string
+): Promise<{ message: string; api_key: string }> {
+  const res = await authFetch(`/api/v1/admin/tenants/${tenantId}/reactivate`, {
+    method: "POST",
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || "Reactivation failed");
+  }
+  return res.json();
+}
+
+export async function editTenant(
+  tenantId: string,
+  data: {
+    name_ar?: string;
+    name_en?: string;
+    email?: string;
+    phone?: string;
+    package?: string;
+  }
+): Promise<{ message: string; updated_fields: string[] }> {
+  const res = await authFetch(`/api/v1/admin/tenants/${tenantId}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || "Edit failed");
+  }
+  return res.json();
+}
+
 // ── Payment API ───────────────────────────────────────────────────────
 
 export async function createCheckout(

@@ -16,6 +16,7 @@ from app.deps import require_admin
 from app.models import Document, Invoice, Subscription, Tenant, User
 from app.schemas import (
     DocumentInfo,
+    EditTenantRequest,
     InvoiceInfo,
     RegistrationDetail,
     RegistrationListResponse,
@@ -350,6 +351,119 @@ async def activate_tenant(
     return {
         "message": "Tenant activated successfully",
         "api_key": api_key,
+        "tenant_id": tenant_id,
+        "status": "active",
+    }
+
+
+# ── Edit tenant ──────────────────────────────────────────────────────
+PACKAGE_LIMITS = {
+    "basic": {"max_businesses": 1, "max_reviews_per_month": 500},
+    "advanced": {"max_businesses": 5, "max_reviews_per_month": 2000},
+    "enterprise": {"max_businesses": 999, "max_reviews_per_month": 999999},
+}
+
+
+@router.put("/tenants/{tenant_id}")
+async def edit_tenant(
+    tenant_id: str,
+    req: EditTenantRequest,
+    _admin: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Edit tenant details (name, email, phone, package)."""
+    result = await db.execute(select(Tenant).where(Tenant.id == _uuid.UUID(tenant_id)))
+    tenant = result.scalar_one_or_none()
+    if not tenant:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Tenant not found")
+
+    updated_fields = []
+    if req.name_ar is not None:
+        tenant.name_ar = req.name_ar
+        updated_fields.append("name_ar")
+    if req.name_en is not None:
+        tenant.name_en = req.name_en
+        updated_fields.append("name_en")
+    if req.email is not None:
+        tenant.email = req.email
+        updated_fields.append("email")
+    if req.phone is not None:
+        tenant.phone = req.phone
+        updated_fields.append("phone")
+    if req.package is not None and req.package != tenant.package:
+        tenant.package = req.package
+        limits = PACKAGE_LIMITS.get(req.package, PACKAGE_LIMITS["basic"])
+        tenant.max_businesses = limits["max_businesses"]
+        tenant.max_reviews_per_month = limits["max_reviews_per_month"]
+        updated_fields.append("package")
+
+    await db.commit()
+    log.info("tenant_edited", tenant_id=tenant_id, fields=updated_fields)
+    return {"message": "Tenant updated successfully", "updated_fields": updated_fields}
+
+
+# ── Deactivate tenant ────────────────────────────────────────────────
+@router.post("/tenants/{tenant_id}/deactivate")
+async def deactivate_tenant(
+    tenant_id: str,
+    _admin: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Deactivate an active tenant: revoke API key, disable owner."""
+    result = await db.execute(select(Tenant).where(Tenant.id == _uuid.UUID(tenant_id)))
+    tenant = result.scalar_one_or_none()
+    if not tenant:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Tenant not found")
+    if tenant.status != "active":
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, f"Cannot deactivate tenant with status: {tenant.status}")
+
+    tenant.status = "suspended"
+    tenant.api_key = None
+
+    # Disable the owner user
+    owner_r = await db.execute(
+        select(User).where(User.tenant_id == tenant.id, User.role == "owner")
+    )
+    owner = owner_r.scalar_one_or_none()
+    if owner:
+        owner.is_active = False
+
+    await db.commit()
+    log.info("tenant_deactivated", tenant_id=tenant_id)
+    return {"message": "Tenant deactivated", "tenant_id": tenant_id, "status": "suspended"}
+
+
+# ── Reactivate tenant ────────────────────────────────────────────────
+@router.post("/tenants/{tenant_id}/reactivate")
+async def reactivate_tenant(
+    tenant_id: str,
+    _admin: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Reactivate a suspended tenant: generate new API key, enable owner."""
+    result = await db.execute(select(Tenant).where(Tenant.id == _uuid.UUID(tenant_id)))
+    tenant = result.scalar_one_or_none()
+    if not tenant:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Tenant not found")
+    if tenant.status != "suspended":
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, f"Cannot reactivate tenant with status: {tenant.status}")
+
+    tenant.status = "active"
+    tenant.api_key = generate_api_key()
+
+    # Re-enable the owner user
+    owner_r = await db.execute(
+        select(User).where(User.tenant_id == tenant.id, User.role == "owner")
+    )
+    owner = owner_r.scalar_one_or_none()
+    if owner:
+        owner.is_active = True
+
+    await db.commit()
+    log.info("tenant_reactivated", tenant_id=tenant_id, api_key=tenant.api_key[:12] + "...")
+    return {
+        "message": "Tenant reactivated",
+        "api_key": tenant.api_key,
         "tenant_id": tenant_id,
         "status": "active",
     }
