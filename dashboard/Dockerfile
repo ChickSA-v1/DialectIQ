@@ -12,11 +12,10 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Build-time env vars for NEXT_PUBLIC_*
-ARG NEXT_PUBLIC_API_URL
-ARG NEXT_PUBLIC_API_KEY
-ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
-ENV NEXT_PUBLIC_API_KEY=$NEXT_PUBLIC_API_KEY
+# NEXT_PUBLIC_* vars are inlined into the JS bundle at build time.
+# These are public by design (visible in client-side code).
+ENV NEXT_PUBLIC_API_URL=https://dialectiq-api-297578317935.me-central1.run.app
+ENV NEXT_PUBLIC_API_KEY=diq_live_sk_2026_sa
 
 RUN npm run build
 
