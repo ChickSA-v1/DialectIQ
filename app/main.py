@@ -1,9 +1,12 @@
+import logging
+
 import structlog
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import ORJSONResponse
 
 from app.api.routes import router
+from app.api.webhooks import router as webhooks_router
 from app.config import get_settings
 
 settings = get_settings()
@@ -17,7 +20,7 @@ structlog.configure(
         else structlog.processors.JSONRenderer(),
     ],
     wrapper_class=structlog.make_filtering_bound_logger(
-        structlog.get_level_from_name(settings.log_level)
+        getattr(logging, settings.log_level.upper(), logging.INFO)
     ),
 )
 
@@ -37,6 +40,7 @@ app.add_middleware(
 )
 
 app.include_router(router)
+app.include_router(webhooks_router)
 
 
 @app.get("/health", tags=["infra"])

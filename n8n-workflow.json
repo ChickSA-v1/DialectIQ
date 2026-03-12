@@ -1,0 +1,219 @@
+{
+  "name": "Google Maps Reviews → DialectIQ Sentiment Analysis",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 6
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Every 6 Hours",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://places.googleapis.com/v1/places/{{ $json.place_id }}/reviews",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Goog-FieldMask",
+              "value": "reviews.text,reviews.rating,reviews.authorAttribution"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "fetch-reviews",
+      "name": "Fetch Google Maps Reviews",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [440, 0],
+      "notes": "Replace with your Google Maps API credentials. Or use the SerpAPI / Outscraper node if you prefer scraping."
+    },
+    {
+      "parameters": {
+        "jsCode": "const placeId = $('Set Businesses').first().json.place_id;\nconst businessName = $('Set Businesses').first().json.business_name;\n\nreturn $input.all().flatMap(item => {\n  const reviews = item.json.reviews || [];\n  return reviews.map(review => ({\n    json: {\n      business_name: businessName,\n      place_id: placeId,\n      text: review.text?.text || review.text || '',\n      rating: review.rating || 0,\n      author_name: review.authorAttribution?.displayName || 'Anonymous'\n    }\n  }));\n});"
+      },
+      "id": "transform-reviews",
+      "name": "Transform to DialectIQ Format",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [660, 0]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://dialectiq-api-297578317935.me-central1.run.app/reviews",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "send-to-dialectiq",
+      "name": "Send to DialectIQ",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [880, 0]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "place_id",
+              "value": "YOUR_GOOGLE_PLACE_ID"
+            },
+            {
+              "name": "business_name",
+              "value": "Your Business Name"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-businesses",
+      "name": "Set Businesses",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [220, 0],
+      "notes": "Add your business place_ids here. Works for any institution — restaurants, clinics, banks, telecom, government services, etc. You can also replace this with a Google Sheet or database lookup."
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [{}]
+        }
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook Trigger (Alternative)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 300],
+      "disabled": true,
+      "webhookId": "dialectiq-google-reviews",
+      "parameters_extra": {
+        "httpMethod": "POST",
+        "path": "google-reviews",
+        "responseMode": "lastNode"
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://dialectiq-api-297578317935.me-central1.run.app/reviews",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ business_name: $json.business_name, place_id: $json.place_id, text: $json.text, rating: $json.rating, author_name: $json.author_name }) }}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "webhook-to-dialectiq",
+      "name": "Webhook → DialectIQ",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [220, 300],
+      "disabled": true
+    }
+  ],
+  "connections": {
+    "Every 6 Hours": {
+      "main": [
+        [
+          {
+            "node": "Set Businesses",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Businesses": {
+      "main": [
+        [
+          {
+            "node": "Fetch Google Maps Reviews",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Google Maps Reviews": {
+      "main": [
+        [
+          {
+            "node": "Transform to DialectIQ Format",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transform to DialectIQ Format": {
+      "main": [
+        [
+          {
+            "node": "Send to DialectIQ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook Trigger (Alternative)": {
+      "main": [
+        [
+          {
+            "node": "Webhook → DialectIQ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    {
+      "name": "DialectIQ"
+    },
+    {
+      "name": "Google Maps"
+    }
+  ]
+}

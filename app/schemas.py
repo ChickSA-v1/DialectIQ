@@ -39,3 +39,24 @@ class AnalyzeResponse(BaseModel):
     count: int
     results: list[ReviewResult]
     total_latency_ms: int
+
+
+# --- Google Maps Webhook (n8n) ---
+
+class GoogleReviewInput(BaseModel):
+    business_name: str = Field(..., min_length=1, max_length=255, description="Name of the business/institution")
+    place_id: str = Field(..., min_length=1, max_length=255)
+    text: str = Field(..., min_length=1, max_length=5000)
+    rating: int = Field(..., ge=1, le=5)
+    author_name: str = Field(..., min_length=1, max_length=255)
+
+
+class GoogleReviewResponse(BaseModel):
+    status: str
+    business_name: str
+    place_id: str
+    author_name: str
+    rating: int
+    text: str
+    sentiment: SentimentOutput | None = None
+    latency_ms: int | None = None
