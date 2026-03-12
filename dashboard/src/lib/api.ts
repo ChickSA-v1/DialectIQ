@@ -1,4 +1,5 @@
 import { DashboardResponse, Filters } from "./types";
+import { getToken } from "./auth";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://dialectiq-api-297578317935.me-central1.run.app";
 const API_KEY = process.env.NEXT_PUBLIC_API_KEY || "";
@@ -17,11 +18,19 @@ export async function fetchDashboard(
   if (filters.category) params.set("category", filters.category);
   if (filters.urgency) params.set("urgency", filters.urgency);
 
+  // Use JWT token if logged in, otherwise fall back to API key
+  const token = getToken();
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  } else if (API_KEY) {
+    headers["X-API-Key"] = API_KEY;
+  }
+
   const res = await fetch(`${API_BASE}/api/v1/dashboard?${params.toString()}`, {
-    headers: {
-      "X-API-Key": API_KEY,
-      "Content-Type": "application/json",
-    },
+    headers,
     cache: "no-store",
   });
 

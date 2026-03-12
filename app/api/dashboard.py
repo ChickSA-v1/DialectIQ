@@ -1,32 +1,70 @@
 import math
 
 import structlog
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Request
+from fastapi.security import APIKeyHeader
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth import verify_api_key
 from app.database import get_db
-from app.models import AnalysisResult, Review
+from app.models import AnalysisResult, Review, User
 from app.schemas import DashboardResponse, DashboardStats, ReviewDetail
+from app.security import decode_access_token
 
 logger = structlog.get_logger()
 
 router = APIRouter(prefix="/api/v1/dashboard", tags=["dashboard"])
 
+_api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
+
+
+async def _resolve_tenant_id(request: Request, db: AsyncSession) -> str:
+    """
+    Resolve tenant_id from JWT Bearer token OR X-API-Key header.
+    JWT takes priority if both are present.
+    """
+    # 1) Try JWT Bearer token
+    auth_header = request.headers.get("Authorization", "")
+    if auth_header.startswith("Bearer "):
+        token = auth_header[7:]
+        try:
+            payload = decode_access_token(token)
+            user_id = payload.get("sub")
+            if user_id:
+                result = await db.execute(select(User).where(User.id == user_id))
+                user = result.scalar_one_or_none()
+                if user:
+                    if user.role == "admin":
+                        # Admin sees all — use legacy tenant_id
+                        from app.config import get_settings
+                        return get_settings().default_tenant_id
+                    if user.tenant_id:
+                        return str(user.tenant_id)
+        except Exception:
+            pass  # fall through to API key
+
+    # 2) Fall back to X-API-Key
+    return await verify_api_key(
+        api_key=request.headers.get("X-API-Key"),
+        db=db,
+    )
+
 
 @router.get("", response_model=DashboardResponse)
 async def get_dashboard(
+    request: Request,
     place_id: str | None = Query(None, description="Filter by Google place_id"),
     business_name: str | None = Query(None, description="Filter by business name"),
     category: str | None = Query(None, description="Filter by category"),
     urgency: str | None = Query(None, description="Filter by urgency level"),
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
-    tenant_id: str = Depends(verify_api_key),
     db: AsyncSession = Depends(get_db),
 ) -> DashboardResponse:
     """Dashboard endpoint — returns stats + paginated reviews with analysis."""
+
+    tenant_id = await _resolve_tenant_id(request, db)
 
     # --- Base filter ---
     base_filter = [Review.tenant_id == tenant_id]
