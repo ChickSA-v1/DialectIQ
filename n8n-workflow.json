@@ -1,5 +1,5 @@
 {
-  "name": "Google Maps Reviews → DialectIQ Sentiment Analysis",
+  "name": "Google Maps Reviews → DialectIQ",
   "nodes": [
     {
       "parameters": {
@@ -20,37 +20,73 @@
     },
     {
       "parameters": {
-        "method": "POST",
-        "url": "https://places.googleapis.com/v1/places/{{ $json.place_id }}/reviews",
-        "authentication": "predefinedCredentialType",
-        "nodeCredentialType": "googleApi",
+        "jsCode": "// ═══════════════════════════════════════════════════════════\n// Configure your businesses here.\n// Works for ANY institution: restaurants, clinics, banks,\n// telecom, malls, government services, etc.\n// ═══════════════════════════════════════════════════════════\n\nconst businesses = [\n  {\n    place_id: 'ChIJN1t_tDeuEmsRUsoyG83frY4',   // Replace with real place_id\n    business_name: 'My Business'                  // Replace with real name\n  },\n  // Add more businesses below:\n  // {\n  //   place_id: 'ChIJ...',\n  //   business_name: 'Another Business'\n  // },\n];\n\nreturn businesses.map(b => ({ json: b }));"
+      },
+      "id": "list-businesses",
+      "name": "List Businesses",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [220, 0],
+      "notes": "Add your Google place_ids and business names here. Each business will be processed in sequence."
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "loop-businesses",
+      "name": "Loop Over Businesses",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [440, 0]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "=https://places.googleapis.com/v1/places/{{ $json.place_id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
             {
               "name": "X-Goog-FieldMask",
-              "value": "reviews.text,reviews.rating,reviews.authorAttribution"
+              "value": "displayName,reviews.text,reviews.rating,reviews.authorAttribution.displayName,reviews.publishTime"
             }
           ]
         },
-        "options": {}
+        "options": {
+          "timeout": 15000,
+          "response": {
+            "response": {
+              "fullResponse": false
+            }
+          }
+        }
       },
-      "id": "fetch-reviews",
-      "name": "Fetch Google Maps Reviews",
+      "id": "fetch-google-reviews",
+      "name": "Fetch Google Reviews",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [440, 0],
-      "notes": "Replace with your Google Maps API credentials. Or use the SerpAPI / Outscraper node if you prefer scraping."
+      "position": [660, 0],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "GOOGLE_API_CREDENTIAL_ID",
+          "name": "Google Places API Key"
+        }
+      },
+      "continueOnFail": true,
+      "notes": "Uses Google Places API (New). Create an HTTP Header Auth credential with:\n  Name: X-Goog-Api-Key\n  Value: YOUR_GOOGLE_API_KEY\n\nGet your API key from: https://console.cloud.google.com/apis/credentials\nEnable 'Places API (New)' in your GCP project."
     },
     {
       "parameters": {
-        "jsCode": "const placeId = $('Set Businesses').first().json.place_id;\nconst businessName = $('Set Businesses').first().json.business_name;\n\nreturn $input.all().flatMap(item => {\n  const reviews = item.json.reviews || [];\n  return reviews.map(review => ({\n    json: {\n      business_name: businessName,\n      place_id: placeId,\n      text: review.text?.text || review.text || '',\n      rating: review.rating || 0,\n      author_name: review.authorAttribution?.displayName || 'Anonymous'\n    }\n  }));\n});"
+        "jsCode": "// Get business info from the Loop node input\nconst loopItems = $('Loop Over Businesses').all();\nconst business = loopItems[0]?.json || {};\nconst placeId = business.place_id || 'unknown';\nconst businessName = business.business_name || 'Unknown Business';\n\nconst reviews = $input.first()?.json?.reviews || [];\n\nif (reviews.length === 0) {\n  // No reviews or API error — skip silently\n  return [];\n}\n\n// Transform each review to match DialectIQ POST /reviews schema:\n// { business_name, place_id, text, rating, author_name }\nreturn reviews\n  .filter(r => {\n    const text = r.text?.text || r.originalText?.text || '';\n    return text.trim().length > 0;\n  })\n  .map(review => ({\n    json: {\n      business_name: businessName,\n      place_id: placeId,\n      text: review.text?.text || review.originalText?.text || '',\n      rating: review.rating || 3,\n      author_name: review.authorAttribution?.displayName || 'Anonymous'\n    }\n  }));"
       },
       "id": "transform-reviews",
-      "name": "Transform to DialectIQ Format",
+      "name": "Transform Reviews",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [660, 0]
+      "position": [880, 0]
     },
     {
       "parameters": {
@@ -73,56 +109,58 @@
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify($json) }}",
         "options": {
-          "timeout": 30000
+          "timeout": 60000,
+          "batching": {
+            "batch": {
+              "batchSize": 1,
+              "batchInterval": 2000
+            }
+          }
         }
       },
       "id": "send-to-dialectiq",
-      "name": "Send to DialectIQ",
+      "name": "Send to DialectIQ API",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [880, 0]
+      "position": [1100, 0],
+      "continueOnFail": true,
+      "notes": "Sends each review to DialectIQ for:\n1. Saudi dialect detection (Najdi/Hijazi/Sharqi/MSA/Arabizi)\n2. Sentiment analysis (1-10 score)\n3. Category + urgency classification\n4. Auto-reply generation in Arabic\n\n2s delay between requests to respect Claude API rate limits."
     },
     {
       "parameters": {
-        "values": {
-          "string": [
-            {
-              "name": "place_id",
-              "value": "YOUR_GOOGLE_PLACE_ID"
-            },
-            {
-              "name": "business_name",
-              "value": "Your Business Name"
-            }
-          ]
-        },
+        "jsCode": "// Summarize results for logging\nconst items = $input.all();\nconst success = items.filter(i => i.json?.status === 'analyzed').length;\nconst failed = items.filter(i => i.json?.error || i.json?.status !== 'analyzed').length;\n\nreturn [{\n  json: {\n    summary: `Processed ${items.length} reviews: ${success} analyzed, ${failed} failed`,\n    total: items.length,\n    success,\n    failed,\n    timestamp: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "log-results",
+      "name": "Log Results",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1320, 0]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "dialectiq-review",
+        "responseMode": "lastNode",
         "options": {}
       },
-      "id": "set-businesses",
-      "name": "Set Businesses",
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
-      "position": [220, 0],
-      "notes": "Add your business place_ids here. Works for any institution — restaurants, clinics, banks, telecom, government services, etc. You can also replace this with a Google Sheet or database lookup."
+      "id": "webhook-trigger",
+      "name": "Webhook (Direct Push)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 340],
+      "disabled": true,
+      "webhookId": "dialectiq-direct-review"
     },
     {
       "parameters": {
-        "rule": {
-          "interval": [{}]
-        }
+        "jsCode": "// Validate incoming webhook payload matches DialectIQ schema\nconst body = $input.first().json?.body || $input.first().json || {};\n\nconst required = ['business_name', 'place_id', 'text', 'rating', 'author_name'];\nconst missing = required.filter(f => !body[f]);\n\nif (missing.length > 0) {\n  throw new Error(`Missing required fields: ${missing.join(', ')}`);\n}\n\n// Clamp rating to 1-5\nconst rating = Math.max(1, Math.min(5, parseInt(body.rating) || 3));\n\nreturn [{\n  json: {\n    business_name: String(body.business_name).slice(0, 255),\n    place_id: String(body.place_id).slice(0, 255),\n    text: String(body.text).slice(0, 5000),\n    rating: rating,\n    author_name: String(body.author_name).slice(0, 255)\n  }\n}];"
       },
-      "id": "webhook-trigger",
-      "name": "Webhook Trigger (Alternative)",
-      "type": "n8n-nodes-base.webhook",
+      "id": "validate-webhook",
+      "name": "Validate & Normalize",
+      "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [0, 300],
-      "disabled": true,
-      "webhookId": "dialectiq-google-reviews",
-      "parameters_extra": {
-        "httpMethod": "POST",
-        "path": "google-reviews",
-        "responseMode": "lastNode"
-      }
+      "position": [220, 340],
+      "disabled": true
     },
     {
       "parameters": {
@@ -143,16 +181,16 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ business_name: $json.business_name, place_id: $json.place_id, text: $json.text, rating: $json.rating, author_name: $json.author_name }) }}",
+        "jsonBody": "={{ JSON.stringify($json) }}",
         "options": {
-          "timeout": 30000
+          "timeout": 60000
         }
       },
-      "id": "webhook-to-dialectiq",
-      "name": "Webhook → DialectIQ",
+      "id": "webhook-send-dialectiq",
+      "name": "Analyze via DialectIQ",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [220, 300],
+      "position": [440, 340],
       "disabled": true
     }
   ],
@@ -161,51 +199,96 @@
       "main": [
         [
           {
-            "node": "Set Businesses",
+            "node": "List Businesses",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Set Businesses": {
+    "List Businesses": {
       "main": [
         [
           {
-            "node": "Fetch Google Maps Reviews",
+            "node": "Loop Over Businesses",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Fetch Google Maps Reviews": {
+    "Loop Over Businesses": {
       "main": [
+        null,
         [
           {
-            "node": "Transform to DialectIQ Format",
+            "node": "Fetch Google Reviews",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Transform to DialectIQ Format": {
+    "Fetch Google Reviews": {
       "main": [
         [
           {
-            "node": "Send to DialectIQ",
+            "node": "Transform Reviews",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Webhook Trigger (Alternative)": {
+    "Transform Reviews": {
       "main": [
         [
           {
-            "node": "Webhook → DialectIQ",
+            "node": "Send to DialectIQ API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send to DialectIQ API": {
+      "main": [
+        [
+          {
+            "node": "Log Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Results": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Businesses",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook (Direct Push)": {
+      "main": [
+        [
+          {
+            "node": "Validate & Normalize",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate & Normalize": {
+      "main": [
+        [
+          {
+            "node": "Analyze via DialectIQ",
             "type": "main",
             "index": 0
           }
@@ -215,13 +298,5 @@
   },
   "settings": {
     "executionOrder": "v1"
-  },
-  "tags": [
-    {
-      "name": "DialectIQ"
-    },
-    {
-      "name": "Google Maps"
-    }
-  ]
+  }
 }
