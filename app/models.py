@@ -71,7 +71,7 @@ class AnalysisResult(Base):
     suggested_reply: Mapped[str | None] = mapped_column(
         Text, nullable=True, comment="AI-generated culturally appropriate reply"
     )
-    model_version: Mapped[str] = mapped_column(String(50), nullable=False, comment="Claude model used")
+    model_version: Mapped[str] = mapped_column(String(50), nullable=False, comment="AI model used (e.g. gpt-4o)")
     latency_ms: Mapped[int | None] = mapped_column(nullable=True, comment="API call latency")
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()

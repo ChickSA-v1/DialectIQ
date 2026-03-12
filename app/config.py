@@ -13,10 +13,10 @@ class Settings(BaseSettings):
     # --- Database ---
     database_url: str = "postgresql+asyncpg://postgres:password@localhost:5432/dialectiq"
 
-    # --- Anthropic ---
-    anthropic_api_key: str = ""
-    claude_model: str = "claude-3-5-sonnet-latest"
-    claude_max_tokens: int = 4096
+    # --- OpenAI ---
+    openai_api_key: str = ""
+    openai_model: str = "gpt-4o"
+    openai_max_tokens: int = 4096
 
     # --- Auth ---
     api_key: str = ""  # shared secret for MVP; multi-key later

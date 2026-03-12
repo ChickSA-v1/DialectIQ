@@ -1,7 +1,7 @@
 import time
 
-import anthropic
 import structlog
+from openai import AsyncOpenAI
 from tenacity import retry, stop_after_attempt, wait_exponential
 
 from app.config import get_settings
@@ -10,7 +10,7 @@ from app.prompts.auto_reply import AUTO_REPLY_PROMPT, build_reply_message
 logger = structlog.get_logger()
 settings = get_settings()
 
-_client = anthropic.AsyncAnthropic(api_key=settings.anthropic_api_key)
+_client = AsyncOpenAI(api_key=settings.openai_api_key)
 
 
 @retry(
@@ -47,16 +47,18 @@ async def generate_reply(
 
     start = time.perf_counter()
 
-    response = await _client.messages.create(
-        model=settings.claude_model,
+    response = await _client.chat.completions.create(
+        model=settings.openai_model,
         max_tokens=512,
-        system=AUTO_REPLY_PROMPT,
-        messages=[{"role": "user", "content": user_message}],
+        messages=[
+            {"role": "system", "content": AUTO_REPLY_PROMPT},
+            {"role": "user", "content": user_message},
+        ],
         temperature=0.4,  # slight creativity for natural-sounding replies
     )
 
     latency_ms = int((time.perf_counter() - start) * 1000)
-    reply_text = response.content[0].text.strip()
+    reply_text = response.choices[0].message.content.strip()
 
     logger.debug("reply_generated", length=len(reply_text), latency_ms=latency_ms)
 

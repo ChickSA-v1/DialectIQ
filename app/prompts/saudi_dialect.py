@@ -100,6 +100,6 @@ RULES:
 
 
 def build_user_message(reviews: list[str]) -> str:
-    """Format reviews into a numbered list for Claude."""
+    """Format reviews into a numbered list for the AI model."""
     numbered = "\n".join(f"[{i+1}] {text}" for i, text in enumerate(reviews))
     return f"Analyze these {len(reviews)} Saudi customer reviews:\n\n{numbered}"

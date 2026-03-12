@@ -26,7 +26,7 @@ async def receive_google_review(
 ) -> GoogleReviewResponse:
     """
     Receive a Google Maps review from n8n, run sentiment analysis + auto-reply
-    via Claude, persist to DB, and return the combined result.
+    via GPT-4o, persist to DB, and return the combined result.
     """
     logger.info(
         "review_received",
@@ -51,7 +51,7 @@ async def receive_google_review(
     db.add(review_row)
     await db.flush()
 
-    # --- Sentiment analysis via Claude ---
+    # --- Sentiment analysis via GPT-4o ---
     try:
         analyses, sentiment_latency = await analyze_reviews([payload.text])
         sentiment = analyses[0]
@@ -62,7 +62,7 @@ async def receive_google_review(
         logger.error("unexpected_error", error=str(e), place_id=payload.place_id)
         raise HTTPException(status_code=500, detail="Internal analysis error") from e
 
-    # --- Auto-reply generation via Claude ---
+    # --- Auto-reply generation via GPT-4o ---
     suggested_reply = None
     try:
         suggested_reply, _ = await generate_reply(
@@ -88,7 +88,7 @@ async def receive_google_review(
         dialect_detected=sentiment.dialect_detected,
         translated_intent=sentiment.translated_intent,
         suggested_reply=suggested_reply,
-        model_version=settings.claude_model,
+        model_version=settings.openai_model,
         latency_ms=sentiment_latency,
     )
     db.add(analysis_row)
