@@ -801,8 +801,8 @@ function Footer() {
           <div>
             <h4 className="text-white font-semibold text-sm mb-4">{t("landing.footer.legal")}</h4>
             <ul className="space-y-2 text-sm">
-              <li><a href="#" className="hover:text-white transition-colors">{t("landing.footer.privacy")}</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">{t("landing.footer.terms")}</a></li>
+              <li><a href="/privacy" className="hover:text-white transition-colors">{t("landing.footer.privacy")}</a></li>
+              <li><a href="/privacy" className="hover:text-white transition-colors">{t("landing.footer.terms")}</a></li>
             </ul>
           </div>
 

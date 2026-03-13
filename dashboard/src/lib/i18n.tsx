@@ -424,6 +424,46 @@ const translations = {
     "landing.footer.copyright": "DialectIQ. All rights reserved.",
     "landing.footer.builtFor": "Built for Saudi businesses",
     "landing.footer.builtBy": "Developed by",
+
+    // Privacy & Terms page
+    "privacy.backHome": "Back to Home",
+    "privacy.legalDocs": "Legal Documents",
+    "privacy.pageTitle": "Terms & Privacy Policy",
+    "privacy.lastUpdated": "Last updated: March 2026",
+
+    // Terms and Conditions
+    "privacy.termsTitle": "Terms and Conditions for DialectIQ",
+    "privacy.terms1Title": "1. Introduction and Legal Identity",
+    "privacy.terms1Body": "These Terms and Conditions govern your use of the DialectIQ platform. This agreement is between the user and \"DataWeave\" (a Single-Person Limited Liability Company), as the exclusive owner and operator of the platform. By using the platform, you fully agree to these terms.",
+    "privacy.terms2Title": "2. Nature of AI Services and Output Accuracy",
+    "privacy.terms2Body": "DialectIQ relies on advanced Artificial Intelligence models for text processing and data generation. The user acknowledges that the platform's outputs are automated analytical results that may not be 100% accurate, complete, or error-free. They should not be relied upon as professional advice or final decisions without independent human review.",
+    "privacy.terms3Title": "3. User Obligations and Fair Use Policy",
+    "privacy.terms3Bullet1": "You agree to use the platform only for lawful purposes.",
+    "privacy.terms3Bullet2": "All subscription plans are subject to a \"Fair Use Policy\" to ensure server stability. Excessive or automated usage (e.g., unauthorized bots) that overloads the platform's infrastructure or APIs is strictly prohibited. The platform reserves the right to rate-limit or suspend accounts that exceed normal usage patterns.",
+    "privacy.terms4Title": "4. Intellectual Property Rights",
+    "privacy.terms4Bullet1": "Inputs and Outputs: The user retains full ownership of all text and data inputted into the platform. DialectIQ grants the user the right to use the generated outputs for the purposes specified in their subscription plan.",
+    "privacy.terms4Bullet2": "The Platform: All content, designs, algorithms, processing models, and source code are the exclusive property of DataWeave.",
+    "privacy.terms5Title": "5. Subscriptions, Billing, and Cancellation",
+    "privacy.terms5Body": "DialectIQ operates on a Software-as-a-Service (SaaS) recurring subscription model. Subscriptions renew automatically unless canceled by the user via the dashboard prior to the end of the current billing cycle. All payments made are non-refundable and considered final.",
+    "privacy.terms6Title": "6. Limitation of Liability",
+    "privacy.terms6Body": "Services are provided on an \"as-is\" basis. DataWeave bears no legal responsibility for any direct or indirect damages resulting from the use of the service, downtime, data loss, or reliance on AI-generated outputs.",
+
+    // Privacy Policy
+    "privacy.privacyTitle": "Privacy Policy for DialectIQ",
+    "privacy.priv1Title": "1. Data We Collect",
+    "privacy.priv1Bullet1": "Account Data: Name, email address, and payment information.",
+    "privacy.priv1Bullet2": "Usage Data: Interaction with the platform, IP address.",
+    "privacy.priv1Bullet3": "Text and Linguistic Inputs: The text and queries submitted to be processed by our AI models.",
+    "privacy.priv2Title": "2. How We Use and Process Data",
+    "privacy.priv2Body": "We use your data primarily to operate the service and generate your requested outputs. We may use portions of the inputted data in an entirely anonymized manner to improve the accuracy of our language models and AI performance, strictly ensuring that no personal or sensitive information is used in training processes.",
+    "privacy.priv3Title": "3. Data Sharing and Third-Party Providers",
+    "privacy.priv3Body": "DialectIQ utilizes third-party cloud service providers and servers (such as hosting and database services). We ensure these technical partners are bound by strict confidentiality agreements and do not have the right to use your data for their own commercial purposes. We do not sell your personal data to any third party.",
+    "privacy.priv4Title": "4. Data Retention and User Rights",
+    "privacy.priv4Bullet1": "Your query history is retained as long as your account is active.",
+    "privacy.priv4Bullet2": "You have the right to access, modify, or request the secure and permanent deletion of all your texts, inputs, and account data at any time.",
+    "privacy.priv5Title": "5. Data Security",
+    "privacy.priv5Body": "We employ advanced technical measures and secure encryption protocols to protect your data against unauthorized access, alteration, or loss.",
+    "privacy.contactLine": "For questions, contact us at support@d-iq.io",
   },
   ar: {
     // Header
@@ -844,6 +884,46 @@ const translations = {
     "landing.footer.copyright": "DialectIQ. جميع الحقوق محفوظة.",
     "landing.footer.builtFor": "صُنع للمنشآت السعودية",
     "landing.footer.builtBy": "تطوير",
+
+    // Privacy & Terms page
+    "privacy.backHome": "الرجوع للرئيسية",
+    "privacy.legalDocs": "المستندات القانونية",
+    "privacy.pageTitle": "الشروط وسياسة الخصوصية",
+    "privacy.lastUpdated": "آخر تحديث: مارس 2026",
+
+    // Terms and Conditions
+    "privacy.termsTitle": "الشروط والأحكام لمنصة DialectIQ",
+    "privacy.terms1Title": "1. المقدمة والهوية القانونية",
+    "privacy.terms1Body": "تحكم هذه الشروط والأحكام استخدامك لمنصة DialectIQ. هذه الاتفاقية مبرمة بين المستخدم وشركة \"DataWeave\" (شركة ذات مسؤولية محدودة - شخص واحد)، بصفتها المالك والمشغل الحصري للمنصة. باستخدامك للمنصة، فإنك توافق موافقة كاملة على هذه الشروط.",
+    "privacy.terms2Title": "2. طبيعة خدمات الذكاء الاصطناعي ودقة المخرجات",
+    "privacy.terms2Body": "تعتمد منصة DialectIQ على نماذج ذكاء اصطناعي متقدمة لمعالجة النصوص وتوليد البيانات. يقر المستخدم بأن مخرجات المنصة هي نتائج تحليلية آلية قد لا تكون دقيقة أو كاملة أو خالية من الأخطاء بنسبة 100%. ولا ينبغي الاعتماد عليها كمشورة مهنية أو قرارات نهائية دون مراجعة بشرية مستقلة.",
+    "privacy.terms3Title": "3. التزامات المستخدم وسياسة الاستخدام العادل",
+    "privacy.terms3Bullet1": "توافق على استخدام المنصة للأغراض المشروعة فقط.",
+    "privacy.terms3Bullet2": "تخضع جميع خطط الاشتراك لـ \"سياسة الاستخدام العادل\" لضمان استقرار الخوادم. يُحظر تمامًا الاستخدام المفرط أو الآلي (مثل البوتات غير المصرح بها) الذي يُثقل البنية التحتية أو واجهات البرمجة للمنصة. تحتفظ المنصة بحق تقييد أو تعليق الحسابات التي تتجاوز أنماط الاستخدام الطبيعية.",
+    "privacy.terms4Title": "4. حقوق الملكية الفكرية",
+    "privacy.terms4Bullet1": "المدخلات والمخرجات: يحتفظ المستخدم بالملكية الكاملة لجميع النصوص والبيانات المُدخلة في المنصة. تمنح DialectIQ المستخدم حق استخدام المخرجات المُولدة للأغراض المحددة في خطة اشتراكه.",
+    "privacy.terms4Bullet2": "المنصة: جميع المحتويات والتصاميم والخوارزميات ونماذج المعالجة والشفرة المصدرية هي ملكية حصرية لشركة DataWeave.",
+    "privacy.terms5Title": "5. الاشتراكات والفوترة والإلغاء",
+    "privacy.terms5Body": "تعمل DialectIQ بنموذج اشتراك متكرر كبرنامج خدمة (SaaS). يتم تجديد الاشتراكات تلقائيًا ما لم يتم إلغاؤها من قبل المستخدم عبر لوحة التحكم قبل نهاية دورة الفوترة الحالية. جميع المدفوعات غير قابلة للاسترداد وتُعتبر نهائية.",
+    "privacy.terms6Title": "6. حدود المسؤولية",
+    "privacy.terms6Body": "تُقدم الخدمات على أساس \"كما هي\". لا تتحمل DataWeave أي مسؤولية قانونية عن أي أضرار مباشرة أو غير مباشرة ناتجة عن استخدام الخدمة أو انقطاعها أو فقدان البيانات أو الاعتماد على مخرجات الذكاء الاصطناعي.",
+
+    // Privacy Policy
+    "privacy.privacyTitle": "سياسة الخصوصية لمنصة DialectIQ",
+    "privacy.priv1Title": "1. البيانات التي نجمعها",
+    "privacy.priv1Bullet1": "بيانات الحساب: الاسم، عنوان البريد الإلكتروني، ومعلومات الدفع.",
+    "privacy.priv1Bullet2": "بيانات الاستخدام: التفاعل مع المنصة، عنوان IP.",
+    "privacy.priv1Bullet3": "المدخلات النصية واللغوية: النصوص والاستعلامات المقدمة لمعالجتها بواسطة نماذج الذكاء الاصطناعي.",
+    "privacy.priv2Title": "2. كيف نستخدم ونعالج البيانات",
+    "privacy.priv2Body": "نستخدم بياناتك بشكل أساسي لتشغيل الخدمة وتوليد المخرجات المطلوبة. قد نستخدم أجزاء من البيانات المُدخلة بطريقة مجهولة الهوية بالكامل لتحسين دقة نماذجنا اللغوية وأداء الذكاء الاصطناعي، مع ضمان صارم بعدم استخدام أي معلومات شخصية أو حساسة في عمليات التدريب.",
+    "privacy.priv3Title": "3. مشاركة البيانات ومقدمو الخدمات الخارجيون",
+    "privacy.priv3Body": "تستخدم DialectIQ مقدمي خدمات سحابية وخوادم خارجية (مثل خدمات الاستضافة وقواعد البيانات). نضمن أن هؤلاء الشركاء التقنيين ملزمون باتفاقيات سرية صارمة وليس لديهم حق استخدام بياناتك لأغراضهم التجارية. نحن لا نبيع بياناتك الشخصية لأي طرف ثالث.",
+    "privacy.priv4Title": "4. الاحتفاظ بالبيانات وحقوق المستخدم",
+    "privacy.priv4Bullet1": "يتم الاحتفاظ بسجل استعلاماتك طالما حسابك نشط.",
+    "privacy.priv4Bullet2": "لديك الحق في الوصول إلى جميع نصوصك ومدخلاتك وبيانات حسابك أو تعديلها أو طلب حذفها بشكل آمن ودائم في أي وقت.",
+    "privacy.priv5Title": "5. أمن البيانات",
+    "privacy.priv5Body": "نستخدم إجراءات تقنية متقدمة وبروتوكولات تشفير آمنة لحماية بياناتك من الوصول غير المصرح به أو التعديل أو الفقدان.",
+    "privacy.contactLine": "للاستفسارات، تواصل معنا على support@d-iq.io",
   },
 } as const;
 
