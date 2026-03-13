@@ -374,7 +374,7 @@ const translations = {
     "landing.faq4.q": "Is my business data secure?",
     "landing.faq4.a": "Absolutely. We use enterprise-grade encryption, and data is stored on Google Cloud in the Middle East region.",
     "landing.faq5.q": "What payment methods do you accept?",
-    "landing.faq5.a": "We accept Visa, Mastercard, and Mada cards through our secure HyperPay payment gateway in Saudi Riyals.",
+    "landing.faq5.a": "We accept payment via bank transfer in Saudi Riyals. After registration approval, you'll receive our bank details to complete your payment.",
     "landing.faq6.q": "How accurate is the sentiment analysis?",
     "landing.faq6.a": "Our dialect-aware AI achieves 97% accuracy on Saudi Arabic reviews, outperforming generic Arabic NLP tools.",
 
@@ -392,6 +392,7 @@ const translations = {
     "landing.footer.terms": "Terms of Service",
     "landing.footer.copyright": "DialectIQ. All rights reserved.",
     "landing.footer.builtFor": "Built for Saudi businesses",
+    "landing.footer.builtBy": "Developed by",
   },
   ar: {
     // Header
@@ -762,7 +763,7 @@ const translations = {
     "landing.faq4.q": "هل بيانات منشأتي آمنة؟",
     "landing.faq4.a": "بالتأكيد. نستخدم تشفير بمستوى المؤسسات، والبيانات مخزنة على Google Cloud في منطقة الشرق الأوسط.",
     "landing.faq5.q": "ما طرق الدفع المقبولة؟",
-    "landing.faq5.a": "نقبل فيزا وماستركارد ومدى عبر بوابة الدفع الآمنة HyperPay بالريال السعودي.",
+    "landing.faq5.a": "نقبل الدفع عبر التحويل البنكي بالريال السعودي. بعد الموافقة على التسجيل، ستتلقى بياناتنا البنكية لإتمام الدفع.",
     "landing.faq6.q": "ما مدى دقة تحليل المشاعر؟",
     "landing.faq6.a": "ذكاؤنا الاصطناعي المتخصص باللهجات يحقق دقة 97% على التقييمات العربية السعودية، متفوقاً على أدوات NLP العربية العامة.",
 
@@ -780,6 +781,7 @@ const translations = {
     "landing.footer.terms": "شروط الخدمة",
     "landing.footer.copyright": "DialectIQ. جميع الحقوق محفوظة.",
     "landing.footer.builtFor": "صُنع للمنشآت السعودية",
+    "landing.footer.builtBy": "تطوير",
   },
 } as const;
 

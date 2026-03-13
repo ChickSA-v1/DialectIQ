@@ -16,7 +16,6 @@ import {
   ChevronUp,
   CheckCircle,
   ArrowRight,
-  Star,
   Play,
   Zap,
   BarChart3,
@@ -101,7 +100,6 @@ function LandingPage() {
       <HowItWorks />
       <DashboardPreview />
       <Pricing />
-      <Testimonials />
       <FAQ />
       <CTABanner />
       <Footer />
@@ -137,12 +135,12 @@ function Navbar() {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
         {/* Logo */}
-        <div className="flex items-center gap-2">
+        <a href="https://d-iq.io" className="flex items-center gap-2">
           <div className="w-9 h-9 rounded-lg gradient-primary flex items-center justify-center text-white font-bold text-lg">
             D
           </div>
           <span className="text-xl font-bold text-gray-900">DialectIQ</span>
-        </div>
+        </a>
 
         {/* Desktop nav */}
         <div className="hidden md:flex items-center gap-8">
@@ -658,60 +656,7 @@ function Pricing() {
   );
 }
 
-/* ─────────────── 8. Testimonials ─────────────── */
-
-function Testimonials() {
-  const { t } = useI18n();
-  const ref = useScrollReveal();
-
-  const cards = [
-    { text: t("landing.testimonial1.text"), name: t("landing.testimonial1.name"), role: t("landing.testimonial1.role"), initial: "M" },
-    { text: t("landing.testimonial2.text"), name: t("landing.testimonial2.name"), role: t("landing.testimonial2.role"), initial: "S" },
-    { text: t("landing.testimonial3.text"), name: t("landing.testimonial3.name"), role: t("landing.testimonial3.role"), initial: "A" },
-  ];
-
-  return (
-    <section className="py-20 md:py-28">
-      <div ref={ref} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <span className="inline-block bg-indigo-50 text-indigo-700 text-sm font-medium px-4 py-1.5 rounded-full mb-4">
-            {t("landing.testimonials.badge")}
-          </span>
-          <h2 className="text-3xl sm:text-4xl font-bold">{t("landing.testimonials.title")}</h2>
-        </div>
-
-        <div className="grid md:grid-cols-3 gap-6 lg:gap-8">
-          {cards.map((c, i) => (
-            <div
-              key={i}
-              className="glass-card glass-card-hover rounded-2xl p-6 sm:p-8"
-              style={{ animationDelay: `${i * 0.1}s` }}
-            >
-              {/* Stars */}
-              <div className="flex gap-0.5 mb-4">
-                {Array.from({ length: 5 }).map((_, j) => (
-                  <Star key={j} className="w-4 h-4 fill-amber-400 text-amber-400" />
-                ))}
-              </div>
-              <p className="text-gray-700 text-sm leading-relaxed mb-6">&ldquo;{c.text}&rdquo;</p>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full gradient-primary flex items-center justify-center text-white font-bold text-sm">
-                  {c.initial}
-                </div>
-                <div>
-                  <div className="text-sm font-semibold text-gray-800">{c.name}</div>
-                  <div className="text-xs text-gray-500">{c.role}</div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ─────────────── 9. FAQ ─────────────── */
+/* ─────────────── 8. FAQ ─────────────── */
 
 function FAQ() {
   const { t } = useI18n();
@@ -820,12 +765,12 @@ function Footer() {
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
           {/* Brand */}
           <div className="sm:col-span-2 lg:col-span-1">
-            <div className="flex items-center gap-2 mb-4">
+            <a href="https://d-iq.io" className="flex items-center gap-2 mb-4">
               <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center text-white font-bold text-sm">
                 D
               </div>
               <span className="text-lg font-bold text-white">DialectIQ</span>
-            </div>
+            </a>
             <p className="text-sm leading-relaxed">{t("landing.footer.desc")}</p>
           </div>
 
@@ -852,7 +797,7 @@ function Footer() {
           <div>
             <h4 className="text-white font-semibold text-sm mb-4">{t("landing.footer.contact")}</h4>
             <ul className="space-y-2 text-sm">
-              <li>support@dialectiq.com</li>
+              <li>support@d-iq.io</li>
               <li>Riyadh, Saudi Arabia</li>
             </ul>
           </div>
@@ -860,7 +805,11 @@ function Footer() {
 
         <div className="border-t border-gray-800 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm">
           <p>&copy; {new Date().getFullYear()} {t("landing.footer.copyright")}</p>
-          <p>{t("landing.footer.builtFor")} 🇸🇦</p>
+          <div className="flex items-center gap-2">
+            <span>{t("landing.footer.builtFor")} 🇸🇦</span>
+            <span className="text-gray-600">|</span>
+            <span>{t("landing.footer.builtBy")} <a href="https://dataweave.sa" target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:text-indigo-300 transition-colors font-medium">DataWeave</a></span>
+          </div>
         </div>
       </div>
     </footer>
