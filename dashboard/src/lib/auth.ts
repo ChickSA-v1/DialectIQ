@@ -269,6 +269,52 @@ export async function editTenant(
   return res.json();
 }
 
+// ── Admin Place ID Management ─────────────────────────────────────────
+
+export async function adminSearchPlaces(
+  tenantId: string,
+  query: string
+): Promise<PlaceSearchResponse> {
+  const res = await authFetch(`/api/v1/admin/tenants/${tenantId}/search-places`, {
+    method: "POST",
+    body: JSON.stringify({ query }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || "Search failed");
+  }
+  return res.json();
+}
+
+export async function adminAddPlaceId(
+  tenantId: string,
+  placeId: string
+): Promise<{ message: string; place_id: string; place_name: string | null }> {
+  const res = await authFetch(`/api/v1/admin/tenants/${tenantId}/place-ids`, {
+    method: "POST",
+    body: JSON.stringify({ place_id: placeId }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || "Add failed");
+  }
+  return res.json();
+}
+
+export async function adminRemovePlaceId(
+  tenantId: string,
+  placeId: string
+): Promise<{ message: string }> {
+  const res = await authFetch(`/api/v1/admin/tenants/${tenantId}/place-ids/${encodeURIComponent(placeId)}`, {
+    method: "DELETE",
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || "Remove failed");
+  }
+  return res.json();
+}
+
 // ── Payment API ───────────────────────────────────────────────────────
 
 export async function createCheckout(

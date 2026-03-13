@@ -14,7 +14,6 @@ import {
 import { UserProfile, InvoiceInfo, FetchReviewsResult } from "@/lib/types";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import DashboardShell from "@/components/DashboardShell";
-import BusinessSearch from "@/components/BusinessSearch";
 import {
   Clock,
   CheckCircle,
@@ -377,9 +376,9 @@ function ClientDashboard() {
                 </span>
               </div>
 
-              {/* Existing place IDs */}
-              {tenant?.place_ids && tenant.place_ids.length > 0 && (
-                <div className="flex flex-wrap gap-2 mb-4">
+              {/* Existing place IDs (read-only, managed by admin) */}
+              {tenant?.place_ids && tenant.place_ids.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
                   {tenant.place_ids.map((pid) => (
                     <span
                       key={pid}
@@ -390,14 +389,11 @@ function ClientDashboard() {
                     </span>
                   ))}
                 </div>
+              ) : (
+                <p className="text-sm text-gray-400">
+                  {t("client.noPlaceIds")}
+                </p>
               )}
-
-              {/* Business search */}
-              <BusinessSearch
-                currentPlaceIds={tenant?.place_ids || []}
-                maxBusinesses={tenant?.max_businesses || 1}
-                onPlaceAdded={loadProfile}
-              />
             </div>
 
             {/* Fetch Reviews */}

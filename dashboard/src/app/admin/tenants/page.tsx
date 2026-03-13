@@ -8,8 +8,11 @@ import {
   deactivateTenant,
   reactivateTenant,
   editTenant,
+  adminSearchPlaces,
+  adminAddPlaceId,
+  adminRemovePlaceId,
 } from "@/lib/auth";
-import { TenantInfo } from "@/lib/types";
+import { TenantInfo, PlaceSearchResult } from "@/lib/types";
 import {
   CheckCircle,
   Key,
@@ -21,6 +24,13 @@ import {
   PowerOff,
   X,
   Save,
+  MapPin,
+  Search,
+  Plus,
+  Trash2,
+  Star,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 
 export default function TenantsPage() {
@@ -46,6 +56,16 @@ export default function TenantsPage() {
   const [confirmDeactivate, setConfirmDeactivate] = useState<string | null>(
     null
   );
+
+  // Place ID management state
+  const [expandedTenant, setExpandedTenant] = useState<string | null>(null);
+  const [placeSearchQuery, setPlaceSearchQuery] = useState("");
+  const [placeSearchResults, setPlaceSearchResults] = useState<
+    PlaceSearchResult[]
+  >([]);
+  const [placeSearching, setPlaceSearching] = useState(false);
+  const [placeAdding, setPlaceAdding] = useState<string | null>(null);
+  const [placeRemoving, setPlaceRemoving] = useState<string | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -135,6 +155,59 @@ export default function TenantsPage() {
     setTimeout(() => setCopiedKey(null), 2000);
   };
 
+  // ── Place ID Actions ──
+
+  const togglePlaces = (tenantId: string) => {
+    if (expandedTenant === tenantId) {
+      setExpandedTenant(null);
+      setPlaceSearchResults([]);
+      setPlaceSearchQuery("");
+    } else {
+      setExpandedTenant(tenantId);
+      setPlaceSearchResults([]);
+      setPlaceSearchQuery("");
+    }
+  };
+
+  const handlePlaceSearch = async (tenantId: string) => {
+    if (!placeSearchQuery.trim()) return;
+    setPlaceSearching(true);
+    try {
+      const res = await adminSearchPlaces(tenantId, placeSearchQuery.trim());
+      setPlaceSearchResults(res.results);
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setPlaceSearching(false);
+    }
+  };
+
+  const handleAddPlace = async (tenantId: string, placeId: string) => {
+    setPlaceAdding(placeId);
+    try {
+      await adminAddPlaceId(tenantId, placeId);
+      setPlaceSearchResults([]);
+      setPlaceSearchQuery("");
+      await load();
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setPlaceAdding(null);
+    }
+  };
+
+  const handleRemovePlace = async (tenantId: string, placeId: string) => {
+    setPlaceRemoving(placeId);
+    try {
+      await adminRemovePlaceId(tenantId, placeId);
+      await load();
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setPlaceRemoving(null);
+    }
+  };
+
   const statusBadge = (status: string) => {
     const colors: Record<string, string> = {
       active: "bg-emerald-100 text-emerald-700",
@@ -175,190 +248,324 @@ export default function TenantsPage() {
           <p className="text-gray-400 text-sm">{t("admin.noTenants")}</p>
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b border-gray-200">
-              <tr>
-                <th className="text-start px-4 py-3 font-medium text-gray-600">
-                  {t("admin.businessName")}
-                </th>
-                <th className="text-start px-4 py-3 font-medium text-gray-600">
-                  {t("admin.package")}
-                </th>
-                <th className="text-start px-4 py-3 font-medium text-gray-600">
-                  {t("admin.status")}
-                </th>
-                <th className="text-start px-4 py-3 font-medium text-gray-600">
-                  {t("payment.status")}
-                </th>
-                <th className="text-start px-4 py-3 font-medium text-gray-600">
-                  {t("admin.reviewsUsed")}
-                </th>
-                <th className="text-start px-4 py-3 font-medium text-gray-600">
-                  {t("admin.apiKey")}
-                </th>
-                <th className="text-start px-4 py-3 font-medium text-gray-600">
-                  {t("admin.actions")}
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {tenants.map((tenant) => (
-                <tr key={tenant.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-2">
-                      <Building2 className="w-4 h-4 text-gray-400" />
-                      <div>
-                        <div className="font-medium text-gray-800">
-                          {tenant.name_ar}
-                        </div>
-                        <div className="text-xs text-gray-400">
-                          {tenant.email}
-                        </div>
-                      </div>
+        <div className="space-y-3">
+          {tenants.map((tenant) => (
+            <div
+              key={tenant.id}
+              className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden"
+            >
+              {/* Main row */}
+              <div className="flex items-center gap-4 px-4 py-3 text-sm">
+                {/* Business Name */}
+                <div className="flex items-center gap-2 min-w-[200px] flex-1">
+                  <Building2 className="w-4 h-4 text-gray-400 shrink-0" />
+                  <div>
+                    <div className="font-medium text-gray-800">
+                      {tenant.name_ar}
                     </div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className="px-2 py-0.5 bg-indigo-50 text-indigo-700 rounded text-xs font-medium">
-                      {t(`package.${tenant.package}` as any)}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={`px-2 py-0.5 rounded text-xs font-medium ${statusBadge(tenant.status)}`}
-                    >
-                      {t(`tenant.${tenant.status}` as any)}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    {tenant.latest_invoice_status ? (
-                      <span
-                        className={`px-2 py-0.5 rounded text-xs font-medium ${
-                          tenant.latest_invoice_status === "paid"
-                            ? "bg-emerald-100 text-emerald-700"
-                            : tenant.latest_invoice_status === "failed"
-                              ? "bg-red-100 text-red-700"
-                              : "bg-amber-100 text-amber-700"
-                        }`}
-                      >
-                        {t(`payment.${tenant.latest_invoice_status}` as any)}
-                      </span>
-                    ) : (
-                      <span className="text-xs text-gray-400">
-                        {t("payment.none")}
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3 text-gray-600">
-                    {tenant.reviews_used_this_month} /{" "}
-                    {tenant.max_reviews_per_month}
-                  </td>
-                  <td className="px-4 py-3">
-                    {tenant.api_key ? (
-                      <button
-                        onClick={() => copyKey(tenant.api_key!)}
-                        className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700 font-mono"
-                      >
-                        <Key className="w-3 h-3" />
-                        {tenant.api_key.slice(0, 12)}...
-                        <Copy className="w-3 h-3" />
-                        {copiedKey === tenant.api_key && (
-                          <span className="text-emerald-600 ms-1">
-                            {t("admin.copied")}
-                          </span>
-                        )}
-                      </button>
-                    ) : (
-                      <span className="text-xs text-gray-400">—</span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-1.5">
-                      {/* Edit button — always visible */}
-                      <button
-                        onClick={() => openEdit(tenant)}
-                        className="flex items-center gap-1 px-2.5 py-1.5 text-gray-600 border border-gray-200 rounded-lg text-xs font-medium hover:bg-gray-50 transition-colors"
-                        title={t("admin.edit" as any)}
-                      >
-                        <Pencil className="w-3 h-3" />
-                        {t("admin.edit" as any)}
-                      </button>
+                    <div className="text-xs text-gray-400">{tenant.email}</div>
+                  </div>
+                </div>
 
-                      {/* Activate — for approved tenants */}
-                      {tenant.status === "approved" && (
+                {/* Package */}
+                <span className="px-2 py-0.5 bg-indigo-50 text-indigo-700 rounded text-xs font-medium">
+                  {t(`package.${tenant.package}` as any)}
+                </span>
+
+                {/* Status */}
+                <span
+                  className={`px-2 py-0.5 rounded text-xs font-medium ${statusBadge(tenant.status)}`}
+                >
+                  {t(`tenant.${tenant.status}` as any)}
+                </span>
+
+                {/* Payment */}
+                {tenant.latest_invoice_status ? (
+                  <span
+                    className={`px-2 py-0.5 rounded text-xs font-medium ${
+                      tenant.latest_invoice_status === "paid"
+                        ? "bg-emerald-100 text-emerald-700"
+                        : tenant.latest_invoice_status === "failed"
+                          ? "bg-red-100 text-red-700"
+                          : "bg-amber-100 text-amber-700"
+                    }`}
+                  >
+                    {t(`payment.${tenant.latest_invoice_status}` as any)}
+                  </span>
+                ) : (
+                  <span className="text-xs text-gray-400">
+                    {t("payment.none")}
+                  </span>
+                )}
+
+                {/* Reviews */}
+                <span className="text-xs text-gray-600 whitespace-nowrap">
+                  {tenant.reviews_used_this_month}/{tenant.max_reviews_per_month}
+                </span>
+
+                {/* API Key */}
+                {tenant.api_key ? (
+                  <button
+                    onClick={() => copyKey(tenant.api_key!)}
+                    className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700 font-mono"
+                  >
+                    <Key className="w-3 h-3" />
+                    {tenant.api_key.slice(0, 12)}...
+                    <Copy className="w-3 h-3" />
+                    {copiedKey === tenant.api_key && (
+                      <span className="text-emerald-600 ms-1">
+                        {t("admin.copied")}
+                      </span>
+                    )}
+                  </button>
+                ) : (
+                  <span className="text-xs text-gray-400">—</span>
+                )}
+
+                {/* Actions */}
+                <div className="flex items-center gap-1.5">
+                  {/* Place IDs toggle */}
+                  <button
+                    onClick={() => togglePlaces(tenant.id)}
+                    className={`flex items-center gap-1 px-2.5 py-1.5 border rounded-lg text-xs font-medium transition-colors ${
+                      expandedTenant === tenant.id
+                        ? "bg-indigo-50 text-indigo-700 border-indigo-200"
+                        : "text-gray-600 border-gray-200 hover:bg-gray-50"
+                    }`}
+                  >
+                    <MapPin className="w-3 h-3" />
+                    {tenant.place_ids?.length || 0}
+                    {expandedTenant === tenant.id ? (
+                      <ChevronUp className="w-3 h-3" />
+                    ) : (
+                      <ChevronDown className="w-3 h-3" />
+                    )}
+                  </button>
+
+                  {/* Edit */}
+                  <button
+                    onClick={() => openEdit(tenant)}
+                    className="flex items-center gap-1 px-2.5 py-1.5 text-gray-600 border border-gray-200 rounded-lg text-xs font-medium hover:bg-gray-50 transition-colors"
+                    title={t("admin.edit" as any)}
+                  >
+                    <Pencil className="w-3 h-3" />
+                    {t("admin.edit" as any)}
+                  </button>
+
+                  {/* Activate */}
+                  {tenant.status === "approved" && (
+                    <button
+                      onClick={() => handleActivate(tenant.id)}
+                      disabled={actionLoading === tenant.id}
+                      className="flex items-center gap-1 px-2.5 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-medium hover:bg-emerald-700 transition-colors disabled:opacity-50"
+                    >
+                      {actionLoading === tenant.id ? (
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                      ) : (
+                        <CheckCircle className="w-3 h-3" />
+                      )}
+                      {t("admin.activate")}
+                    </button>
+                  )}
+
+                  {/* Deactivate */}
+                  {tenant.status === "active" && (
+                    <>
+                      {confirmDeactivate === tenant.id ? (
+                        <div className="flex items-center gap-1">
+                          <button
+                            onClick={() => handleDeactivate(tenant.id)}
+                            disabled={actionLoading === tenant.id}
+                            className="flex items-center gap-1 px-2.5 py-1.5 bg-red-600 text-white rounded-lg text-xs font-medium hover:bg-red-700 transition-colors disabled:opacity-50"
+                          >
+                            {actionLoading === tenant.id ? (
+                              <Loader2 className="w-3 h-3 animate-spin" />
+                            ) : (
+                              <PowerOff className="w-3 h-3" />
+                            )}
+                            {t("admin.deactivate" as any)}
+                          </button>
+                          <button
+                            onClick={() => setConfirmDeactivate(null)}
+                            className="px-2 py-1.5 text-gray-500 border border-gray-200 rounded-lg text-xs hover:bg-gray-50"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </div>
+                      ) : (
                         <button
-                          onClick={() => handleActivate(tenant.id)}
-                          disabled={actionLoading === tenant.id}
-                          className="flex items-center gap-1 px-2.5 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-medium hover:bg-emerald-700 transition-colors disabled:opacity-50"
+                          onClick={() => setConfirmDeactivate(tenant.id)}
+                          className="flex items-center gap-1 px-2.5 py-1.5 text-red-600 border border-red-200 rounded-lg text-xs font-medium hover:bg-red-50 transition-colors"
                         >
-                          {actionLoading === tenant.id ? (
-                            <Loader2 className="w-3 h-3 animate-spin" />
-                          ) : (
-                            <CheckCircle className="w-3 h-3" />
-                          )}
-                          {t("admin.activate")}
+                          <PowerOff className="w-3 h-3" />
+                          {t("admin.deactivate" as any)}
                         </button>
                       )}
+                    </>
+                  )}
 
-                      {/* Deactivate — for active tenants */}
-                      {tenant.status === "active" && (
-                        <>
-                          {confirmDeactivate === tenant.id ? (
-                            <div className="flex items-center gap-1">
-                              <button
-                                onClick={() => handleDeactivate(tenant.id)}
-                                disabled={actionLoading === tenant.id}
-                                className="flex items-center gap-1 px-2.5 py-1.5 bg-red-600 text-white rounded-lg text-xs font-medium hover:bg-red-700 transition-colors disabled:opacity-50"
-                              >
-                                {actionLoading === tenant.id ? (
-                                  <Loader2 className="w-3 h-3 animate-spin" />
-                                ) : (
-                                  <PowerOff className="w-3 h-3" />
+                  {/* Reactivate */}
+                  {tenant.status === "suspended" && (
+                    <button
+                      onClick={() => handleReactivate(tenant.id)}
+                      disabled={actionLoading === tenant.id}
+                      className="flex items-center gap-1 px-2.5 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-medium hover:bg-emerald-700 transition-colors disabled:opacity-50"
+                    >
+                      {actionLoading === tenant.id ? (
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                      ) : (
+                        <Power className="w-3 h-3" />
+                      )}
+                      {t("admin.reactivate" as any)}
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* ── Expanded Place IDs panel ── */}
+              {expandedTenant === tenant.id && (
+                <div className="border-t border-gray-200 bg-gray-50 px-4 py-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <MapPin className="w-4 h-4 text-indigo-600" />
+                    <span className="text-sm font-medium text-gray-700">
+                      {t("admin.placeIds" as any)}
+                    </span>
+                    <span className="text-xs text-gray-400">
+                      ({tenant.place_ids?.length || 0} /{" "}
+                      {tenant.max_businesses})
+                    </span>
+                  </div>
+
+                  {/* Current Place IDs */}
+                  {tenant.place_ids && tenant.place_ids.length > 0 ? (
+                    <div className="space-y-1.5 mb-4">
+                      {tenant.place_ids.map((pid) => (
+                        <div
+                          key={pid}
+                          className="flex items-center justify-between bg-white border border-gray-200 rounded-lg px-3 py-2"
+                        >
+                          <span className="text-xs font-mono text-gray-700 flex items-center gap-1.5">
+                            <CheckCircle className="w-3 h-3 text-emerald-500" />
+                            {pid}
+                          </span>
+                          <button
+                            onClick={() =>
+                              handleRemovePlace(tenant.id, pid)
+                            }
+                            disabled={placeRemoving === pid}
+                            className="flex items-center gap-1 px-2 py-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded text-xs transition-colors disabled:opacity-50"
+                          >
+                            {placeRemoving === pid ? (
+                              <Loader2 className="w-3 h-3 animate-spin" />
+                            ) : (
+                              <Trash2 className="w-3 h-3" />
+                            )}
+                            {t("admin.removePlaceId" as any)}
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-gray-400 mb-4">
+                      {t("admin.noPlaceIds" as any)}
+                    </p>
+                  )}
+
+                  {/* Search & Add */}
+                  <div className="flex gap-2 mb-3">
+                    <input
+                      type="text"
+                      value={placeSearchQuery}
+                      onChange={(e) => setPlaceSearchQuery(e.target.value)}
+                      onKeyDown={(e) =>
+                        e.key === "Enter" &&
+                        handlePlaceSearch(tenant.id)
+                      }
+                      placeholder={t("admin.searchBusiness" as any)}
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                      dir="auto"
+                    />
+                    <button
+                      onClick={() => handlePlaceSearch(tenant.id)}
+                      disabled={placeSearching || !placeSearchQuery.trim()}
+                      className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                    >
+                      {placeSearching ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Search className="w-4 h-4" />
+                      )}
+                      {t("client.searchBusiness")}
+                    </button>
+                  </div>
+
+                  {/* Search results */}
+                  {placeSearchResults.length > 0 && (
+                    <div className="space-y-2">
+                      {placeSearchResults.map((place) => {
+                        const alreadyAdded = tenant.place_ids?.includes(
+                          place.place_id
+                        );
+                        return (
+                          <div
+                            key={place.place_id}
+                            className="flex items-center justify-between bg-white border border-gray-200 rounded-lg px-3 py-2"
+                          >
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-gray-800 truncate">
+                                {place.name}
+                              </p>
+                              <p className="text-xs text-gray-400 truncate">
+                                {place.address}
+                              </p>
+                              <div className="flex items-center gap-2 mt-0.5">
+                                {place.rating && (
+                                  <span className="flex items-center gap-0.5 text-xs text-amber-600">
+                                    <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                                    {place.rating}
+                                  </span>
                                 )}
-                                {t("admin.deactivate" as any)}
-                              </button>
-                              <button
-                                onClick={() => setConfirmDeactivate(null)}
-                                className="px-2 py-1.5 text-gray-500 border border-gray-200 rounded-lg text-xs hover:bg-gray-50"
-                              >
-                                <X className="w-3 h-3" />
-                              </button>
+                                {place.user_ratings_total != null && (
+                                  <span className="text-xs text-gray-400">
+                                    ({place.user_ratings_total}{" "}
+                                    {t("client.reviews")})
+                                  </span>
+                                )}
+                                <span className="text-xs text-gray-300 font-mono">
+                                  {place.place_id}
+                                </span>
+                              </div>
                             </div>
-                          ) : (
                             <button
                               onClick={() =>
-                                setConfirmDeactivate(tenant.id)
+                                handleAddPlace(tenant.id, place.place_id)
                               }
-                              className="flex items-center gap-1 px-2.5 py-1.5 text-red-600 border border-red-200 rounded-lg text-xs font-medium hover:bg-red-50 transition-colors"
+                              disabled={
+                                !!alreadyAdded ||
+                                placeAdding === place.place_id
+                              }
+                              className="flex items-center gap-1 px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-medium hover:bg-emerald-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors ms-3 shrink-0"
                             >
-                              <PowerOff className="w-3 h-3" />
-                              {t("admin.deactivate" as any)}
+                              {placeAdding === place.place_id ? (
+                                <Loader2 className="w-3 h-3 animate-spin" />
+                              ) : alreadyAdded ? (
+                                <CheckCircle className="w-3 h-3" />
+                              ) : (
+                                <Plus className="w-3 h-3" />
+                              )}
+                              {alreadyAdded
+                                ? t("client.alreadyAdded")
+                                : t("admin.addPlaceId" as any)}
                             </button>
-                          )}
-                        </>
-                      )}
-
-                      {/* Reactivate — for suspended tenants */}
-                      {tenant.status === "suspended" && (
-                        <button
-                          onClick={() => handleReactivate(tenant.id)}
-                          disabled={actionLoading === tenant.id}
-                          className="flex items-center gap-1 px-2.5 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-medium hover:bg-emerald-700 transition-colors disabled:opacity-50"
-                        >
-                          {actionLoading === tenant.id ? (
-                            <Loader2 className="w-3 h-3 animate-spin" />
-                          ) : (
-                            <Power className="w-3 h-3" />
-                          )}
-                          {t("admin.reactivate" as any)}
-                        </button>
-                      )}
+                          </div>
+                        );
+                      })}
                     </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  )}
+                </div>
+              )}
+            </div>
+          ))}
         </div>
       )}
 

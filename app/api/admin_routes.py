@@ -15,9 +15,13 @@ from app.database import get_db
 from app.deps import require_admin
 from app.models import Document, Invoice, Subscription, Tenant, User
 from app.schemas import (
+    ConfirmPlaceIdRequest,
     DocumentInfo,
     EditTenantRequest,
     InvoiceInfo,
+    PlaceSearchRequest,
+    PlaceSearchResponse,
+    PlaceSearchResult,
     RegistrationDetail,
     RegistrationListResponse,
     RejectRequest,
@@ -27,6 +31,7 @@ from app.schemas import (
     UserProfile,
 )
 from app.security import generate_api_key
+from app.services.places import get_place_details, resolve_maps_url, search_places
 from app.services.storage import download_blob
 
 log = structlog.get_logger()
@@ -505,3 +510,109 @@ async def view_document(
             "Cache-Control": "private, max-age=300",
         },
     )
+
+
+# ── Place ID Management (Admin) ─────────────────────────────────────
+
+
+@router.post("/tenants/{tenant_id}/search-places", response_model=PlaceSearchResponse)
+async def admin_search_places(
+    tenant_id: str,
+    req: PlaceSearchRequest,
+    _admin: User = Depends(require_admin),
+):
+    """Admin: search for businesses by name or resolve a Google Maps URL."""
+    query = req.query.strip()
+
+    is_url = any(s in query for s in ("google.com/maps", "goo.gl", "maps.app", "maps.google"))
+
+    if is_url:
+        resolved = await resolve_maps_url(query)
+        if resolved:
+            source = resolved.pop("source", "url_resolve")
+            return PlaceSearchResponse(
+                results=[PlaceSearchResult(**resolved)],
+                query=query,
+                source=source,
+            )
+        return PlaceSearchResponse(results=[], query=query, source="url_resolve")
+
+    raw_results = await search_places(query)
+    results = [PlaceSearchResult(**r) for r in raw_results]
+    return PlaceSearchResponse(results=results, query=query, source="text_search")
+
+
+@router.post("/tenants/{tenant_id}/place-ids")
+async def admin_add_place_id(
+    tenant_id: str,
+    req: ConfirmPlaceIdRequest,
+    _admin: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Admin: add a Place ID to a tenant's list."""
+    tid = _uuid.UUID(tenant_id)
+    result = await db.execute(select(Tenant).where(Tenant.id == tid))
+    tenant = result.scalar_one_or_none()
+    if not tenant:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Tenant not found")
+
+    current_places = list(tenant.place_ids or [])
+    if req.place_id in current_places:
+        raise HTTPException(status.HTTP_409_CONFLICT, "Place ID already added")
+
+    if len(current_places) >= tenant.max_businesses:
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST,
+            f"Maximum {tenant.max_businesses} businesses for {tenant.package} package",
+        )
+
+    # Validate and get place name
+    place_name = None
+    try:
+        details = await get_place_details(req.place_id)
+        if details:
+            place_name = details.get("name")
+    except Exception:
+        pass
+
+    current_places.append(req.place_id)
+    tenant.place_ids = current_places
+    from sqlalchemy.orm.attributes import flag_modified
+    flag_modified(tenant, "place_ids")
+    await db.commit()
+
+    log.info("admin_place_id_added", tenant_id=tenant_id, place_id=req.place_id)
+    return {
+        "message": "Place ID added",
+        "place_id": req.place_id,
+        "place_name": place_name,
+        "total_places": len(current_places),
+    }
+
+
+@router.delete("/tenants/{tenant_id}/place-ids/{place_id}")
+async def admin_remove_place_id(
+    tenant_id: str,
+    place_id: str,
+    _admin: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Admin: remove a Place ID from a tenant's list."""
+    tid = _uuid.UUID(tenant_id)
+    result = await db.execute(select(Tenant).where(Tenant.id == tid))
+    tenant = result.scalar_one_or_none()
+    if not tenant:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Tenant not found")
+
+    current_places = list(tenant.place_ids or [])
+    if place_id not in current_places:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Place ID not found in tenant")
+
+    current_places.remove(place_id)
+    tenant.place_ids = current_places
+    from sqlalchemy.orm.attributes import flag_modified
+    flag_modified(tenant, "place_ids")
+    await db.commit()
+
+    log.info("admin_place_id_removed", tenant_id=tenant_id, place_id=place_id)
+    return {"message": "Place ID removed", "place_id": place_id, "total_places": len(current_places)}

@@ -166,6 +166,13 @@ const translations = {
     "admin.nameEn": "Name (English)",
     "admin.email": "Email",
     "admin.phone": "Phone",
+    "admin.placeIds": "Place IDs",
+    "admin.addPlaceId": "Add Place ID",
+    "admin.removePlaceId": "Remove",
+    "admin.searchBusiness": "Search business...",
+    "admin.noPlaceIds": "No businesses assigned",
+    "admin.placeIdAdded": "Business added",
+    "admin.placeIdRemoved": "Business removed",
 
     // Tenant statuses
     "tenant.active": "Active",
@@ -206,7 +213,7 @@ const translations = {
     "client.fetchingReviews": "Fetching & analyzing reviews...",
     "client.reviewsFetched": "reviews fetched",
     "client.newAnalyzed": "new analyzed",
-    "client.noPlaceIds": "Add a business first to fetch reviews",
+    "client.noPlaceIds": "No businesses assigned yet. Your admin will add them for you.",
     "client.fetchSuccess": "Reviews fetched successfully!",
 
     // Payment
@@ -389,6 +396,13 @@ const translations = {
     "admin.nameEn": "الاسم (إنجليزي)",
     "admin.email": "البريد الإلكتروني",
     "admin.phone": "رقم الجوال",
+    "admin.placeIds": "المنشآت",
+    "admin.addPlaceId": "إضافة منشأة",
+    "admin.removePlaceId": "إزالة",
+    "admin.searchBusiness": "ابحث عن منشأة...",
+    "admin.noPlaceIds": "لم يتم تعيين منشآت",
+    "admin.placeIdAdded": "تمت إضافة المنشأة",
+    "admin.placeIdRemoved": "تمت إزالة المنشأة",
 
     // Tenant statuses
     "tenant.active": "نشط",
@@ -429,7 +443,7 @@ const translations = {
     "client.fetchingReviews": "جاري جلب وتحليل التقييمات...",
     "client.reviewsFetched": "تقييمات تم جلبها",
     "client.newAnalyzed": "جديدة تم تحليلها",
-    "client.noPlaceIds": "أضف منشأة أولاً لجلب التقييمات",
+    "client.noPlaceIds": "لم يتم تعيين منشآت بعد. سيقوم المشرف بإضافتها لك.",
     "client.fetchSuccess": "تم جلب التقييمات بنجاح!",
 
     // Payment
