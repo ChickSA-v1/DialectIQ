@@ -209,60 +209,74 @@ function Hero() {
   const ref = useScrollReveal();
 
   return (
-    <section className="relative pt-32 pb-20 md:pt-44 md:pb-32 overflow-hidden">
+    <section className="relative pt-32 pb-20 md:pt-40 md:pb-28 overflow-hidden">
       {/* Decorative blobs */}
       <div className="blob w-96 h-96 bg-indigo-300/30 -top-20 -left-40" />
       <div className="blob w-80 h-80 bg-violet-300/25 top-32 -right-32" style={{ animationDelay: "5s" }} />
       <div className="blob w-64 h-64 bg-purple-200/20 bottom-0 left-1/4" style={{ animationDelay: "10s" }} />
 
-      <div ref={ref} className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        {/* Badge */}
-        <div className="inline-flex items-center gap-2 bg-indigo-50 border border-indigo-100 text-indigo-700 text-sm font-medium px-4 py-1.5 rounded-full mb-6 animate-fade-in">
-          <Sparkles className="w-4 h-4" />
-          {t("landing.hero.badge")}
-        </div>
-
-        {/* Headline */}
-        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight mb-6" style={{ animationDelay: "0.1s" }}>
-          <span className="gradient-text">{t("landing.hero.title")}</span>
-        </h1>
-
-        {/* Subtitle */}
-        <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto mb-10" style={{ animationDelay: "0.2s" }}>
-          {t("landing.hero.subtitle")}
-        </p>
-
-        {/* CTAs */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16" style={{ animationDelay: "0.3s" }}>
-          <a
-            href="/register"
-            className="gradient-primary text-white font-semibold px-8 py-3.5 rounded-xl hover:opacity-90 transition-opacity shadow-lg shadow-indigo-200 flex items-center gap-2"
-          >
-            {t("landing.hero.cta.primary")}
-            <ArrowRight className="w-4 h-4" />
-          </a>
-          <button className="glass-card text-gray-700 font-medium px-8 py-3.5 rounded-xl hover:shadow-lg transition-shadow flex items-center gap-2">
-            <Play className="w-4 h-4 text-indigo-600" />
-            {t("landing.hero.cta.secondary")}
-          </button>
-        </div>
-
-        {/* Floating stat badges */}
-        <div className="flex flex-wrap items-center justify-center gap-4 md:gap-6">
-          {[
-            { key: "landing.hero.stat.accuracy" as const, icon: <Zap className="w-4 h-4 text-indigo-600" />, delay: "0.4s" },
-            { key: "landing.hero.stat.dialects" as const, icon: <Globe className="w-4 h-4 text-violet-600" />, delay: "0.5s" },
-            { key: "landing.hero.stat.realtime" as const, icon: <BarChart3 className="w-4 h-4 text-purple-600" />, delay: "0.6s" },
-          ].map(({ key, icon, delay }) => (
-            <div
-              key={key}
-              className="glass-card px-5 py-2.5 rounded-full flex items-center gap-2 text-sm font-medium text-gray-700 animate-float"
-              style={{ animationDelay: delay }}
-            >
-              {icon}
-              {t(key)}
+      <div ref={ref} className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-8 items-center">
+          {/* Text side */}
+          <div className="text-center lg:text-start">
+            {/* Badge */}
+            <div className="inline-flex items-center gap-2 bg-indigo-50 border border-indigo-100 text-indigo-700 text-sm font-medium px-4 py-1.5 rounded-full mb-6">
+              <Sparkles className="w-4 h-4" />
+              {t("landing.hero.badge")}
             </div>
-          ))}
+
+            {/* Headline */}
+            <h1 className="text-4xl sm:text-5xl lg:text-[3.25rem] font-extrabold leading-tight mb-6">
+              <span className="gradient-text">{t("landing.hero.title")}</span>
+            </h1>
+
+            {/* Subtitle */}
+            <p className="text-lg text-gray-600 max-w-lg mx-auto lg:mx-0 mb-8">
+              {t("landing.hero.subtitle")}
+            </p>
+
+            {/* CTAs */}
+            <div className="flex flex-col sm:flex-row items-center lg:items-start gap-4 mb-8">
+              <a
+                href="/register"
+                className="gradient-primary text-white font-semibold px-8 py-3.5 rounded-xl hover:opacity-90 transition-opacity shadow-lg shadow-indigo-200 flex items-center gap-2"
+              >
+                {t("landing.hero.cta.primary")}
+                <ArrowRight className="w-4 h-4" />
+              </a>
+              <button className="glass-card text-gray-700 font-medium px-8 py-3.5 rounded-xl hover:shadow-lg transition-shadow flex items-center gap-2">
+                <Play className="w-4 h-4 text-indigo-600" />
+                {t("landing.hero.cta.secondary")}
+              </button>
+            </div>
+
+            {/* Floating stat badges */}
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3">
+              {[
+                { key: "landing.hero.stat.accuracy" as const, icon: <Zap className="w-4 h-4 text-indigo-600" /> },
+                { key: "landing.hero.stat.dialects" as const, icon: <Globe className="w-4 h-4 text-violet-600" /> },
+                { key: "landing.hero.stat.realtime" as const, icon: <BarChart3 className="w-4 h-4 text-purple-600" /> },
+              ].map(({ key, icon }) => (
+                <div
+                  key={key}
+                  className="glass-card px-4 py-2 rounded-full flex items-center gap-2 text-sm font-medium text-gray-700"
+                >
+                  {icon}
+                  {t(key)}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Illustration side */}
+          <div className="hidden lg:flex items-center justify-center">
+            <img
+              src="/images/hero-dashboard.svg"
+              alt="DialectIQ Dashboard Preview"
+              className="w-full max-w-[540px] animate-float"
+              style={{ animationDuration: "8s" }}
+            />
+          </div>
         </div>
       </div>
     </section>
@@ -386,9 +400,9 @@ function HowItWorks() {
   const ref = useScrollReveal();
 
   const steps = [
-    { num: "1", icon: <MapPin className="w-6 h-6 text-white" />, title: t("landing.how.step1.title"), desc: t("landing.how.step1.desc") },
-    { num: "2", icon: <Sparkles className="w-6 h-6 text-white" />, title: t("landing.how.step2.title"), desc: t("landing.how.step2.desc") },
-    { num: "3", icon: <BarChart3 className="w-6 h-6 text-white" />, title: t("landing.how.step3.title"), desc: t("landing.how.step3.desc") },
+    { num: "1", img: "/images/step-connect.svg", title: t("landing.how.step1.title"), desc: t("landing.how.step1.desc") },
+    { num: "2", img: "/images/step-analyze.svg", title: t("landing.how.step2.title"), desc: t("landing.how.step2.desc") },
+    { num: "3", img: "/images/step-insights.svg", title: t("landing.how.step3.title"), desc: t("landing.how.step3.desc") },
   ];
 
   return (
@@ -403,15 +417,14 @@ function HowItWorks() {
 
         <div className="grid md:grid-cols-3 gap-8 relative">
           {/* Connecting line (desktop) */}
-          <div className="hidden md:block absolute top-16 left-[20%] right-[20%] h-0.5 bg-gradient-to-r from-indigo-200 via-violet-200 to-purple-200" />
+          <div className="hidden md:block absolute top-24 left-[20%] right-[20%] h-0.5 bg-gradient-to-r from-indigo-200 via-violet-200 to-purple-200" />
 
           {steps.map((s, i) => (
             <div key={i} className="relative text-center" style={{ animationDelay: `${i * 0.15}s` }}>
-              <div className="relative inline-flex mb-6">
-                <div className="w-14 h-14 rounded-full gradient-primary flex items-center justify-center shadow-lg shadow-indigo-200 z-10">
-                  {s.icon}
-                </div>
-                <span className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-white border-2 border-indigo-500 text-indigo-600 text-xs font-bold flex items-center justify-center z-20">
+              {/* Step illustration */}
+              <div className="relative inline-block mb-4">
+                <img src={s.img} alt={s.title} className="w-32 h-32 mx-auto" />
+                <span className="absolute top-0 right-2 w-7 h-7 rounded-full gradient-primary text-white text-xs font-bold flex items-center justify-center shadow-md z-10">
                   {s.num}
                 </span>
               </div>

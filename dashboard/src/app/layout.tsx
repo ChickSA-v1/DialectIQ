@@ -11,7 +11,7 @@ const zain = Zain({
 export const metadata: Metadata = {
   title: "DialectIQ — Dashboard",
   description:
-    "Saudi dialect-aware sentiment analysis dashboard powered by GPT-4o",
+    "Saudi dialect-aware sentiment analysis dashboard for Google Business reviews",
 };
 
 export default function RootLayout({
