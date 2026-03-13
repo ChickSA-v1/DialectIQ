@@ -7,6 +7,7 @@ from datetime import datetime, timedelta, timezone
 
 import structlog
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, Request, UploadFile, status
+from fastapi.responses import Response
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -16,7 +17,7 @@ from app.models import Invoice, Subscription, Tenant, User
 from app.schemas import BankTransferUploadResponse, CheckoutRequest, CheckoutResponse, PaymentStatusResponse
 from app.security import generate_api_key
 from app.services.hyperpay import create_checkout, get_payment_status
-from app.services.storage import upload_document
+from app.services.storage import download_blob, upload_document
 
 ALLOWED_RECEIPT_EXTENSIONS = {"pdf", "jpg", "jpeg", "png"}
 MAX_RECEIPT_SIZE = 10 * 1024 * 1024  # 10 MB
@@ -447,3 +448,43 @@ async def list_pending_bank_transfers(
         })
 
     return {"transfers": items, "total": len(items)}
+
+
+# ── Admin: view bank transfer receipt (proxy from GCS) ───────────────
+@router.get("/bank-transfer/{invoice_id}/receipt")
+async def view_bank_transfer_receipt(
+    invoice_id: str,
+    _admin: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Proxy-serve a bank transfer receipt from GCS. Admin-only.
+    The browser receives the file content directly — no public GCS access needed.
+    """
+    result = await db.execute(
+        select(Invoice).where(Invoice.id == uuid.UUID(invoice_id))
+    )
+    invoice = result.scalar_one_or_none()
+    if not invoice:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Invoice not found")
+    if not invoice.transfer_receipt_url:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "No transfer receipt uploaded")
+
+    try:
+        content, content_type = download_blob(invoice.transfer_receipt_url)
+    except Exception as e:
+        log.error("receipt_download_failed", invoice_id=invoice_id, error=str(e))
+        raise HTTPException(status.HTTP_502_BAD_GATEWAY, "Failed to retrieve receipt from storage")
+
+    from urllib.parse import quote
+    filename = invoice.transfer_receipt_name or "receipt"
+    filename_encoded = quote(filename)
+
+    return Response(
+        content=content,
+        media_type=content_type,
+        headers={
+            "Content-Disposition": f"inline; filename*=UTF-8''{filename_encoded}",
+            "Cache-Control": "private, max-age=300",
+        },
+    )

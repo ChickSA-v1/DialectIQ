@@ -6,6 +6,7 @@ import {
   fetchPendingBankTransfers,
   approveBankTransfer,
   rejectBankTransfer,
+  getToken,
 } from "@/lib/auth";
 import { BankTransferItem } from "@/lib/types";
 import {
@@ -132,15 +133,23 @@ export default function BankTransfersPage() {
                     {tr.transfer_receipt_name || "receipt"}
                   </p>
                 </div>
-                <a
-                  href={tr.transfer_receipt_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <button
+                  onClick={async () => {
+                    const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://dialectiq-api-297578317935.me-central1.run.app";
+                    const token = getToken();
+                    const res = await fetch(`${API_BASE}/api/v1/payments/bank-transfer/${tr.invoice_id}/receipt`, {
+                      headers: { Authorization: `Bearer ${token}` },
+                    });
+                    if (!res.ok) { alert("Failed to load receipt"); return; }
+                    const blob = await res.blob();
+                    const url = URL.createObjectURL(blob);
+                    window.open(url, "_blank");
+                  }}
                   className="flex items-center gap-1 px-3 py-1.5 bg-indigo-50 text-indigo-600 rounded-lg text-xs font-medium hover:bg-indigo-100 transition-colors shrink-0"
                 >
                   <ExternalLink className="w-3.5 h-3.5" />
                   {t("admin.viewReceipt" as any)}
-                </a>
+                </button>
               </div>
 
               {/* Actions */}
