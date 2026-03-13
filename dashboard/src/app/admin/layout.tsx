@@ -8,6 +8,7 @@ import LanguageSwitcher from "@/components/LanguageSwitcher";
 import {
   ClipboardList,
   Building2,
+  Landmark,
   LogOut,
   Shield,
 } from "lucide-react";
@@ -49,6 +50,11 @@ function AdminShell({ children }: { children: React.ReactNode }) {
       href: "/admin/tenants",
       label: t("admin.tenants"),
       icon: Building2,
+    },
+    {
+      href: "/admin/bank-transfers",
+      label: t("admin.bankTransfers" as any),
+      icon: Landmark,
     },
   ];
 

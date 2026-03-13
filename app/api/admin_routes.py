@@ -175,6 +175,9 @@ async def get_registration(
             InvoiceInfo(
                 id=i.id, amount_sar=i.amount_sar, status=i.status,
                 hyperpay_checkout_id=i.hyperpay_checkout_id,
+                payment_method=i.payment_method,
+                transfer_receipt_url=i.transfer_receipt_url,
+                transfer_receipt_name=i.transfer_receipt_name,
                 paid_at=i.paid_at, created_at=i.created_at,
             ) for i in invoices
         ],

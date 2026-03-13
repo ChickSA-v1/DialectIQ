@@ -10,6 +10,7 @@ import {
   logout,
   createCheckout,
   fetchReviews,
+  uploadBankTransfer,
 } from "@/lib/auth";
 import { UserProfile, InvoiceInfo, FetchReviewsResult } from "@/lib/types";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
@@ -30,6 +31,9 @@ import {
   MessageSquareText,
   HelpCircle,
   Sparkles,
+  Building2,
+  Upload,
+  FileCheck,
 } from "lucide-react";
 
 const HYPERPAY_SCRIPT_URL =
@@ -58,6 +62,12 @@ function ClientDashboard() {
   const [isMockPayment, setIsMockPayment] = useState(false);
   const [payError, setPayError] = useState<string | null>(null);
   const paymentFormRef = useRef<HTMLDivElement>(null);
+
+  // Payment method state
+  const [paymentMethod, setPaymentMethod] = useState<"card" | "bank_transfer" | null>(null);
+  const [receiptFile, setReceiptFile] = useState<File | null>(null);
+  const [uploadingReceipt, setUploadingReceipt] = useState(false);
+  const [receiptUploaded, setReceiptUploaded] = useState(false);
 
   useEffect(() => {
     document.documentElement.lang = locale;
@@ -133,6 +143,27 @@ function ClientDashboard() {
       setPayError(err.message);
     } finally {
       setPayLoading(false);
+    }
+  };
+
+  const handleBankTransferUpload = async () => {
+    const payableInvoice = profile?.invoices?.find(
+      (inv: InvoiceInfo) => inv.status === "pending" || inv.status === "failed"
+    );
+    if (!payableInvoice || !receiptFile) return;
+
+    setUploadingReceipt(true);
+    setPayError(null);
+    try {
+      await uploadBankTransfer(payableInvoice.id, receiptFile);
+      setReceiptUploaded(true);
+      setReceiptFile(null);
+      // Reload profile to get updated invoice status
+      loadProfile();
+    } catch (err: any) {
+      setPayError(err.message);
+    } finally {
+      setUploadingReceipt(false);
     }
   };
 
@@ -295,7 +326,43 @@ function ClientDashboard() {
                 </div>
               )}
 
-              {checkoutId ? (
+              {/* Check if bank transfer already uploaded & awaiting review */}
+              {pendingInvoice?.payment_method === "bank_transfer" && pendingInvoice?.transfer_receipt_url && pendingInvoice?.status === "pending" ? (
+                <div className="text-center space-y-4">
+                  <div className="w-16 h-16 bg-amber-100 rounded-2xl flex items-center justify-center mx-auto">
+                    <Clock className="w-8 h-8 text-amber-500" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-900">{t("payment.receiptUploaded" as any)}</h3>
+                    <p className="text-sm text-gray-500 mt-1 max-w-md mx-auto">
+                      {t("payment.receiptUploadedDesc" as any)}
+                    </p>
+                  </div>
+                  {pendingInvoice.transfer_receipt_name && (
+                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-700 rounded-xl text-sm font-medium border border-emerald-100">
+                      <FileCheck className="w-4 h-4" />
+                      {pendingInvoice.transfer_receipt_name}
+                    </div>
+                  )}
+                  <p className="text-xs text-amber-600 font-medium">
+                    {t("payment.awaitingReview" as any)}
+                  </p>
+                </div>
+              ) : receiptUploaded ? (
+                /* Just uploaded successfully */
+                <div className="text-center space-y-4">
+                  <div className="w-16 h-16 bg-emerald-100 rounded-2xl flex items-center justify-center mx-auto">
+                    <CheckCircle className="w-8 h-8 text-emerald-500" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-900">{t("payment.receiptUploaded" as any)}</h3>
+                    <p className="text-sm text-gray-500 mt-1 max-w-md mx-auto">
+                      {t("payment.receiptUploadedDesc" as any)}
+                    </p>
+                  </div>
+                </div>
+              ) : checkoutId ? (
+                /* Card payment flow */
                 isMockPayment ? (
                   <div className="space-y-4">
                     <div className="bg-gray-50 rounded-xl p-5 space-y-3">
@@ -338,24 +405,148 @@ function ClientDashboard() {
                     </div>
                   </div>
                 )
+              ) : !paymentMethod ? (
+                /* Payment method selector */
+                <div className="space-y-3">
+                  <p className="text-sm font-semibold text-gray-700 text-center mb-4">
+                    {t("payment.chooseMethod" as any)}
+                  </p>
+                  <button
+                    onClick={() => setPaymentMethod("card")}
+                    className="w-full flex items-center gap-4 p-4 bg-white border-2 border-gray-200 rounded-xl hover:border-indigo-400 hover:bg-indigo-50/30 transition-all group"
+                  >
+                    <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center shrink-0">
+                      <CreditCard className="w-6 h-6 text-white" />
+                    </div>
+                    <div className="text-start flex-1">
+                      <p className="font-semibold text-gray-900 group-hover:text-indigo-700 transition-colors">
+                        {t("payment.cardPayment" as any)}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        {t("payment.cardPaymentDesc" as any)}
+                      </p>
+                    </div>
+                  </button>
+                  <button
+                    onClick={() => setPaymentMethod("bank_transfer")}
+                    className="w-full flex items-center gap-4 p-4 bg-white border-2 border-gray-200 rounded-xl hover:border-emerald-400 hover:bg-emerald-50/30 transition-all group"
+                  >
+                    <div className="w-12 h-12 rounded-xl bg-emerald-600 flex items-center justify-center shrink-0">
+                      <Building2 className="w-6 h-6 text-white" />
+                    </div>
+                    <div className="text-start flex-1">
+                      <p className="font-semibold text-gray-900 group-hover:text-emerald-700 transition-colors">
+                        {t("payment.bankTransfer" as any)}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        {t("payment.bankTransferDesc" as any)}
+                      </p>
+                    </div>
+                  </button>
+                </div>
+              ) : paymentMethod === "card" ? (
+                /* Card payment: Pay Now button */
+                <div className="space-y-3">
+                  <button
+                    onClick={() => setPaymentMethod(null)}
+                    className="text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+                  >
+                    ← {t("register.back")}
+                  </button>
+                  <button
+                    onClick={handlePayNow}
+                    disabled={payLoading || !pendingInvoice}
+                    className="w-full flex items-center justify-center gap-2 px-6 py-3 gradient-primary text-white rounded-xl text-base font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 shadow-lg"
+                  >
+                    {payLoading ? (
+                      <>
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        {t("payment.processing")}
+                      </>
+                    ) : (
+                      <>
+                        <CreditCard className="w-5 h-5" />
+                        {t("payment.payNow")}
+                      </>
+                    )}
+                  </button>
+                </div>
               ) : (
-                <button
-                  onClick={handlePayNow}
-                  disabled={payLoading || !pendingInvoice}
-                  className="w-full flex items-center justify-center gap-2 px-6 py-3 gradient-primary text-white rounded-xl text-base font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 shadow-lg"
-                >
-                  {payLoading ? (
-                    <>
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                      {t("payment.processing")}
-                    </>
-                  ) : (
-                    <>
-                      <CreditCard className="w-5 h-5" />
-                      {t("payment.payNow")}
-                    </>
+                /* Bank transfer form */
+                <div className="space-y-4">
+                  <button
+                    onClick={() => setPaymentMethod(null)}
+                    className="text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+                  >
+                    ← {t("register.back")}
+                  </button>
+
+                  {/* Bank details */}
+                  <div className="bg-emerald-50/80 border border-emerald-200 rounded-xl p-5 space-y-2">
+                    <h4 className="font-semibold text-emerald-800 text-sm flex items-center gap-2">
+                      <Building2 className="w-4 h-4" />
+                      {t("payment.bankInfo" as any)}
+                    </h4>
+                    <div className="text-sm text-emerald-700 space-y-1">
+                      <p>{t("payment.bankName" as any)}</p>
+                      <p>{t("payment.accountName" as any)}</p>
+                      <p className="font-mono text-xs bg-white/60 rounded-lg px-3 py-1.5 border border-emerald-100" dir="ltr">
+                        {t("payment.iban" as any)}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Receipt upload */}
+                  <div className="bg-gray-50/80 rounded-xl p-5 space-y-3">
+                    <h4 className="font-semibold text-gray-800 text-sm flex items-center gap-2">
+                      <Upload className="w-4 h-4" />
+                      {t("payment.uploadReceipt" as any)}
+                    </h4>
+                    <p className="text-xs text-gray-500">
+                      {t("payment.uploadReceiptDesc" as any)}
+                    </p>
+                    <label className="flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-indigo-400 hover:bg-indigo-50/20 transition-colors">
+                      <Upload className="w-4 h-4 text-gray-400" />
+                      <span className="text-sm text-gray-500">
+                        {receiptFile ? receiptFile.name : t("payment.chooseReceipt" as any)}
+                      </span>
+                      <input
+                        type="file"
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        className="hidden"
+                        onChange={(e) => setReceiptFile(e.target.files?.[0] || null)}
+                      />
+                    </label>
+                    <p className="text-xs text-gray-400">
+                      {t("payment.receiptHint" as any)}
+                    </p>
+                  </div>
+
+                  {/* Failed bank transfer message */}
+                  {pendingInvoice?.payment_method === "bank_transfer" && pendingInvoice?.status === "failed" && (
+                    <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-center">
+                      <p className="text-sm text-red-600">{t("payment.receiptRejected" as any)}</p>
+                    </div>
                   )}
-                </button>
+
+                  <button
+                    onClick={handleBankTransferUpload}
+                    disabled={uploadingReceipt || !receiptFile || !pendingInvoice}
+                    className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-emerald-600 text-white rounded-xl text-base font-semibold hover:bg-emerald-700 transition-colors disabled:opacity-50 shadow-lg"
+                  >
+                    {uploadingReceipt ? (
+                      <>
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        {t("payment.submitting" as any)}
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="w-5 h-5" />
+                        {t("payment.submitReceipt" as any)}
+                      </>
+                    )}
+                  </button>
+                </div>
               )}
             </div>
           </div>

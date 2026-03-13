@@ -44,6 +44,10 @@ invoice_status_enum = Enum(
     "pending", "paid", "failed", "refunded",
     name="invoice_status_enum", create_constraint=True,
 )
+payment_method_enum = Enum(
+    "card", "bank_transfer",
+    name="payment_method_enum", create_constraint=True,
+)
 
 
 # ── Tenant ─────────────────────────────────────────────────────────────
@@ -180,6 +184,18 @@ class Invoice(Base):
     )
     hyperpay_checkout_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
     hyperpay_resource_path: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    payment_method: Mapped[str | None] = mapped_column(
+        payment_method_enum, nullable=True, default="card",
+        comment="Payment method: card (HyperPay) or bank_transfer",
+    )
+    transfer_receipt_url: Mapped[str | None] = mapped_column(
+        String(500), nullable=True,
+        comment="GCS URL for bank transfer receipt/statement",
+    )
+    transfer_receipt_name: Mapped[str | None] = mapped_column(
+        String(255), nullable=True,
+        comment="Original filename of bank transfer receipt",
+    )
     paid_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()

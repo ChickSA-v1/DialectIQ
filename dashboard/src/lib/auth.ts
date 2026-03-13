@@ -363,6 +363,69 @@ export async function verifyPaymentResult(
   return res.json();
 }
 
+// ── Bank Transfer API ─────────────────────────────────────────────────
+
+export async function uploadBankTransfer(
+  invoiceId: string,
+  file: File
+): Promise<{
+  invoice_id: string;
+  status: string;
+  message: string;
+  transfer_receipt_name: string | null;
+}> {
+  const formData = new FormData();
+  formData.append("invoice_id", invoiceId);
+  formData.append("file", file);
+
+  const res = await authFetch("/api/v1/payments/bank-transfer", {
+    method: "POST",
+    body: formData,
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || "Upload failed");
+  }
+  return res.json();
+}
+
+export async function fetchPendingBankTransfers(): Promise<{
+  transfers: import("./types").BankTransferItem[];
+  total: number;
+}> {
+  const res = await authFetch("/api/v1/payments/bank-transfers/pending");
+  if (!res.ok) throw new Error("Failed to load bank transfers");
+  return res.json();
+}
+
+export async function approveBankTransfer(
+  invoiceId: string
+): Promise<{ message: string }> {
+  const res = await authFetch(
+    `/api/v1/payments/bank-transfer/${invoiceId}/approve`,
+    { method: "POST" }
+  );
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || "Approval failed");
+  }
+  return res.json();
+}
+
+export async function rejectBankTransfer(
+  invoiceId: string
+): Promise<{ message: string }> {
+  const res = await authFetch(
+    `/api/v1/payments/bank-transfer/${invoiceId}/reject`,
+    { method: "POST" }
+  );
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || "Rejection failed");
+  }
+  return res.json();
+}
+
 // ── Place ID API ──────────────────────────────────────────────────────
 
 export async function confirmPlaceId(

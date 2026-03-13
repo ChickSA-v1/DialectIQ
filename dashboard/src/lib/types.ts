@@ -115,8 +115,23 @@ export interface InvoiceInfo {
   amount_sar: number;
   status: string;
   hyperpay_checkout_id: string | null;
+  payment_method: string | null;
+  transfer_receipt_url: string | null;
+  transfer_receipt_name: string | null;
   paid_at: string | null;
   created_at: string;
+}
+
+export interface BankTransferItem {
+  invoice_id: string;
+  tenant_id: string;
+  tenant_name: string;
+  tenant_email: string;
+  package: string;
+  amount_sar: number;
+  transfer_receipt_url: string;
+  transfer_receipt_name: string | null;
+  created_at: string | null;
 }
 
 export interface SubscriptionInfo {

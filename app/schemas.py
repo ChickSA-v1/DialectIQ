@@ -224,12 +224,22 @@ class InvoiceInfo(BaseModel):
     amount_sar: float
     status: str
     hyperpay_checkout_id: str | None = None
+    payment_method: str | None = None
+    transfer_receipt_url: str | None = None
+    transfer_receipt_name: str | None = None
     paid_at: datetime | None
     created_at: datetime
 
 
 class CheckoutRequest(BaseModel):
     invoice_id: UUID
+
+
+class BankTransferUploadResponse(BaseModel):
+    invoice_id: UUID
+    status: str
+    message: str
+    transfer_receipt_name: str | None = None
 
 
 class CheckoutResponse(BaseModel):

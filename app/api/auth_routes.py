@@ -233,6 +233,9 @@ async def get_profile(
                     amount_sar=inv.amount_sar,
                     status=inv.status,
                     hyperpay_checkout_id=inv.hyperpay_checkout_id,
+                    payment_method=inv.payment_method,
+                    transfer_receipt_url=inv.transfer_receipt_url,
+                    transfer_receipt_name=inv.transfer_receipt_name,
                     paid_at=inv.paid_at,
                     created_at=inv.created_at,
                 )
