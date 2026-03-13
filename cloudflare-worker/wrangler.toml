@@ -1,0 +1,9 @@
+name = "dialectiq-proxy"
+main = "worker.js"
+compatibility_date = "2024-01-01"
+
+# Route: all traffic on d-iq.io goes through this worker
+routes = [
+  { pattern = "d-iq.io/*", zone_name = "d-iq.io" },
+  { pattern = "d-iq.io", zone_name = "d-iq.io" },
+]
