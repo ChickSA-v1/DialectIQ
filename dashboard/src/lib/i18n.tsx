@@ -234,6 +234,54 @@ const translations = {
     "payment.paid": "Paid",
     "payment.failed": "Failed",
     "payment.none": "—",
+
+    // Insight explanations
+    "insight.totalReviews": "Track how many customer reviews we've analyzed. More reviews mean stronger insights into what your customers really think.",
+    "insight.avgSentiment": "How positively or negatively customers feel overall. Above 7 is excellent, 4\u20137 needs attention, below 4 is critical.",
+    "insight.avgRating": "Your average Google star rating \u2014 the first thing potential customers see when finding your business online.",
+    "insight.highUrgency": "Reviews needing immediate attention \u2014 complaints, safety issues, or serious dissatisfaction that could harm your reputation.",
+    "insight.urgencyBreakdown": "Action Required",
+    "insight.urgencyBreakdownDesc": "See how many reviews need immediate action vs. routine monitoring. A healthy business has mostly low-urgency reviews.",
+    "insight.categories": "What Customers Talk About",
+    "insight.categoriesDesc": "Know the topics customers mention most. Pricing dominant? Review your value. Quality leading? Focus on improvements.",
+    "insight.dialectDistribution": "Where Your Customers Are From",
+    "insight.dialectDistributionDesc": "Najdi = Central Saudi, Hijazi = Western, Sharqi = Eastern. Tailor your marketing and service to your real audience.",
+    "insight.learnMore": "Why this matters",
+
+    // Tutorial steps
+    "tutorial.step1Title": "Your Key Metrics",
+    "tutorial.step1Desc": "These four cards show your most important numbers \u2014 total reviews, customer sentiment, star rating, and urgent issues needing action.",
+    "tutorial.step2Title": "Urgency Breakdown",
+    "tutorial.step2Desc": "This chart shows how many reviews need immediate action. Address high-urgency reviews first to protect your reputation.",
+    "tutorial.step3Title": "Category Analysis",
+    "tutorial.step3Desc": "See what topics customers discuss most \u2014 pricing, quality, service, and more. Prioritize improvements where it matters.",
+    "tutorial.step4Title": "Dialect Distribution",
+    "tutorial.step4Desc": "Understand where your customers are from by their dialect. Tailor your marketing and service to your real audience.",
+    "tutorial.step5Title": "Filter Your Data",
+    "tutorial.step5Desc": "Narrow down reviews by business, category, or urgency. Perfect for focusing on specific areas that need attention.",
+    "tutorial.step6Title": "Individual Reviews",
+    "tutorial.step6Desc": "Each review shows AI-detected sentiment, category, and dialect. Expand to see translated intent and a ready-to-use suggested reply.",
+    "tutorial.skip": "Skip tour",
+    "tutorial.next": "Next",
+    "tutorial.prev": "Previous",
+    "tutorial.done": "Got it!",
+    "tutorial.startTour": "Take a tour",
+    "tutorial.help": "Help",
+
+    // Section headers
+    "section.overview": "Overview",
+    "section.analytics": "Analytics",
+    "section.reviews": "Customer Reviews",
+
+    // Welcome banner
+    "welcome.greeting": "Welcome back",
+    "welcome.reviewsAcross": "reviews across",
+    "welcome.businesses": "businesses",
+    "welcome.takeTour": "Take a tour",
+
+    // Review extras
+    "review.copyReply": "Copy reply",
+    "review.replyCopied": "Copied!",
   },
   ar: {
     // Header
@@ -464,6 +512,54 @@ const translations = {
     "payment.paid": "مدفوع",
     "payment.failed": "فشل",
     "payment.none": "—",
+
+    // Insight explanations
+    "insight.totalReviews": "تتبع عدد تقييمات العملاء التي تم تحليلها. تقييمات أكثر تعني رؤى أقوى حول آراء عملائك.",
+    "insight.avgSentiment": "يعكس مدى إيجابية أو سلبية مشاعر العملاء. فوق 7 ممتاز، 4-7 يحتاج اهتمام، أقل من 4 حرج.",
+    "insight.avgRating": "متوسط تقييمك على قوقل \u2014 أول ما يراه العملاء المحتملون عند البحث عن منشأتك.",
+    "insight.highUrgency": "تقييمات تحتاج اهتمام فوري \u2014 شكاوى أو مشاكل خطيرة قد تضر بسمعتك إن لم تُعالج بسرعة.",
+    "insight.urgencyBreakdown": "الإجراءات المطلوبة",
+    "insight.urgencyBreakdownDesc": "اعرف كم تقييم يحتاج تدخل فوري مقابل المتابعة الروتينية. المنشأة الصحية أغلب تقييماتها منخفضة الأولوية.",
+    "insight.categories": "ما يتحدث عنه العملاء",
+    "insight.categoriesDesc": "اعرف أكثر المواضيع التي يتحدث عنها عملاؤك. التسعير هو الأكثر؟ راجع عرض القيمة. الجودة تتصدر؟ ركز على التحسين.",
+    "insight.dialectDistribution": "من أين عملاؤك",
+    "insight.dialectDistributionDesc": "نجدي = وسط السعودية، حجازي = غرب، شرقي = شرق. يساعدك في توجيه التسويق لجمهورك الفعلي.",
+    "insight.learnMore": "لماذا هذا مهم",
+
+    // Tutorial steps
+    "tutorial.step1Title": "مؤشراتك الرئيسية",
+    "tutorial.step1Desc": "هذه البطاقات الأربع تعرض أهم أرقامك \u2014 إجمالي التقييمات، مشاعر العملاء، التقييم بالنجوم، والمسائل العاجلة.",
+    "tutorial.step2Title": "توزيع الأولويات",
+    "tutorial.step2Desc": "يوضح هذا الرسم عدد التقييمات التي تحتاج تدخل فوري. عالج التقييمات العاجلة أولاً لحماية سمعتك.",
+    "tutorial.step3Title": "تحليل التصنيفات",
+    "tutorial.step3Desc": "اعرف أكثر المواضيع التي يتحدث عنها عملاؤك \u2014 التسعير، الجودة، الخدمة. حدد أولويات التحسين.",
+    "tutorial.step4Title": "توزيع اللهجات",
+    "tutorial.step4Desc": "افهم من أين عملاؤك من خلال لهجتهم. وجّه تسويقك وخدمتك لجمهورك الحقيقي.",
+    "tutorial.step5Title": "فلتر البيانات",
+    "tutorial.step5Desc": "صفّي التقييمات حسب المنشأة أو التصنيف أو الأولوية. مثالي للتركيز على مجالات محددة.",
+    "tutorial.step6Title": "التقييمات الفردية",
+    "tutorial.step6Desc": "كل تقييم يعرض تحليل الذكاء الاصطناعي للمشاعر والتصنيف واللهجة. وسّعه لرؤية الترجمة والرد المقترح.",
+    "tutorial.skip": "تخطي الجولة",
+    "tutorial.next": "التالي",
+    "tutorial.prev": "السابق",
+    "tutorial.done": "فهمت!",
+    "tutorial.startTour": "ابدأ الجولة",
+    "tutorial.help": "مساعدة",
+
+    // Section headers
+    "section.overview": "نظرة عامة",
+    "section.analytics": "التحليلات",
+    "section.reviews": "تقييمات العملاء",
+
+    // Welcome banner
+    "welcome.greeting": "مرحباً بعودتك",
+    "welcome.reviewsAcross": "تقييم عبر",
+    "welcome.businesses": "منشآت",
+    "welcome.takeTour": "ابدأ الجولة",
+
+    // Review extras
+    "review.copyReply": "نسخ الرد",
+    "review.replyCopied": "تم النسخ!",
   },
 } as const;
 

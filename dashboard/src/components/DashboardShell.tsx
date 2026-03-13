@@ -9,7 +9,45 @@ import BreakdownCharts from "./BreakdownCharts";
 import FilterBar from "./FilterBar";
 import ReviewCard from "./ReviewCard";
 import Pagination from "./Pagination";
-import { RefreshCw, AlertCircle } from "lucide-react";
+import {
+  RefreshCw,
+  AlertCircle,
+  BarChart3,
+  MessageSquare,
+  LayoutDashboard,
+} from "lucide-react";
+
+function SectionHeader({
+  icon: Icon,
+  titleKey,
+  badge,
+}: {
+  icon: React.ElementType;
+  titleKey: string;
+  badge?: string;
+}) {
+  const { t } = useI18n();
+  return (
+    <div className="flex items-center gap-3">
+      <div className="p-2 rounded-xl bg-indigo-50">
+        <Icon className="w-4 h-4 text-indigo-500" />
+      </div>
+      <h2 className="text-base font-bold text-gray-800">
+        {t(titleKey as any)}
+      </h2>
+      {badge && (
+        <span className="px-2.5 py-0.5 bg-indigo-100 text-indigo-700 rounded-full text-xs font-semibold">
+          {badge}
+        </span>
+      )}
+      <div className="flex-1 h-px bg-gradient-to-r from-indigo-200/60 to-transparent" />
+    </div>
+  );
+}
+
+function ShimmerBlock({ className }: { className: string }) {
+  return <div className={`shimmer-bg rounded-2xl ${className}`} />;
+}
 
 export default function DashboardShell() {
   const { t } = useI18n();
@@ -43,45 +81,38 @@ export default function DashboardShell() {
 
   return (
     <div className="space-y-6">
-      {/* Filter bar */}
-      <FilterBar filters={filters} onApply={handleFilters} />
-
       {/* Error state */}
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-center gap-3">
+        <div className="glass-card rounded-2xl p-4 flex items-center gap-3 border-red-200/50 bg-red-50/50">
           <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
           <div className="flex-1">
-            <p className="text-sm text-red-700 font-medium">
-              {t("error.title")}
-            </p>
+            <p className="text-sm text-red-700 font-semibold">{t("error.title")}</p>
             <p className="text-xs text-red-500 mt-0.5">{error}</p>
           </div>
           <button
             onClick={load}
-            className="px-3 py-1.5 bg-red-100 text-red-700 rounded-lg text-xs font-medium hover:bg-red-200 transition-colors"
+            className="px-4 py-1.5 bg-red-100 text-red-700 rounded-xl text-xs font-semibold hover:bg-red-200 transition-colors"
           >
             {t("error.retry")}
           </button>
         </div>
       )}
 
-      {/* Loading skeleton */}
+      {/* Loading skeleton with shimmer */}
       {loading && !data && (
-        <div className="space-y-4">
+        <div className="space-y-6 animate-fade-in">
+          {/* Filter skeleton */}
+          <ShimmerBlock className="h-16" />
+          {/* Stats skeleton */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {[...Array(4)].map((_, i) => (
-              <div
-                key={i}
-                className="h-24 bg-gray-100 rounded-xl animate-pulse"
-              />
+              <ShimmerBlock key={i} className="h-28" />
             ))}
           </div>
+          {/* Charts skeleton */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             {[...Array(3)].map((_, i) => (
-              <div
-                key={i}
-                className="h-64 bg-gray-100 rounded-xl animate-pulse"
-              />
+              <ShimmerBlock key={i} className="h-72" />
             ))}
           </div>
         </div>
@@ -90,22 +121,29 @@ export default function DashboardShell() {
       {/* Dashboard content */}
       {data && (
         <>
+          {/* Filters */}
+          <FilterBar filters={filters} onApply={handleFilters} />
+
+          {/* Overview section */}
+          <SectionHeader icon={LayoutDashboard} titleKey="section.overview" />
           <StatsCards stats={data.stats} />
+
+          {/* Analytics section */}
+          <SectionHeader icon={BarChart3} titleKey="section.analytics" />
           <BreakdownCharts stats={data.stats} />
 
           {/* Reviews section */}
-          <div className="space-y-3">
+          <div data-tutorial="reviews-section" className="space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-gray-800">
-                {t("reviews.title")}
-                <span className="text-sm font-normal text-gray-400 ms-2">
-                  ({data.stats.total_reviews} {t("reviews.total")})
-                </span>
-              </h2>
+              <SectionHeader
+                icon={MessageSquare}
+                titleKey="section.reviews"
+                badge={`${data.stats.total_reviews}`}
+              />
               <button
                 onClick={load}
                 disabled={loading}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+                className="flex items-center gap-1.5 px-4 py-2 text-sm text-gray-600 hover:text-gray-800 glass-card rounded-xl hover:shadow-md transition-all disabled:opacity-50"
               >
                 <RefreshCw
                   className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`}
@@ -115,10 +153,9 @@ export default function DashboardShell() {
             </div>
 
             {data.reviews.length === 0 ? (
-              <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
-                <p className="text-gray-400 text-sm">
-                  {t("reviews.noResults")}
-                </p>
+              <div className="glass-card rounded-2xl p-12 text-center">
+                <MessageSquare className="w-10 h-10 text-gray-300 mx-auto mb-3" />
+                <p className="text-gray-400 text-sm">{t("reviews.noResults")}</p>
               </div>
             ) : (
               <div className="space-y-3">
