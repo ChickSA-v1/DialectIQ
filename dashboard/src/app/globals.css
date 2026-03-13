@@ -44,6 +44,9 @@
   --animate-scale-in: scale-in 0.3s ease-out both;
   --animate-pulse-soft: pulse-soft 2s ease-in-out infinite;
   --animate-shimmer: shimmer 1.5s infinite;
+  --animate-reveal-up: reveal-up 0.7s ease-out both;
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-blob-drift: blob-drift 20s ease-in-out infinite;
 }
 
 /* ── Keyframes ─────────────────────────────────────────────────────── */
@@ -76,6 +79,23 @@
 @keyframes shimmer {
   0%   { background-position: -200% 0; }
   100% { background-position: 200% 0; }
+}
+
+@keyframes reveal-up {
+  from { opacity: 0; transform: translateY(40px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-12px); }
+}
+
+@keyframes blob-drift {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25%      { transform: translate(30px, -20px) scale(1.05); }
+  50%      { transform: translate(-10px, 20px) scale(0.95); }
+  75%      { transform: translate(-30px, -10px) scale(1.02); }
 }
 
 /* ── Utility Classes ───────────────────────────────────────────────── */
@@ -121,6 +141,39 @@
 }
 .gradient-stripe-rose {
   background: linear-gradient(90deg, #e11d48, #f43f5e);
+}
+
+/* ── Landing Page Utilities ────────────────────────────────────────── */
+
+.gradient-text {
+  background: linear-gradient(135deg, var(--primary-start), var(--primary-end));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.scroll-hidden {
+  opacity: 0;
+  transform: translateY(40px);
+}
+.scroll-visible {
+  animation: reveal-up 0.7s ease-out forwards;
+}
+
+.blob {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(80px);
+  animation: blob-drift 20s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.glass-card-dark {
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: var(--glass-shadow);
 }
 
 /* ── Base Styles ───────────────────────────────────────────────────── */
