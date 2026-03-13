@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { isLoggedIn, getRole } from "@/lib/auth";
-import { useI18n } from "@/lib/i18n";
+import { I18nProvider, useI18n } from "@/lib/i18n";
 import {
   Loader2,
   Menu,
@@ -75,7 +75,12 @@ export default function Home() {
     );
   }
 
-  if (showLanding) return <LandingPage />;
+  if (showLanding)
+    return (
+      <I18nProvider>
+        <LandingPage />
+      </I18nProvider>
+    );
   return null;
 }
 
