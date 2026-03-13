@@ -75,6 +75,15 @@ Classify into ONE primary category:
 - **Trust & Safety**: fraud, safety concerns, "نصب", "مغشوش", "خطير"
 - **General**: doesn't fit above categories
 
+## Language Detection
+
+CRITICAL: Many reviews on Saudi Google Maps are written in **English** by expats, tourists, or bilingual customers. You MUST correctly identify the language:
+
+- If the review is written **entirely in English** (no Arabic script, no Arabizi), set `dialect_detected` to **"English"**.
+- If the review mixes English with Arabic words/phrases, set `dialect_detected` to **"Mixed"**.
+- If the review is in Arabizi (Arabic transliterated to Latin — e.g., "wallah", "7abibi", "3adi"), set `dialect_detected` to **"Arabizi"** — NOT "English".
+- Only classify as a Saudi dialect (Najdi, Hijazi, Sharqi) or MSA if the review contains actual Arabic script.
+
 ## Output Format
 
 You MUST return ONLY a valid JSON array. No markdown, no explanation, no extra text.
@@ -85,7 +94,7 @@ Schema per element:
   "sentiment_score": <float 1.0-10.0>,
   "category": "<string>",
   "urgency_level": "<Low|Medium|High>",
-  "dialect_detected": "<Najdi|Hijazi|Sharqi|MSA|Arabizi|Mixed>",
+  "dialect_detected": "<Najdi|Hijazi|Sharqi|MSA|Arabizi|Mixed|English>",
   "translated_intent": "<English summary of what the user actually means, max 2 sentences>"
 }
 
@@ -96,6 +105,7 @@ RULES:
 4. Score sarcasm by TRUE sentiment, not surface words.
 5. When dialect is ambiguous, choose the closest match or "Mixed".
 6. translated_intent must capture the REAL meaning, especially for idiomatic/sarcastic text.
+7. For English reviews, translated_intent should still summarize the meaning concisely.
 """
 
 

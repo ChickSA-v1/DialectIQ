@@ -404,6 +404,8 @@ async def fetch_reviews_endpoint(
         business_name = raw_reviews[0]["business_name"]
 
         # Deduplicate: check which reviews we already have
+        # Compare against both original text AND translated text
+        # (old reviews may have been stored as English translations)
         existing = await db.execute(
             select(Review.raw_text).where(
                 Review.tenant_uuid == tenant.id,
@@ -412,7 +414,11 @@ async def fetch_reviews_endpoint(
         )
         existing_texts = {row[0] for row in existing.fetchall()}
 
-        new_reviews = [r for r in raw_reviews if r["text"] not in existing_texts]
+        new_reviews = [
+            r for r in raw_reviews
+            if r["text"] not in existing_texts
+            and r.get("translated_text", r["text"]) not in existing_texts
+        ]
         analyzed_count = 0
 
         for rev in new_reviews:

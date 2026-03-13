@@ -78,6 +78,7 @@ const translations = {
     "dialect.MSA": "MSA",
     "dialect.Arabizi": "Arabizi",
     "dialect.Mixed": "Mixed",
+    "dialect.English": "English",
 
     // Auth
     "auth.loginTitle": "Welcome Back",
@@ -356,6 +357,7 @@ const translations = {
     "dialect.MSA": "فصحى",
     "dialect.Arabizi": "عربيزي",
     "dialect.Mixed": "مختلط",
+    "dialect.English": "إنجليزي",
 
     // Auth
     "auth.loginTitle": "مرحباً بعودتك",

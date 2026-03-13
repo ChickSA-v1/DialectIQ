@@ -136,6 +136,11 @@ async def fetch_place_reviews(place_id: str) -> list[dict]:
     """
     Fetch reviews for a Google Place ID via Places API (New).
     Returns up to 5 most recent reviews (API limit).
+
+    Each returned dict contains:
+      - text: the ORIGINAL language text (Arabic / Arabizi / English)
+      - translated_text: Google's auto-translated text (may be same as text)
+      - text_language: language code of `text` (e.g. "ar", "en")
     """
     if not settings.google_places_api_key:
         log.warning("google_places_api_key_not_set")
@@ -165,20 +170,42 @@ async def fetch_place_reviews(place_id: str) -> list[dict]:
 
         reviews = []
         for r in raw_reviews:
-            # Prefer originalText (native language), fallback to text (translated)
-            text_obj = r.get("originalText") or r.get("text", {})
-            text = text_obj.get("text", "")
-            if not text:
+            original_obj = r.get("originalText", {}) or {}
+            translated_obj = r.get("text", {}) or {}
+
+            original_text = original_obj.get("text", "").strip()
+            original_lang = original_obj.get("languageCode", "")
+            translated_text = translated_obj.get("text", "").strip()
+            translated_lang = translated_obj.get("languageCode", "")
+
+            # Prefer originalText (native language), fallback to text
+            if original_text:
+                text = original_text
+                text_language = original_lang
+            elif translated_text:
+                text = translated_text
+                text_language = translated_lang
+            else:
                 continue
 
             author = r.get("authorAttribution", {}).get("displayName", "Anonymous")
             rating = r.get("rating", 0)
             publish_time = r.get("publishTime", "")
 
+            log.debug(
+                "review_text_resolved",
+                has_original=bool(original_text),
+                original_lang=original_lang,
+                translated_lang=translated_lang,
+                text_preview=text[:60],
+            )
+
             reviews.append({
                 "business_name": business_name,
                 "place_id": place_id,
                 "text": text,
+                "translated_text": translated_text or text,
+                "text_language": text_language,
                 "rating": rating,
                 "author_name": author,
                 "publish_time": publish_time,

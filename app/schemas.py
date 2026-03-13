@@ -47,7 +47,8 @@ class AnalyzeResponse(BaseModel):
 class GoogleReviewInput(BaseModel):
     business_name: str = Field(..., min_length=1, max_length=255, description="Name of the business/institution")
     place_id: str = Field(..., min_length=1, max_length=255)
-    text: str = Field(..., min_length=1, max_length=5000)
+    text: str = Field(..., min_length=1, max_length=5000, description="Review text (may be Google-translated)")
+    original_text: str | None = Field(None, max_length=5000, description="Original language text from Google originalText field")
     rating: int = Field(..., ge=1, le=5)
     author_name: str = Field(..., min_length=1, max_length=255)
 

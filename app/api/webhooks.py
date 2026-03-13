@@ -72,13 +72,16 @@ async def receive_google_review(
             pass  # Legacy string tenant_id — no enforcement
 
     # --- Persist raw review ---
+    # Prefer original_text (native language) over text (potentially translated)
+    review_text = payload.original_text or payload.text
+
     review_row = Review(
         id=uuid.uuid4(),
         business_name=payload.business_name,
         place_id=payload.place_id,
         source="google_maps",
         author=payload.author_name,
-        raw_text=payload.text,
+        raw_text=review_text,
         rating=payload.rating,
         tenant_id=tenant_id,
         tenant_uuid=tenant_uuid,
@@ -88,7 +91,7 @@ async def receive_google_review(
 
     # --- Sentiment analysis via GPT-4o ---
     try:
-        analyses, sentiment_latency = await analyze_reviews([payload.text])
+        analyses, sentiment_latency = await analyze_reviews([review_text])
         sentiment = analyses[0]
     except AnalysisError as e:
         logger.error("analysis_failed", error=str(e), place_id=payload.place_id)
@@ -101,7 +104,7 @@ async def receive_google_review(
     suggested_reply = None
     try:
         suggested_reply, _ = await generate_reply(
-            review_text=payload.text,
+            review_text=review_text,
             sentiment_score=sentiment.sentiment_score,
             category=sentiment.category,
             urgency_level=sentiment.urgency_level,
