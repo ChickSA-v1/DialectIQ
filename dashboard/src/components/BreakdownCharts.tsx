@@ -13,8 +13,6 @@ import {
   YAxis,
   Tooltip,
   ResponsiveContainer,
-  Legend,
-  type PieLabelRenderProps,
 } from "recharts";
 
 interface Props {
@@ -39,7 +37,7 @@ function GlassTooltip({ active, payload, label }: any) {
   const total = payload[0]?.payload?.total;
   const pct = total ? ((payload[0].value / total) * 100).toFixed(0) : null;
   return (
-    <div className="glass-card rounded-xl px-3 py-2 text-xs shadow-lg">
+    <div className="glass-card rounded-xl px-3 py-2 text-xs shadow-lg z-50">
       <p className="font-semibold text-gray-800">{payload[0].name || label}</p>
       <p className="text-gray-600">
         {payload[0].value} {pct ? `(${pct}%)` : ""}
@@ -47,10 +45,34 @@ function GlassTooltip({ active, payload, label }: any) {
     </div>
   );
 }
+
+/** Custom label renderer that places text INSIDE the donut slices */
+function DonutInsideLabel(props: any) {
+  const { cx, cy, midAngle, innerRadius, outerRadius, percent } = props;
+  if (!percent || percent < 0.05) return null; // Skip tiny slices
+  const RADIAN = Math.PI / 180;
+  const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+  const x = cx + radius * Math.cos(-midAngle * RADIAN);
+  const y = cy + radius * Math.sin(-midAngle * RADIAN);
+  return (
+    <text
+      x={x}
+      y={y}
+      fill="#fff"
+      textAnchor="middle"
+      dominantBaseline="central"
+      fontSize={12}
+      fontWeight={700}
+    >
+      {`${(percent * 100).toFixed(0)}%`}
+    </text>
+  );
+}
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
 export default function BreakdownCharts({ stats }: Props) {
   const { t, locale } = useI18n();
+  const isRTL = locale === "ar";
 
   const totalUrgency = Object.values(stats.urgency_breakdown).reduce((a, b) => a + b, 0);
   const urgencyData = Object.entries(stats.urgency_breakdown).map(
@@ -93,7 +115,7 @@ export default function BreakdownCharts({ stats }: Props) {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-      {/* Urgency Donut */}
+      {/* ── Urgency Donut ── */}
       <div
         data-tutorial="urgency-chart"
         className="glass-card rounded-2xl p-6 animate-scale-in"
@@ -106,7 +128,7 @@ export default function BreakdownCharts({ stats }: Props) {
 
         {urgencyData.length > 0 ? (
           <div className="relative mt-3">
-            <ResponsiveContainer width="100%" height={200}>
+            <ResponsiveContainer width="100%" height={210}>
               <PieChart>
                 <Pie
                   data={urgencyData}
@@ -114,13 +136,12 @@ export default function BreakdownCharts({ stats }: Props) {
                   nameKey="name"
                   cx="50%"
                   cy="50%"
-                  innerRadius={45}
-                  outerRadius={80}
-                  paddingAngle={3}
-                  label={(props: PieLabelRenderProps) =>
-                    `${(((props.percent as number) ?? 0) * 100).toFixed(0)}%`
-                  }
+                  innerRadius={42}
+                  outerRadius={75}
+                  paddingAngle={urgencyData.length > 1 ? 3 : 0}
+                  label={DonutInsideLabel}
                   labelLine={false}
+                  isAnimationActive={true}
                 >
                   {urgencyData.map((entry) => (
                     <Cell
@@ -137,7 +158,9 @@ export default function BreakdownCharts({ stats }: Props) {
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
               <div className="text-center">
                 <p className="text-2xl font-bold text-gray-800">{totalUrgency}</p>
-                <p className="text-[10px] text-gray-400 uppercase tracking-wider">{t("reviews.total" as any)}</p>
+                <p className="text-[10px] text-gray-400 uppercase tracking-wider">
+                  {t("reviews.total" as any)}
+                </p>
               </div>
             </div>
           </div>
@@ -145,21 +168,25 @@ export default function BreakdownCharts({ stats }: Props) {
           <p className="text-gray-400 text-sm text-center py-10">{t("chart.noData")}</p>
         )}
 
-        {/* Legend */}
-        <div className="flex justify-center gap-4 mt-2">
-          {urgencyData.map((entry) => (
-            <div key={entry.key} className="flex items-center gap-1.5 text-xs text-gray-600">
-              <span
-                className="w-2.5 h-2.5 rounded-full"
-                style={{ backgroundColor: URGENCY_COLORS[entry.key] }}
-              />
-              {entry.name}
-            </div>
-          ))}
+        {/* Legend with percentages */}
+        <div className="flex flex-wrap justify-center gap-4 mt-3">
+          {urgencyData.map((entry) => {
+            const pct = totalUrgency > 0 ? ((entry.value / totalUrgency) * 100).toFixed(0) : "0";
+            return (
+              <div key={entry.key} className="flex items-center gap-1.5 text-xs text-gray-600">
+                <span
+                  className="w-3 h-3 rounded-full shrink-0"
+                  style={{ backgroundColor: URGENCY_COLORS[entry.key] }}
+                />
+                <span className="font-medium">{entry.name}</span>
+                <span className="text-gray-400">({pct}%)</span>
+              </div>
+            );
+          })}
         </div>
       </div>
 
-      {/* Category Bar */}
+      {/* ── Category Bar ── */}
       <div
         data-tutorial="category-chart"
         className="glass-card rounded-2xl p-6 animate-scale-in"
@@ -171,39 +198,48 @@ export default function BreakdownCharts({ stats }: Props) {
         <InsightCard descriptionKey="insight.categoriesDesc" variant="panel" />
 
         {categoryData.length > 0 ? (
-          <ResponsiveContainer width="100%" height={220} className="mt-3">
-            <BarChart
-              data={categoryData}
-              layout="vertical"
-              margin={{ left: locale === "ar" ? 0 : 10, right: locale === "ar" ? 10 : 0 }}
-            >
-              <XAxis type="number" allowDecimals={false} fontSize={11} stroke="#cbd5e1" />
-              <YAxis
-                type="category"
-                dataKey="name"
-                width={100}
-                fontSize={11}
-                tick={{ fill: "#6b7280" }}
-                axisLine={false}
-                tickLine={false}
-              />
-              <Tooltip content={<GlassTooltip />} />
-              <Bar dataKey="value" radius={[0, 8, 8, 0]} barSize={20}>
-                {categoryData.map((_, i) => (
-                  <Cell
-                    key={i}
-                    fill={CATEGORY_GRADIENT[i % CATEGORY_GRADIENT.length]}
-                  />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+          <div className="mt-3" dir="ltr">
+            <ResponsiveContainer width="100%" height={Math.max(220, categoryData.length * 40)}>
+              <BarChart
+                data={categoryData}
+                layout="vertical"
+                margin={{ left: 10, right: 20, top: 5, bottom: 5 }}
+              >
+                <XAxis
+                  type="number"
+                  allowDecimals={false}
+                  fontSize={11}
+                  stroke="#e2e8f0"
+                  tick={{ fill: "#94a3b8" }}
+                  axisLine={false}
+                />
+                <YAxis
+                  type="category"
+                  dataKey="name"
+                  width={isRTL ? 110 : 100}
+                  fontSize={12}
+                  tick={{ fill: "#374151", fontWeight: 500 }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <Tooltip content={<GlassTooltip />} />
+                <Bar dataKey="value" radius={[0, 8, 8, 0]} barSize={22}>
+                  {categoryData.map((_, i) => (
+                    <Cell
+                      key={i}
+                      fill={CATEGORY_GRADIENT[i % CATEGORY_GRADIENT.length]}
+                    />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         ) : (
           <p className="text-gray-400 text-sm text-center py-10">{t("chart.noData")}</p>
         )}
       </div>
 
-      {/* Dialect Donut */}
+      {/* ── Dialect Donut ── */}
       <div
         data-tutorial="dialect-chart"
         className="glass-card rounded-2xl p-6 animate-scale-in"
@@ -216,7 +252,7 @@ export default function BreakdownCharts({ stats }: Props) {
 
         {dialectData.length > 0 ? (
           <div className="relative mt-3">
-            <ResponsiveContainer width="100%" height={200}>
+            <ResponsiveContainer width="100%" height={210}>
               <PieChart>
                 <Pie
                   data={dialectData}
@@ -224,13 +260,12 @@ export default function BreakdownCharts({ stats }: Props) {
                   nameKey="name"
                   cx="50%"
                   cy="50%"
-                  innerRadius={45}
-                  outerRadius={80}
-                  paddingAngle={3}
-                  label={(props: PieLabelRenderProps) =>
-                    `${(((props.percent as number) ?? 0) * 100).toFixed(0)}%`
-                  }
+                  innerRadius={42}
+                  outerRadius={75}
+                  paddingAngle={dialectData.length > 1 ? 3 : 0}
+                  label={DonutInsideLabel}
                   labelLine={false}
+                  isAnimationActive={true}
                 >
                   {dialectData.map((_, i) => (
                     <Cell key={i} fill={DIALECT_COLORS[i % DIALECT_COLORS.length]} stroke="none" />
@@ -243,7 +278,9 @@ export default function BreakdownCharts({ stats }: Props) {
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
               <div className="text-center">
                 <p className="text-2xl font-bold text-gray-800">{totalDialect}</p>
-                <p className="text-[10px] text-gray-400 uppercase tracking-wider">{t("reviews.total" as any)}</p>
+                <p className="text-[10px] text-gray-400 uppercase tracking-wider">
+                  {t("reviews.total" as any)}
+                </p>
               </div>
             </div>
           </div>
@@ -251,17 +288,21 @@ export default function BreakdownCharts({ stats }: Props) {
           <p className="text-gray-400 text-sm text-center py-10">{t("chart.noData")}</p>
         )}
 
-        {/* Legend */}
-        <div className="flex flex-wrap justify-center gap-3 mt-2">
-          {dialectData.map((entry, i) => (
-            <div key={i} className="flex items-center gap-1.5 text-xs text-gray-600">
-              <span
-                className="w-2.5 h-2.5 rounded-full"
-                style={{ backgroundColor: DIALECT_COLORS[i % DIALECT_COLORS.length] }}
-              />
-              {entry.name}
-            </div>
-          ))}
+        {/* Legend with percentages */}
+        <div className="flex flex-wrap justify-center gap-4 mt-3">
+          {dialectData.map((entry, i) => {
+            const pct = totalDialect > 0 ? ((entry.value / totalDialect) * 100).toFixed(0) : "0";
+            return (
+              <div key={i} className="flex items-center gap-1.5 text-xs text-gray-600">
+                <span
+                  className="w-3 h-3 rounded-full shrink-0"
+                  style={{ backgroundColor: DIALECT_COLORS[i % DIALECT_COLORS.length] }}
+                />
+                <span className="font-medium">{entry.name}</span>
+                <span className="text-gray-400">({pct}%)</span>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
