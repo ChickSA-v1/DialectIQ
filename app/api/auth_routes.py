@@ -35,6 +35,7 @@ from app.services.places import (
     resolve_maps_url,
     search_places,
 )
+from app.services.email import send_new_registration_email
 from app.services.storage import upload_document
 
 log = structlog.get_logger()
@@ -91,6 +92,17 @@ async def register(req: RegisterRequest, db: AsyncSession = Depends(get_db)):
     await db.commit()
 
     log.info("tenant_registered", tenant_id=str(tenant.id), email=req.email, package=req.package)
+
+    # Send admin notification email (non-blocking, never fails registration)
+    await send_new_registration_email(
+        business_name_ar=req.business_name_ar,
+        business_name_en=req.business_name_en or "",
+        owner_name=req.full_name,
+        email=req.email,
+        phone=req.phone or "",
+        package=req.package,
+    )
+
     return RegisterResponse(
         tenant_id=tenant.id,
         message="Registration submitted. Please upload required documents.",

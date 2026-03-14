@@ -42,6 +42,13 @@ class Settings(BaseSettings):
     # --- Dashboard ---
     dashboard_url: str = "http://localhost:3000"  # set via env in production
 
+    # --- Email / SMTP ---
+    smtp_host: str = "smtp.gmail.com"
+    smtp_port: int = 587
+    smtp_username: str = ""  # Gmail address
+    smtp_password: str = ""  # Gmail App Password
+    admin_notification_email: str = "aalmahlasi@gmail.com"
+
     # --- Limits ---
     max_batch_size: int = 50
 
