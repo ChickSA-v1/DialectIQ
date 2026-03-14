@@ -145,5 +145,11 @@
   "bankName": "Saudi National Bank (SNB)",
   "iban": "IBAN: SA0000000000000000000000",
   "accountHolder": "Account Holder: DataWeave LLC",
-  "transferRef": "Reference: Your email address"
+  "transferRef": "Reference: Your email address",
+
+  "deleteAccount": "Delete Account",
+  "deleteAccountDesc": "Permanently delete your account and all data",
+  "deleteAccountConfirm": "This action is irreversible. All your data, reviews, documents, and payment history will be permanently deleted. Are you sure?",
+  "deleteAccountButton": "Delete Permanently",
+  "deleteAccountSuccess": "Your account has been deleted successfully"
 }

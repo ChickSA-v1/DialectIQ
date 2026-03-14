@@ -52,9 +52,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             padding: const EdgeInsets.all(24),
             child: Column(
               children: [
-                // Header
-                const LocaleSwitcher(),
-                const SizedBox(height: 32),
+                const SizedBox(height: 16),
 
                 // Logo
                 Container(
@@ -173,6 +171,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                   ],
                 ),
+
+                const SizedBox(height: 24),
+
+                // Language switcher at bottom
+                const LocaleSwitcher(),
               ],
             ),
           ),

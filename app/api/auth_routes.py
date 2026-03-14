@@ -265,6 +265,31 @@ async def get_profile(
     )
 
 
+# ── Delete Account ────────────────────────────────────────────────────
+@router.delete("/me")
+async def delete_account(
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Delete the current user's account and all associated data."""
+    if user.role == "admin":
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Admin accounts cannot be deleted")
+
+    # Delete the tenant (cascades to documents, subscriptions, invoices, users)
+    if user.tenant_id:
+        result = await db.execute(select(Tenant).where(Tenant.id == user.tenant_id))
+        tenant = result.scalar_one_or_none()
+        if tenant:
+            await db.delete(tenant)
+    else:
+        # No tenant — just delete the user directly
+        await db.delete(user)
+
+    await db.commit()
+    log.info("account_deleted", user_id=str(user.id), email=user.email)
+    return {"message": "Account deleted successfully"}
+
+
 # ── Confirm Place ID ──────────────────────────────────────────────────
 place_router = APIRouter(prefix="/api/v1/tenant", tags=["tenant"])
 

@@ -8,13 +8,13 @@ class PaymentRepository {
 
   /// Initiate card payment checkout via HyperPay
   Future<CheckoutResponse> checkout() async {
-    final response = await _dio.post('/payment/checkout');
+    final response = await _dio.post('/api/v1/payments/checkout');
     return CheckoutResponse.fromJson(response.data as Map<String, dynamic>);
   }
 
   /// Check payment status
   Future<PaymentStatusResponse> paymentStatus(String invoiceId) async {
-    final response = await _dio.get('/payment/status/$invoiceId');
+    final response = await _dio.get('/api/v1/payments/status/$invoiceId');
     return PaymentStatusResponse.fromJson(response.data as Map<String, dynamic>);
   }
 
@@ -27,7 +27,7 @@ class PaymentRepository {
       ),
     });
     final response = await _dio.post(
-      '/payment/bank-transfer',
+      '/api/v1/payments/bank-transfer',
       data: formData,
     );
     return BankTransferResponse.fromJson(response.data as Map<String, dynamic>);

@@ -11,7 +11,9 @@ import '../screens/settings_screen.dart';
 import '../screens/payment_result_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
-  final authState = ref.watch(authProvider);
+  // Use ref.read so the GoRouter is created ONCE.
+  // GoRouter reacts to changes via its own refreshListenable.
+  final authState = ref.read(authProvider);
 
   return GoRouter(
     initialLocation: '/',
@@ -26,13 +28,18 @@ final routerProvider = Provider<GoRouter>((ref) {
         return path == '/' ? null : '/';
       }
 
-      final publicRoutes = ['/', '/login', '/register'];
-      final isPublicRoute = publicRoutes.contains(path);
+      // Not loading & not logged in → go to login
+      // (splash '/' is also redirected to /login once loading is done)
+      final authRoutes = ['/login', '/register'];
+      final isAuthRoute = authRoutes.contains(path);
 
-      if (!isLoggedIn && !isPublicRoute) {
+      if (!isLoggedIn && !isAuthRoute && path != '/') {
         return '/login';
       }
-      if (isLoggedIn && isPublicRoute) {
+      if (!isLoggedIn && path == '/') {
+        return '/login';
+      }
+      if (isLoggedIn && (isAuthRoute || path == '/')) {
         return '/client';
       }
       return null;

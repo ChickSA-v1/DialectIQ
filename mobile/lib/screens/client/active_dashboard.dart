@@ -299,7 +299,7 @@ class _ActiveDashboardState extends ConsumerState<ActiveDashboard> {
                   physics: const NeverScrollableScrollPhysics(),
                   mainAxisSpacing: 12,
                   crossAxisSpacing: 12,
-                  childAspectRatio: 1.5,
+                  childAspectRatio: 1.3,
                   children: const [
                     StatCardShimmer(),
                     StatCardShimmer(),
@@ -313,7 +313,7 @@ class _ActiveDashboardState extends ConsumerState<ActiveDashboard> {
                   physics: const NeverScrollableScrollPhysics(),
                   mainAxisSpacing: 12,
                   crossAxisSpacing: 12,
-                  childAspectRatio: 1.5,
+                  childAspectRatio: 1.3,
                   children: [
                     StatCard(
                       label: l10n.totalReviews,

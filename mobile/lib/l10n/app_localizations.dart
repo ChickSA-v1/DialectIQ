@@ -835,6 +835,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Reference: Your email address'**
   String get transferRef;
+
+  /// No description provided for @deleteAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Account'**
+  String get deleteAccount;
+
+  /// No description provided for @deleteAccountDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Permanently delete your account and all data'**
+  String get deleteAccountDesc;
+
+  /// No description provided for @deleteAccountConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'This action is irreversible. All your data, reviews, documents, and payment history will be permanently deleted. Are you sure?'**
+  String get deleteAccountConfirm;
+
+  /// No description provided for @deleteAccountButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Permanently'**
+  String get deleteAccountButton;
+
+  /// No description provided for @deleteAccountSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account has been deleted successfully'**
+  String get deleteAccountSuccess;
 }
 
 class _AppLocalizationsDelegate

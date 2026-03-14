@@ -9,12 +9,8 @@ class AuthRepository {
   /// Login with email + password
   Future<LoginResponse> login(String email, String password) async {
     final response = await _dio.post(
-      '/auth/login',
-      data: FormData.fromMap({
-        'username': email,
-        'password': password,
-      }),
-      options: Options(contentType: 'application/x-www-form-urlencoded'),
+      '/api/v1/auth/login',
+      data: {'email': email, 'password': password},
     );
     return LoginResponse.fromJson(response.data as Map<String, dynamic>);
   }
@@ -28,7 +24,7 @@ class AuthRepository {
     required String password,
     required String package,
   }) async {
-    final response = await _dio.post('/auth/register', data: {
+    final response = await _dio.post('/api/v1/auth/register', data: {
       'name_ar': nameAr,
       'name_en': nameEn,
       'email': email,
@@ -50,7 +46,7 @@ class AuthRepository {
       'doc_type': docType,
     });
     final response = await _dio.post(
-      '/auth/tenants/$tenantId/documents',
+      '/api/v1/auth/tenants/$tenantId/documents',
       data: formData,
     );
     return response.data as Map<String, dynamic>;
@@ -58,7 +54,12 @@ class AuthRepository {
 
   /// Get current user profile
   Future<UserProfile> getProfile() async {
-    final response = await _dio.get('/auth/me');
+    final response = await _dio.get('/api/v1/auth/me');
     return UserProfile.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  /// Delete current user account
+  Future<void> deleteAccount() async {
+    await _dio.delete('/api/v1/auth/me');
   }
 }

@@ -394,4 +394,20 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get transferRef => 'المرجع: بريدك الإلكتروني';
+
+  @override
+  String get deleteAccount => 'حذف الحساب';
+
+  @override
+  String get deleteAccountDesc => 'حذف حسابك وجميع بياناتك نهائياً';
+
+  @override
+  String get deleteAccountConfirm =>
+      'هذا الإجراء لا يمكن التراجع عنه. سيتم حذف جميع بياناتك وتقييماتك ومستنداتك وسجل المدفوعات نهائياً. هل أنت متأكد؟';
+
+  @override
+  String get deleteAccountButton => 'حذف نهائي';
+
+  @override
+  String get deleteAccountSuccess => 'تم حذف حسابك بنجاح';
 }

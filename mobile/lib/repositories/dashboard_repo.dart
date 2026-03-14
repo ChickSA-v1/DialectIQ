@@ -32,7 +32,7 @@ class DashboardRepository {
     }
 
     final response = await _dio.get(
-      '/dashboard',
+      '/api/v1/dashboard',
       queryParameters: queryParams,
     );
     return DashboardResponse.fromJson(response.data as Map<String, dynamic>);

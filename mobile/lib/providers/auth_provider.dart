@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -92,6 +93,26 @@ class AuthState extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Delete account permanently
+  Future<bool> deleteAccount() async {
+    _error = null;
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      await _repo.deleteAccount();
+      await _logout();
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _error = _extractError(e);
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
   Future<void> _logout() async {
     _token = null;
     _role = null;
@@ -101,14 +122,31 @@ class AuthState extends ChangeNotifier {
   }
 
   String _extractError(dynamic e) {
+    // Handle Dio errors with response body
+    if (e is DioException && e.response?.data != null) {
+      final data = e.response!.data;
+      if (data is Map && data.containsKey('detail')) {
+        return data['detail'].toString();
+      }
+    }
+    if (e is DioException) {
+      switch (e.type) {
+        case DioExceptionType.connectionTimeout:
+        case DioExceptionType.sendTimeout:
+        case DioExceptionType.receiveTimeout:
+          return 'Connection timed out. Please try again.';
+        case DioExceptionType.connectionError:
+          return 'No internet connection.';
+        default:
+          break;
+      }
+    }
     if (e is Exception) {
       final str = e.toString();
-      // Dio error detail
       if (str.contains('detail')) {
         final match = RegExp(r'"detail"\s*:\s*"([^"]+)"').firstMatch(str);
         if (match != null) return match.group(1)!;
       }
-      return str.replaceAll('Exception: ', '');
     }
     return 'An unexpected error occurred';
   }

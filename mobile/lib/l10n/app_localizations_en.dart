@@ -397,4 +397,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get transferRef => 'Reference: Your email address';
+
+  @override
+  String get deleteAccount => 'Delete Account';
+
+  @override
+  String get deleteAccountDesc =>
+      'Permanently delete your account and all data';
+
+  @override
+  String get deleteAccountConfirm =>
+      'This action is irreversible. All your data, reviews, documents, and payment history will be permanently deleted. Are you sure?';
+
+  @override
+  String get deleteAccountButton => 'Delete Permanently';
+
+  @override
+  String get deleteAccountSuccess =>
+      'Your account has been deleted successfully';
 }

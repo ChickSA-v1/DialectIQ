@@ -169,6 +169,84 @@ class SettingsScreen extends ConsumerWidget {
               },
             ),
           ),
+
+          const SizedBox(height: 16),
+
+          // Delete Account
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: AppColors.error.withValues(alpha: 0.3)),
+            ),
+            child: ListTile(
+              leading: const Icon(Icons.delete_forever, color: AppColors.error),
+              title: Text(
+                l10n.deleteAccount,
+                style: const TextStyle(color: AppColors.error),
+              ),
+              subtitle: Text(
+                l10n.deleteAccountDesc,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: AppColors.textMuted,
+                ),
+              ),
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    title: Row(
+                      children: [
+                        const Icon(Icons.warning_amber_rounded,
+                            color: AppColors.error, size: 28),
+                        const SizedBox(width: 8),
+                        Expanded(child: Text(l10n.deleteAccount)),
+                      ],
+                    ),
+                    content: Text(l10n.deleteAccountConfirm),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(ctx),
+                        child: Text(l10n.cancel),
+                      ),
+                      TextButton(
+                        onPressed: () async {
+                          Navigator.pop(ctx);
+                          final success = await ref
+                              .read(authProvider.notifier)
+                              .deleteAccount();
+                          if (success && context.mounted) {
+                            context.go('/login');
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(l10n.deleteAccountSuccess),
+                                backgroundColor: AppColors.success,
+                              ),
+                            );
+                          } else if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  ref.read(authProvider).error ??
+                                      l10n.error,
+                                ),
+                                backgroundColor: AppColors.error,
+                              ),
+                            );
+                          }
+                        },
+                        child: Text(
+                          l10n.deleteAccountButton,
+                          style: const TextStyle(color: AppColors.error),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
         ],
       ),
     );

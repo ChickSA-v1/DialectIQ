@@ -9,7 +9,7 @@ class TenantRepository {
   /// Search Google Places by name
   Future<PlaceSearchResponse> searchPlaces(String query) async {
     final response = await _dio.get(
-      '/tenants/places/search',
+      '/api/v1/tenant/places/search',
       queryParameters: {'query': query},
     );
     return PlaceSearchResponse.fromJson(response.data as Map<String, dynamic>);
@@ -18,7 +18,7 @@ class TenantRepository {
   /// Confirm (add) a place ID to the tenant's account
   Future<Map<String, dynamic>> confirmPlaceId(String placeId) async {
     final response = await _dio.post(
-      '/tenants/places/confirm',
+      '/api/v1/tenant/places/confirm',
       data: {'place_id': placeId},
     );
     return response.data as Map<String, dynamic>;
@@ -27,13 +27,13 @@ class TenantRepository {
   /// Fetch reviews for a specific place
   Future<FetchReviewsResult> fetchReviews(String placeId) async {
     final response = await _dio.post(
-      '/tenants/places/$placeId/fetch-reviews',
+      '/api/v1/tenant/places/$placeId/fetch-reviews',
     );
     return FetchReviewsResult.fromJson(response.data as Map<String, dynamic>);
   }
 
   /// Remove a place ID from the tenant's account
   Future<void> removePlaceId(String placeId) async {
-    await _dio.delete('/tenants/places/$placeId');
+    await _dio.delete('/api/v1/tenant/places/$placeId');
   }
 }
