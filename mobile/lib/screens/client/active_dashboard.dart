@@ -75,7 +75,10 @@ class _ActiveDashboardState extends ConsumerState<ActiveDashboard> {
       appBar: AppBar(
         title: Text(l10n.dashboard),
         actions: [
-          const LocaleSwitcher(),
+          Padding(
+            padding: const EdgeInsets.only(right: 4),
+            child: const LocaleSwitcher(),
+          ),
           IconButton(
             icon: const Icon(Icons.settings),
             onPressed: () => context.push('/settings'),
@@ -299,7 +302,7 @@ class _ActiveDashboardState extends ConsumerState<ActiveDashboard> {
                   physics: const NeverScrollableScrollPhysics(),
                   mainAxisSpacing: 12,
                   crossAxisSpacing: 12,
-                  childAspectRatio: 1.3,
+                  childAspectRatio: 1.1,
                   children: const [
                     StatCardShimmer(),
                     StatCardShimmer(),
@@ -313,7 +316,7 @@ class _ActiveDashboardState extends ConsumerState<ActiveDashboard> {
                   physics: const NeverScrollableScrollPhysics(),
                   mainAxisSpacing: 12,
                   crossAxisSpacing: 12,
-                  childAspectRatio: 1.3,
+                  childAspectRatio: 1.1,
                   children: [
                     StatCard(
                       label: l10n.totalReviews,
