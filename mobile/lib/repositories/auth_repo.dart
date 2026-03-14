@@ -1,0 +1,64 @@
+import 'dart:io';
+import 'package:dio/dio.dart';
+import '../core/dio_client.dart';
+import '../models/user.dart';
+
+class AuthRepository {
+  final Dio _dio = dioClient;
+
+  /// Login with email + password
+  Future<LoginResponse> login(String email, String password) async {
+    final response = await _dio.post(
+      '/auth/login',
+      data: FormData.fromMap({
+        'username': email,
+        'password': password,
+      }),
+      options: Options(contentType: 'application/x-www-form-urlencoded'),
+    );
+    return LoginResponse.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  /// Register a new tenant (step 1)
+  Future<Map<String, dynamic>> register({
+    required String nameAr,
+    String? nameEn,
+    required String email,
+    required String phone,
+    required String password,
+    required String package,
+  }) async {
+    final response = await _dio.post('/auth/register', data: {
+      'name_ar': nameAr,
+      'name_en': nameEn,
+      'email': email,
+      'phone': phone,
+      'password': password,
+      'package': package,
+    });
+    return response.data as Map<String, dynamic>;
+  }
+
+  /// Upload a document (commercial registration / national ID)
+  Future<Map<String, dynamic>> uploadDocument({
+    required String tenantId,
+    required File file,
+    required String docType,
+  }) async {
+    final formData = FormData.fromMap({
+      'file': await MultipartFile.fromFile(file.path, filename: file.path.split('/').last),
+      'doc_type': docType,
+    });
+    final response = await _dio.post(
+      '/auth/tenants/$tenantId/documents',
+      data: formData,
+    );
+    return response.data as Map<String, dynamic>;
+  }
+
+  /// Get current user profile
+  Future<UserProfile> getProfile() async {
+    final response = await _dio.get('/auth/me');
+    return UserProfile.fromJson(response.data as Map<String, dynamic>);
+  }
+}

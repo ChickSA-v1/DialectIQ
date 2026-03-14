@@ -1,0 +1,242 @@
+import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:dialectiq/l10n/app_localizations.dart';
+
+import '../../app/theme.dart';
+import '../../repositories/auth_repo.dart';
+import '../../widgets/locale_switcher.dart';
+import 'step_business.dart';
+import 'step_package.dart';
+import 'step_documents.dart';
+import 'step_success.dart';
+
+class RegisterScreen extends ConsumerStatefulWidget {
+  const RegisterScreen({super.key});
+
+  @override
+  ConsumerState<RegisterScreen> createState() => _RegisterScreenState();
+}
+
+class _RegisterScreenState extends ConsumerState<RegisterScreen> {
+  final _pageController = PageController();
+  int _currentStep = 0;
+
+  // Form data
+  String nameAr = '';
+  String nameEn = '';
+  String email = '';
+  String phone = '';
+  String password = '';
+  String selectedPackage = 'basic';
+  String? tenantId;
+  File? commercialRegFile;
+  File? nationalIdFile;
+  bool _isSubmitting = false;
+  String? _error;
+
+  void _nextStep() {
+    if (_currentStep < 3) {
+      setState(() => _currentStep++);
+      _pageController.animateToPage(
+        _currentStep,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
+  void _prevStep() {
+    if (_currentStep > 0) {
+      setState(() => _currentStep--);
+      _pageController.animateToPage(
+        _currentStep,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
+  Future<void> _submitRegistration() async {
+    setState(() {
+      _isSubmitting = true;
+      _error = null;
+    });
+
+    try {
+      final repo = AuthRepository();
+      final result = await repo.register(
+        nameAr: nameAr,
+        nameEn: nameEn.isNotEmpty ? nameEn : null,
+        email: email,
+        phone: phone,
+        password: password,
+        package: selectedPackage,
+      );
+
+      tenantId = result['tenant_id'] as String?;
+
+      // Upload documents if available
+      if (tenantId != null) {
+        if (commercialRegFile != null) {
+          await repo.uploadDocument(
+            tenantId: tenantId!,
+            file: commercialRegFile!,
+            docType: 'commercial_registration',
+          );
+        }
+        if (nationalIdFile != null) {
+          await repo.uploadDocument(
+            tenantId: tenantId!,
+            file: nationalIdFile!,
+            docType: 'national_id',
+          );
+        }
+      }
+
+      _nextStep(); // Go to success step
+    } catch (e) {
+      setState(() => _error = e.toString());
+    } finally {
+      setState(() => _isSubmitting = false);
+    }
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    final stepTitles = [
+      l10n.regStepBusiness,
+      l10n.regStepPackage,
+      l10n.regStepDocuments,
+      l10n.regStepSuccess,
+    ];
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(l10n.register),
+        leading: _currentStep > 0 && _currentStep < 3
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: _prevStep,
+              )
+            : null,
+        actions: const [
+          Padding(
+            padding: EdgeInsets.only(right: 12),
+            child: LocaleSwitcher(),
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
+          // Step indicator
+          if (_currentStep < 3)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              child: Row(
+                children: List.generate(4, (i) {
+                  final isActive = i <= _currentStep;
+                  return Expanded(
+                    child: Container(
+                      height: 4,
+                      margin: const EdgeInsets.symmetric(horizontal: 2),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(2),
+                        color: isActive
+                            ? AppColors.primary
+                            : AppColors.border,
+                      ),
+                    ),
+                  );
+                }),
+              ),
+            ),
+          if (_currentStep < 3)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: Text(
+                  stepTitles[_currentStep],
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ),
+            ),
+
+          // Error display
+          if (_error != null)
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppColors.error.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  _error!,
+                  style: const TextStyle(color: AppColors.error, fontSize: 13),
+                ),
+              ),
+            ),
+
+          // Page view
+          Expanded(
+            child: PageView(
+              controller: _pageController,
+              physics: const NeverScrollableScrollPhysics(),
+              children: [
+                StepBusiness(
+                  nameAr: nameAr,
+                  nameEn: nameEn,
+                  email: email,
+                  phone: phone,
+                  password: password,
+                  onNext: (data) {
+                    setState(() {
+                      nameAr = data['nameAr']!;
+                      nameEn = data['nameEn'] ?? '';
+                      email = data['email']!;
+                      phone = data['phone']!;
+                      password = data['password']!;
+                    });
+                    _nextStep();
+                  },
+                ),
+                StepPackage(
+                  selectedPackage: selectedPackage,
+                  onSelect: (pkg) {
+                    setState(() => selectedPackage = pkg);
+                    _nextStep();
+                  },
+                ),
+                StepDocuments(
+                  commercialRegFile: commercialRegFile,
+                  nationalIdFile: nationalIdFile,
+                  isSubmitting: _isSubmitting,
+                  onCommercialRegSelected: (f) => setState(() => commercialRegFile = f),
+                  onNationalIdSelected: (f) => setState(() => nationalIdFile = f),
+                  onSubmit: _submitRegistration,
+                ),
+                const StepSuccess(),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

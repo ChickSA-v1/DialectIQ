@@ -1,0 +1,397 @@
+// ignore: unused_import
+import 'package:intl/intl.dart' as intl;
+import 'app_localizations.dart';
+
+// ignore_for_file: type=lint
+
+/// The translations for Arabic (`ar`).
+class AppLocalizationsAr extends AppLocalizations {
+  AppLocalizationsAr([String locale = 'ar']) : super(locale);
+
+  @override
+  String get appName => 'DialectIQ';
+
+  @override
+  String get login => 'تسجيل الدخول';
+
+  @override
+  String get register => 'إنشاء حساب';
+
+  @override
+  String get email => 'البريد الإلكتروني';
+
+  @override
+  String get password => 'كلمة المرور';
+
+  @override
+  String get loginButton => 'دخول';
+
+  @override
+  String get noAccount => 'ليس لديك حساب؟';
+
+  @override
+  String get registerNow => 'سجل الآن';
+
+  @override
+  String get haveAccount => 'لديك حساب بالفعل؟';
+
+  @override
+  String get loginNow => 'سجل دخولك';
+
+  @override
+  String get logout => 'تسجيل الخروج';
+
+  @override
+  String get logoutConfirm => 'هل أنت متأكد من تسجيل الخروج؟';
+
+  @override
+  String get cancel => 'إلغاء';
+
+  @override
+  String get confirm => 'تأكيد';
+
+  @override
+  String get yes => 'نعم';
+
+  @override
+  String get no => 'لا';
+
+  @override
+  String get ok => 'حسناً';
+
+  @override
+  String get error => 'خطأ';
+
+  @override
+  String get success => 'نجاح';
+
+  @override
+  String get loading => 'جاري التحميل...';
+
+  @override
+  String get retry => 'إعادة المحاولة';
+
+  @override
+  String get next => 'التالي';
+
+  @override
+  String get back => 'رجوع';
+
+  @override
+  String get submit => 'إرسال';
+
+  @override
+  String get save => 'حفظ';
+
+  @override
+  String get settings => 'الإعدادات';
+
+  @override
+  String get language => 'اللغة';
+
+  @override
+  String get arabic => 'العربية';
+
+  @override
+  String get english => 'English';
+
+  @override
+  String get profile => 'الملف الشخصي';
+
+  @override
+  String get fullName => 'الاسم الكامل';
+
+  @override
+  String get phone => 'الهاتف';
+
+  @override
+  String get role => 'الدور';
+
+  @override
+  String get status => 'الحالة';
+
+  @override
+  String get regStepBusiness => 'معلومات النشاط';
+
+  @override
+  String get regStepPackage => 'اختر الباقة';
+
+  @override
+  String get regStepDocuments => 'رفع المستندات';
+
+  @override
+  String get regStepSuccess => 'تم!';
+
+  @override
+  String get businessNameAr => 'اسم النشاط (عربي)';
+
+  @override
+  String get businessNameEn => 'اسم النشاط (إنجليزي)';
+
+  @override
+  String get ownerName => 'اسم المالك';
+
+  @override
+  String get ownerPhone => 'رقم الهاتف';
+
+  @override
+  String get ownerEmail => 'البريد الإلكتروني';
+
+  @override
+  String get createPassword => 'إنشاء كلمة المرور';
+
+  @override
+  String get confirmPassword => 'تأكيد كلمة المرور';
+
+  @override
+  String get passwordMismatch => 'كلمات المرور غير متطابقة';
+
+  @override
+  String get requiredField => 'هذا الحقل مطلوب';
+
+  @override
+  String get invalidEmail => 'يرجى إدخال بريد إلكتروني صحيح';
+
+  @override
+  String get packageBasic => 'أساسي';
+
+  @override
+  String get packageAdvanced => 'متقدم';
+
+  @override
+  String get packageEnterprise => 'مؤسسات';
+
+  @override
+  String get sarMonth => 'ريال/شهر';
+
+  @override
+  String maxBusinesses(int count) {
+    return 'حتى $count أنشطة تجارية';
+  }
+
+  @override
+  String maxReviews(int count) {
+    return 'حتى $count تقييم/شهر';
+  }
+
+  @override
+  String get uploadCommercialReg => 'رفع السجل التجاري';
+
+  @override
+  String get uploadNationalId => 'رفع الهوية الوطنية';
+
+  @override
+  String get selectFile => 'اختر ملف';
+
+  @override
+  String fileSelected(String name) {
+    return 'تم اختيار: $name';
+  }
+
+  @override
+  String get allowedFormats => 'PDF, JPG, PNG (حد أقصى 10 ميجا)';
+
+  @override
+  String get regSuccess => 'تم إرسال التسجيل!';
+
+  @override
+  String get regSuccessMsg =>
+      'طلب تسجيلك قيد المراجعة. سيتم إشعارك عبر البريد الإلكتروني عند الموافقة.';
+
+  @override
+  String get goToLogin => 'الذهاب لتسجيل الدخول';
+
+  @override
+  String get statusPending => 'قيد المراجعة';
+
+  @override
+  String get statusPendingMsg =>
+      'تسجيلك قيد المراجعة حالياً من قبل فريقنا. سيتم إشعارك عبر البريد عند الموافقة.';
+
+  @override
+  String get statusRejected => 'تم رفض التسجيل';
+
+  @override
+  String get statusRejectedMsg => 'للأسف، تم رفض طلب التسجيل الخاص بك.';
+
+  @override
+  String rejectionReason(String reason) {
+    return 'السبب: $reason';
+  }
+
+  @override
+  String get contactSupport => 'تواصل مع الدعم';
+
+  @override
+  String get paymentRequired => 'الدفع مطلوب';
+
+  @override
+  String get paymentRequiredMsg =>
+      'تمت الموافقة على حسابك! يرجى إتمام الدفع لتفعيل اشتراكك.';
+
+  @override
+  String get payWithCard => 'الدفع بالبطاقة';
+
+  @override
+  String get payWithBankTransfer => 'الدفع بالتحويل البنكي';
+
+  @override
+  String get uploadReceipt => 'رفع إيصال التحويل';
+
+  @override
+  String get receiptUploaded => 'تم رفع الإيصال بنجاح. سنتحقق من دفعتك قريباً.';
+
+  @override
+  String get paymentSuccess => 'تم الدفع بنجاح!';
+
+  @override
+  String get paymentSuccessMsg => 'اشتراكك مفعّل الآن. مرحباً بك في DialectIQ!';
+
+  @override
+  String get paymentFailed => 'فشل الدفع';
+
+  @override
+  String get paymentFailedMsg =>
+      'حدث خطأ في عملية الدفع. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get goToDashboard => 'الذهاب للوحة التحكم';
+
+  @override
+  String get dashboard => 'لوحة التحكم';
+
+  @override
+  String get totalReviews => 'إجمالي التقييمات';
+
+  @override
+  String get avgSentiment => 'متوسط المشاعر';
+
+  @override
+  String get avgRating => 'متوسط التقييم';
+
+  @override
+  String get positive => 'إيجابي';
+
+  @override
+  String get negative => 'سلبي';
+
+  @override
+  String get neutral => 'محايد';
+
+  @override
+  String get reviews => 'التقييمات';
+
+  @override
+  String get noReviews => 'لا توجد تقييمات بعد';
+
+  @override
+  String get fetchReviews => 'جلب التقييمات';
+
+  @override
+  String get fetchingReviews => 'جاري جلب التقييمات...';
+
+  @override
+  String reviewsFetched(int count) {
+    return 'تم جلب وتحليل $count تقييمات جديدة!';
+  }
+
+  @override
+  String get urgency => 'الأولوية';
+
+  @override
+  String get urgencyHigh => 'عالية';
+
+  @override
+  String get urgencyMedium => 'متوسطة';
+
+  @override
+  String get urgencyLow => 'منخفضة';
+
+  @override
+  String get category => 'التصنيف';
+
+  @override
+  String get dialect => 'اللهجة';
+
+  @override
+  String get sentiment => 'المشاعر';
+
+  @override
+  String get suggestedReply => 'الرد المقترح';
+
+  @override
+  String get translatedIntent => 'القصد المترجم';
+
+  @override
+  String get businessName => 'اسم النشاط';
+
+  @override
+  String get filterBy => 'تصفية حسب';
+
+  @override
+  String get clearFilters => 'مسح الفلاتر';
+
+  @override
+  String get search => 'بحث';
+
+  @override
+  String page(int current, int total) {
+    return 'صفحة $current من $total';
+  }
+
+  @override
+  String get apiKey => 'مفتاح API';
+
+  @override
+  String get copyApiKey => 'نسخ مفتاح API';
+
+  @override
+  String get apiKeyCopied => 'تم نسخ مفتاح API';
+
+  @override
+  String get placeIds => 'معرفات الأنشطة التجارية';
+
+  @override
+  String get addBusiness => 'إضافة نشاط تجاري';
+
+  @override
+  String get searchPlaces => 'البحث في خرائط جوجل';
+
+  @override
+  String get noPlaces => 'لم تتم إضافة أنشطة بعد';
+
+  @override
+  String get subscription => 'الاشتراك';
+
+  @override
+  String get package => 'الباقة';
+
+  @override
+  String reviewsUsed(int used, int total) {
+    return '$used من $total تقييم مستخدم';
+  }
+
+  @override
+  String get urgencyBreakdown => 'توزيع الأولوية';
+
+  @override
+  String get categoryBreakdown => 'توزيع التصنيفات';
+
+  @override
+  String get dialectBreakdown => 'توزيع اللهجات';
+
+  @override
+  String get bankDetails => 'تفاصيل التحويل البنكي';
+
+  @override
+  String get bankName => 'البنك الأهلي السعودي (SNB)';
+
+  @override
+  String get iban => 'آيبان: SA0000000000000000000000';
+
+  @override
+  String get accountHolder => 'صاحب الحساب: شركة DataWeave';
+
+  @override
+  String get transferRef => 'المرجع: بريدك الإلكتروني';
+}

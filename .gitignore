@@ -28,3 +28,12 @@ Thumbs.db
 .pytest_cache/
 htmlcov/
 .coverage
+
+# Build artifacts
+builds/
+
+# Flutter
+mobile/build/
+mobile/.dart_tool/
+mobile/.packages
+.wrangler/

@@ -1,0 +1,58 @@
+name: dialectiq
+description: "DialectIQ - Saudi dialect-aware sentiment analysis for business reviews"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.11.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # State management
+  flutter_riverpod: ^2.6.1
+
+  # HTTP & networking
+  dio: ^5.7.0
+
+  # Routing
+  go_router: ^14.8.1
+
+  # Secure storage
+  flutter_secure_storage: ^9.2.4
+
+  # Charts
+  fl_chart: ^0.70.2
+
+  # Fonts
+  google_fonts: ^6.2.1
+
+  # File picker
+  file_picker: ^8.1.7
+
+  # WebView (for HyperPay payment)
+  webview_flutter: ^4.10.0
+
+  # Icons
+  cupertino_icons: ^1.0.8
+
+  # URL launcher
+  url_launcher: ^6.3.1
+
+  # Shared preferences
+  shared_preferences: ^2.3.4
+
+  # Intl for i18n
+  intl: any
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+  generate: true
