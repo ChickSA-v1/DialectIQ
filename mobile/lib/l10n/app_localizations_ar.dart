@@ -396,6 +396,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get transferRef => 'المرجع: بريدك الإلكتروني';
 
   @override
+  String get pendingApproval => 'بانتظار الموافقة';
+
+  @override
+  String get businessPendingMsg => 'تم الإرسال لموافقة الإدارة';
+
+  @override
+  String get pendingPlaceIds => 'طلبات الأنشطة المعلقة';
+
+  @override
   String get deleteAccount => 'حذف الحساب';
 
   @override

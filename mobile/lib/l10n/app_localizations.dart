@@ -836,6 +836,24 @@ abstract class AppLocalizations {
   /// **'Reference: Your email address'**
   String get transferRef;
 
+  /// No description provided for @pendingApproval.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending Approval'**
+  String get pendingApproval;
+
+  /// No description provided for @businessPendingMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitted for admin approval'**
+  String get businessPendingMsg;
+
+  /// No description provided for @pendingPlaceIds.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending Business Requests'**
+  String get pendingPlaceIds;
+
   /// No description provided for @deleteAccount.
   ///
   /// In en, this message translates to:

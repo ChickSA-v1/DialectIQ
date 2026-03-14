@@ -72,6 +72,9 @@ class Tenant(Base):
     place_ids: Mapped[dict | None] = mapped_column(
         JSON, nullable=True, default=list, comment='List of confirmed Place IDs ["ChIJ..."]',
     )
+    pending_place_ids: Mapped[dict | None] = mapped_column(
+        JSON, nullable=True, default=list, comment='Place IDs awaiting admin approval',
+    )
     max_businesses: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
     max_reviews_per_month: Mapped[int] = mapped_column(Integer, nullable=False, default=500)
     reviews_used_this_month: Mapped[int] = mapped_column(Integer, nullable=False, default=0)

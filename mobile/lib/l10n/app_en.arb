@@ -147,6 +147,10 @@
   "accountHolder": "Account Holder: DataWeave LLC",
   "transferRef": "Reference: Your email address",
 
+  "pendingApproval": "Pending Approval",
+  "businessPendingMsg": "Submitted for admin approval",
+  "pendingPlaceIds": "Pending Business Requests",
+
   "deleteAccount": "Delete Account",
   "deleteAccountDesc": "Permanently delete your account and all data",
   "deleteAccountConfirm": "This action is irreversible. All your data, reviews, documents, and payment history will be permanently deleted. Are you sure?",

@@ -147,6 +147,10 @@
   "accountHolder": "صاحب الحساب: شركة DataWeave",
   "transferRef": "المرجع: بريدك الإلكتروني",
 
+  "pendingApproval": "بانتظار الموافقة",
+  "businessPendingMsg": "تم الإرسال لموافقة الإدارة",
+  "pendingPlaceIds": "طلبات الأنشطة المعلقة",
+
   "deleteAccount": "حذف الحساب",
   "deleteAccountDesc": "حذف حسابك وجميع بياناتك نهائياً",
   "deleteAccountConfirm": "هذا الإجراء لا يمكن التراجع عنه. سيتم حذف جميع بياناتك وتقييماتك ومستنداتك وسجل المدفوعات نهائياً. هل أنت متأكد؟",

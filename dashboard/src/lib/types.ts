@@ -73,6 +73,7 @@ export interface TenantInfo {
   status: string;
   package: string;
   place_ids: string[] | null;
+  pending_place_ids: string[] | null;
   rejection_reason?: string | null;
   latest_invoice_status?: string | null;
   max_businesses: number;

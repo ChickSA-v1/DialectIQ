@@ -230,6 +230,7 @@ async def get_profile(
                 status=tenant.status,
                 package=tenant.package,
                 place_ids=tenant.place_ids or [],
+                pending_place_ids=tenant.pending_place_ids or [],
                 max_businesses=tenant.max_businesses,
                 max_reviews_per_month=tenant.max_reviews_per_month,
                 reviews_used_this_month=tenant.reviews_used_this_month,
@@ -297,7 +298,7 @@ async def confirm_place_id(
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    """Confirm and add a Place ID to the tenant's list."""
+    """Submit a Place ID for admin approval (added to pending list)."""
     if not user.tenant_id:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "No tenant associated")
 
@@ -315,29 +316,36 @@ async def confirm_place_id(
     except Exception:
         pass  # Non-fatal — place ID validation is optional
 
-    # Add to list (create NEW list to trigger SQLAlchemy JSON change detection)
+    # Check if already confirmed
     current_places = list(tenant.place_ids or [])
     if req.place_id in current_places:
         raise HTTPException(status.HTTP_409_CONFLICT, "Place ID already confirmed")
 
-    # Check limit
-    if len(current_places) >= tenant.max_businesses:
+    # Check if already pending
+    pending_places = list(tenant.pending_place_ids or [])
+    if req.place_id in pending_places:
+        raise HTTPException(status.HTTP_409_CONFLICT, "Place ID already pending approval")
+
+    # Check limit (confirmed + pending combined)
+    total = len(current_places) + len(pending_places)
+    if total >= tenant.max_businesses:
         raise HTTPException(
             status.HTTP_400_BAD_REQUEST,
             f"Maximum {tenant.max_businesses} businesses allowed for {tenant.package} package",
         )
 
-    current_places.append(req.place_id)
-    tenant.place_ids = current_places
+    # Add to pending list — awaits admin approval
     from sqlalchemy.orm.attributes import flag_modified
-    flag_modified(tenant, "place_ids")
+    pending_places.append(req.place_id)
+    tenant.pending_place_ids = pending_places
+    flag_modified(tenant, "pending_place_ids")
     await db.commit()
 
-    log.info("place_id_confirmed", tenant_id=str(tenant.id), place_id=req.place_id)
+    log.info("place_id_pending", tenant_id=str(tenant.id), place_id=req.place_id)
     return ConfirmPlaceIdResponse(
         place_id=req.place_id,
         place_name=place_name,
-        message="Place ID confirmed successfully",
+        message="Place ID submitted for admin approval",
     )
 
 

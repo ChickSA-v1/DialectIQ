@@ -11,6 +11,8 @@ import {
   adminSearchPlaces,
   adminAddPlaceId,
   adminRemovePlaceId,
+  adminApprovePendingPlace,
+  adminRejectPendingPlace,
 } from "@/lib/auth";
 import { TenantInfo, PlaceSearchResult } from "@/lib/types";
 import {
@@ -31,6 +33,9 @@ import {
   Star,
   ChevronDown,
   ChevronUp,
+  Clock,
+  ThumbsUp,
+  ThumbsDown,
 } from "lucide-react";
 
 export default function TenantsPage() {
@@ -66,6 +71,7 @@ export default function TenantsPage() {
   const [placeSearching, setPlaceSearching] = useState(false);
   const [placeAdding, setPlaceAdding] = useState<string | null>(null);
   const [placeRemoving, setPlaceRemoving] = useState<string | null>(null);
+  const [pendingAction, setPendingAction] = useState<string | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -208,6 +214,30 @@ export default function TenantsPage() {
     }
   };
 
+  const handleApprovePending = async (tenantId: string, placeId: string) => {
+    setPendingAction(placeId);
+    try {
+      await adminApprovePendingPlace(tenantId, placeId);
+      await load();
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setPendingAction(null);
+    }
+  };
+
+  const handleRejectPending = async (tenantId: string, placeId: string) => {
+    setPendingAction(placeId);
+    try {
+      await adminRejectPendingPlace(tenantId, placeId);
+      await load();
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setPendingAction(null);
+    }
+  };
+
   const statusBadge = (status: string) => {
     const colors: Record<string, string> = {
       active: "bg-emerald-100 text-emerald-700",
@@ -335,6 +365,11 @@ export default function TenantsPage() {
                   >
                     <MapPin className="w-3 h-3" />
                     {tenant.place_ids?.length || 0}
+                    {(tenant.pending_place_ids?.length || 0) > 0 && (
+                      <span className="bg-amber-100 text-amber-700 px-1 rounded text-[10px]">
+                        +{tenant.pending_place_ids!.length}
+                      </span>
+                    )}
                     {expandedTenant === tenant.id ? (
                       <ChevronUp className="w-3 h-3" />
                     ) : (
@@ -469,6 +504,57 @@ export default function TenantsPage() {
                     <p className="text-xs text-gray-400 mb-4">
                       {t("admin.noPlaceIds" as any)}
                     </p>
+                  )}
+
+                  {/* Pending Place IDs */}
+                  {tenant.pending_place_ids && tenant.pending_place_ids.length > 0 && (
+                    <div className="mb-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Clock className="w-3.5 h-3.5 text-amber-600" />
+                        <span className="text-xs font-medium text-amber-700">
+                          Pending Approval ({tenant.pending_place_ids.length})
+                        </span>
+                      </div>
+                      <div className="space-y-1.5">
+                        {tenant.pending_place_ids.map((pid) => (
+                          <div
+                            key={pid}
+                            className="flex items-center justify-between bg-amber-50 border border-amber-200 rounded-lg px-3 py-2"
+                          >
+                            <span className="text-xs font-mono text-gray-700 flex items-center gap-1.5">
+                              <Clock className="w-3 h-3 text-amber-500" />
+                              {pid}
+                            </span>
+                            <div className="flex items-center gap-1">
+                              <button
+                                onClick={() => handleApprovePending(tenant.id, pid)}
+                                disabled={pendingAction === pid}
+                                className="flex items-center gap-1 px-2 py-1 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded text-xs transition-colors disabled:opacity-50"
+                              >
+                                {pendingAction === pid ? (
+                                  <Loader2 className="w-3 h-3 animate-spin" />
+                                ) : (
+                                  <ThumbsUp className="w-3 h-3" />
+                                )}
+                                Approve
+                              </button>
+                              <button
+                                onClick={() => handleRejectPending(tenant.id, pid)}
+                                disabled={pendingAction === pid}
+                                className="flex items-center gap-1 px-2 py-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded text-xs transition-colors disabled:opacity-50"
+                              >
+                                {pendingAction === pid ? (
+                                  <Loader2 className="w-3 h-3 animate-spin" />
+                                ) : (
+                                  <ThumbsDown className="w-3 h-3" />
+                                )}
+                                Reject
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   )}
 
                   {/* Search & Add */}

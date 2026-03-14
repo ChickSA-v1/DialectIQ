@@ -215,6 +215,7 @@ const translations = {
     "client.reviewsFetched": "reviews fetched",
     "client.newAnalyzed": "new analyzed",
     "client.noPlaceIds": "No businesses assigned yet. Your admin will add them for you.",
+    "client.pendingApproval": "Pending Admin Approval",
     "client.fetchSuccess": "Reviews fetched successfully!",
 
     // Payment
@@ -675,6 +676,7 @@ const translations = {
     "client.reviewsFetched": "تقييمات تم جلبها",
     "client.newAnalyzed": "جديدة تم تحليلها",
     "client.noPlaceIds": "لم يتم تعيين منشآت بعد. سيقوم المشرف بإضافتها لك.",
+    "client.pendingApproval": "بانتظار موافقة الإدارة",
     "client.fetchSuccess": "تم جلب التقييمات بنجاح!",
 
     // Payment

@@ -87,6 +87,7 @@ async def list_registrations(
                     id=t.id, name_ar=t.name_ar, name_en=t.name_en,
                     email=t.email, phone=t.phone, status=t.status,
                     package=t.package, place_ids=t.place_ids or [],
+                    pending_place_ids=t.pending_place_ids or [],
                     max_businesses=t.max_businesses,
                     max_reviews_per_month=t.max_reviews_per_month,
                     reviews_used_this_month=t.reviews_used_this_month,
@@ -147,6 +148,7 @@ async def get_registration(
             id=tenant.id, name_ar=tenant.name_ar, name_en=tenant.name_en,
             email=tenant.email, phone=tenant.phone, status=tenant.status,
             package=tenant.package, place_ids=tenant.place_ids or [],
+            pending_place_ids=tenant.pending_place_ids or [],
             max_businesses=tenant.max_businesses,
             max_reviews_per_month=tenant.max_reviews_per_month,
             reviews_used_this_month=tenant.reviews_used_this_month,
@@ -297,6 +299,7 @@ async def list_tenants(
                 id=t.id, name_ar=t.name_ar, name_en=t.name_en,
                 email=t.email, phone=t.phone, status=t.status,
                 package=t.package, place_ids=t.place_ids or [],
+                pending_place_ids=t.pending_place_ids or [],
                 max_businesses=t.max_businesses,
                 max_reviews_per_month=t.max_reviews_per_month,
                 reviews_used_this_month=t.reviews_used_this_month,
@@ -619,3 +622,105 @@ async def admin_remove_place_id(
 
     log.info("admin_place_id_removed", tenant_id=tenant_id, place_id=place_id)
     return {"message": "Place ID removed", "place_id": place_id, "total_places": len(current_places)}
+
+
+# ── Pending Place ID Approval ─────────────────────────────────────
+
+
+@router.get("/pending-places")
+async def list_pending_places(
+    _admin: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """List all tenants that have pending place IDs awaiting approval."""
+    result = await db.execute(select(Tenant).where(Tenant.pending_place_ids.isnot(None)))
+    tenants = result.scalars().all()
+
+    pending_list = []
+    for t in tenants:
+        pending = list(t.pending_place_ids or [])
+        if not pending:
+            continue
+        pending_list.append({
+            "tenant_id": str(t.id),
+            "name_ar": t.name_ar,
+            "name_en": t.name_en,
+            "email": t.email,
+            "package": t.package,
+            "status": t.status,
+            "pending_place_ids": pending,
+            "confirmed_place_ids": list(t.place_ids or []),
+            "max_businesses": t.max_businesses,
+        })
+
+    return {"pending": pending_list, "total": len(pending_list)}
+
+
+@router.post("/tenants/{tenant_id}/pending-places/{place_id}/approve")
+async def approve_pending_place(
+    tenant_id: str,
+    place_id: str,
+    _admin: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Admin: approve a pending place ID → move to confirmed list."""
+    tid = _uuid.UUID(tenant_id)
+    result = await db.execute(select(Tenant).where(Tenant.id == tid))
+    tenant = result.scalar_one_or_none()
+    if not tenant:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Tenant not found")
+
+    pending = list(tenant.pending_place_ids or [])
+    if place_id not in pending:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Place ID not in pending list")
+
+    confirmed = list(tenant.place_ids or [])
+    if place_id in confirmed:
+        raise HTTPException(status.HTTP_409_CONFLICT, "Place ID already confirmed")
+
+    if len(confirmed) >= tenant.max_businesses:
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST,
+            f"Maximum {tenant.max_businesses} businesses for {tenant.package} package",
+        )
+
+    # Move from pending → confirmed
+    from sqlalchemy.orm.attributes import flag_modified
+    pending.remove(place_id)
+    confirmed.append(place_id)
+    tenant.pending_place_ids = pending
+    tenant.place_ids = confirmed
+    flag_modified(tenant, "pending_place_ids")
+    flag_modified(tenant, "place_ids")
+    await db.commit()
+
+    log.info("pending_place_approved", tenant_id=tenant_id, place_id=place_id)
+    return {"message": "Place ID approved", "place_id": place_id}
+
+
+@router.post("/tenants/{tenant_id}/pending-places/{place_id}/reject")
+async def reject_pending_place(
+    tenant_id: str,
+    place_id: str,
+    _admin: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Admin: reject a pending place ID → remove from pending list."""
+    tid = _uuid.UUID(tenant_id)
+    result = await db.execute(select(Tenant).where(Tenant.id == tid))
+    tenant = result.scalar_one_or_none()
+    if not tenant:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Tenant not found")
+
+    pending = list(tenant.pending_place_ids or [])
+    if place_id not in pending:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Place ID not in pending list")
+
+    from sqlalchemy.orm.attributes import flag_modified
+    pending.remove(place_id)
+    tenant.pending_place_ids = pending
+    flag_modified(tenant, "pending_place_ids")
+    await db.commit()
+
+    log.info("pending_place_rejected", tenant_id=tenant_id, place_id=place_id)
+    return {"message": "Place ID rejected", "place_id": place_id}

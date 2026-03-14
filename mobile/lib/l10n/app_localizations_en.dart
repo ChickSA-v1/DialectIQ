@@ -399,6 +399,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get transferRef => 'Reference: Your email address';
 
   @override
+  String get pendingApproval => 'Pending Approval';
+
+  @override
+  String get businessPendingMsg => 'Submitted for admin approval';
+
+  @override
+  String get pendingPlaceIds => 'Pending Business Requests';
+
+  @override
   String get deleteAccount => 'Delete Account';
 
   @override

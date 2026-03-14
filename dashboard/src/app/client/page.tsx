@@ -661,6 +661,24 @@ function ClientDashboard() {
                   {t("client.noPlaceIds")}
                 </p>
               )}
+
+              {/* Pending place IDs */}
+              {tenant?.pending_place_ids && tenant.pending_place_ids.length > 0 && (
+                <div className="mt-3">
+                  <p className="text-xs text-amber-600 font-medium mb-1.5">{t("client.pendingApproval" as any)}</p>
+                  <div className="flex flex-wrap gap-2">
+                    {tenant.pending_place_ids.map((pid) => (
+                      <span
+                        key={pid}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 text-amber-700 rounded-xl text-xs font-mono border border-amber-200"
+                      >
+                        <Clock className="w-3 h-3" />
+                        {pid.length > 30 ? pid.slice(0, 30) + "..." : pid}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Fetch Reviews */}

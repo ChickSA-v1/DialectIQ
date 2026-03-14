@@ -67,6 +67,7 @@ class TenantInfo {
   final String status;
   final String package;
   final List<String> placeIds;
+  final List<String> pendingPlaceIds;
   final int maxBusinesses;
   final int maxReviewsPerMonth;
   final int reviewsUsedThisMonth;
@@ -84,6 +85,7 @@ class TenantInfo {
     required this.status,
     required this.package,
     required this.placeIds,
+    this.pendingPlaceIds = const [],
     required this.maxBusinesses,
     required this.maxReviewsPerMonth,
     required this.reviewsUsedThisMonth,
@@ -102,6 +104,7 @@ class TenantInfo {
     status: json['status'] as String,
     package: json['package'] as String,
     placeIds: (json['place_ids'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
+    pendingPlaceIds: (json['pending_place_ids'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
     maxBusinesses: json['max_businesses'] as int? ?? 1,
     maxReviewsPerMonth: json['max_reviews_per_month'] as int? ?? 500,
     reviewsUsedThisMonth: json['reviews_used_this_month'] as int? ?? 0,

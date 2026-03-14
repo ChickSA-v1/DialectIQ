@@ -315,6 +315,34 @@ export async function adminRemovePlaceId(
   return res.json();
 }
 
+export async function adminApprovePendingPlace(
+  tenantId: string,
+  placeId: string
+): Promise<{ message: string }> {
+  const res = await authFetch(`/api/v1/admin/tenants/${tenantId}/pending-places/${encodeURIComponent(placeId)}/approve`, {
+    method: "POST",
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || "Approve failed");
+  }
+  return res.json();
+}
+
+export async function adminRejectPendingPlace(
+  tenantId: string,
+  placeId: string
+): Promise<{ message: string }> {
+  const res = await authFetch(`/api/v1/admin/tenants/${tenantId}/pending-places/${encodeURIComponent(placeId)}/reject`, {
+    method: "POST",
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || "Reject failed");
+  }
+  return res.json();
+}
+
 // ── Payment API ───────────────────────────────────────────────────────
 
 export async function createCheckout(

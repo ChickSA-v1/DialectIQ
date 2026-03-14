@@ -189,8 +189,8 @@ class _ActiveDashboardState extends ConsumerState<ActiveDashboard> {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
                                         content: Text(
-                                            '${place.name} added successfully!'),
-                                        backgroundColor: AppColors.success,
+                                            '${place.name} — ${l10n.businessPendingMsg}'),
+                                        backgroundColor: AppColors.warning,
                                       ),
                                     );
                                   }
@@ -468,6 +468,7 @@ class _ActiveDashboardState extends ConsumerState<ActiveDashboard> {
                       ],
                     ),
                   ),
+                // Confirmed place IDs
                 ...tenant.placeIds.map((placeId) => Container(
                       margin: const EdgeInsets.only(bottom: 8),
                       padding: const EdgeInsets.symmetric(
@@ -495,6 +496,52 @@ class _ActiveDashboardState extends ConsumerState<ActiveDashboard> {
                           ),
                           const Icon(Icons.check_circle,
                               size: 18, color: AppColors.success),
+                        ],
+                      ),
+                    )),
+                // Pending place IDs
+                ...tenant.pendingPlaceIds.map((placeId) => Container(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 14, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: AppColors.warning.withValues(alpha: 0.05),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                            color: AppColors.warning.withValues(alpha: 0.4)),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.place,
+                              size: 18, color: AppColors.warning),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  placeId,
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontFamily: 'monospace',
+                                    color: AppColors.textPrimary,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  l10n.pendingApproval,
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color: AppColors.warning,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Icon(Icons.hourglass_top,
+                              size: 18, color: AppColors.warning),
                         ],
                       ),
                     )),

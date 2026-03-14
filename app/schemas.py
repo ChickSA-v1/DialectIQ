@@ -147,6 +147,7 @@ class TenantInfo(BaseModel):
     status: str
     package: str
     place_ids: list[str] | None = None
+    pending_place_ids: list[str] | None = None
     max_businesses: int
     max_reviews_per_month: int
     reviews_used_this_month: int
