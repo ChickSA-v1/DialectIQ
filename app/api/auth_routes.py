@@ -10,7 +10,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
-from app.deps import get_current_user, require_owner
+from app.deps import get_current_user
 from app.models import Document, Invoice, Tenant, User
 from app.schemas import (
     InvoiceInfo,
@@ -272,9 +272,6 @@ async def delete_account(
     db: AsyncSession = Depends(get_db),
 ):
     """Delete the current user's account and all associated data."""
-    if user.role == "admin":
-        raise HTTPException(status.HTTP_403_FORBIDDEN, "Admin accounts cannot be deleted")
-
     # Delete the tenant (cascades to documents, subscriptions, invoices, users)
     if user.tenant_id:
         result = await db.execute(select(Tenant).where(Tenant.id == user.tenant_id))
@@ -297,7 +294,7 @@ place_router = APIRouter(prefix="/api/v1/tenant", tags=["tenant"])
 @place_router.post("/confirm-place-id", response_model=ConfirmPlaceIdResponse)
 async def confirm_place_id(
     req: ConfirmPlaceIdRequest,
-    user: User = Depends(require_owner),
+    user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     """Confirm and add a Place ID to the tenant's list."""
@@ -349,7 +346,7 @@ async def confirm_place_id(
 @place_router.post("/search-places", response_model=PlaceSearchResponse)
 async def search_places_endpoint(
     req: PlaceSearchRequest,
-    user: User = Depends(require_owner),
+    user: User = Depends(get_current_user),
 ):
     """Search for businesses by name or resolve a Google Maps URL."""
     query = req.query.strip()
@@ -378,7 +375,7 @@ async def search_places_endpoint(
 
 @place_router.post("/fetch-reviews", response_model=list[FetchReviewsResponse])
 async def fetch_reviews_endpoint(
-    user: User = Depends(require_owner),
+    user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     """

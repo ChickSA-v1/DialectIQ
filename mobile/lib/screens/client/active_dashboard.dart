@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -29,6 +30,17 @@ class _ActiveDashboardState extends ConsumerState<ActiveDashboard> {
   bool _searchingPlaces = false;
   final _searchController = TextEditingController();
   List<dynamic>? _searchResults;
+
+  /// Extract a user-friendly error message from exceptions
+  String _friendlyError(Object e) {
+    if (e is DioException && e.response?.data != null) {
+      final data = e.response!.data;
+      if (data is Map<String, dynamic> && data.containsKey('detail')) {
+        return data['detail'].toString();
+      }
+    }
+    return e.toString();
+  }
 
   @override
   void initState() {
@@ -108,7 +120,7 @@ class _ActiveDashboardState extends ConsumerState<ActiveDashboard> {
                                   if (mounted) {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
-                                        content: Text(e.toString()),
+                                        content: Text(_friendlyError(e)),
                                         backgroundColor: AppColors.error,
                                       ),
                                     );
@@ -186,7 +198,7 @@ class _ActiveDashboardState extends ConsumerState<ActiveDashboard> {
                                   if (mounted) {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
-                                        content: Text(e.toString()),
+                                        content: Text(_friendlyError(e)),
                                         backgroundColor: AppColors.error,
                                       ),
                                     );
@@ -227,7 +239,7 @@ class _ActiveDashboardState extends ConsumerState<ActiveDashboard> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(e.toString()),
+            content: Text(_friendlyError(e)),
             backgroundColor: AppColors.error,
           ),
         );
@@ -541,7 +553,7 @@ class _ActiveDashboardState extends ConsumerState<ActiveDashboard> {
                     StatCard(
                       label: l10n.avgSentiment,
                       value: stats.avgSentiment != null
-                          ? '${(stats.avgSentiment! * 100).toInt()}%'
+                          ? '${stats.avgSentiment!.toStringAsFixed(1)}/10'
                           : 'N/A',
                       icon: Icons.sentiment_satisfied,
                       iconColor: AppColors.success,
