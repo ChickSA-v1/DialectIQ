@@ -26,6 +26,9 @@ class ActiveDashboard extends ConsumerStatefulWidget {
 class _ActiveDashboardState extends ConsumerState<ActiveDashboard> {
   final _tenantRepo = TenantRepository();
   bool _fetchingReviews = false;
+  bool _searchingPlaces = false;
+  final _searchController = TextEditingController();
+  List<dynamic>? _searchResults;
 
   @override
   void initState() {
@@ -35,18 +38,189 @@ class _ActiveDashboardState extends ConsumerState<ActiveDashboard> {
     });
   }
 
-  Future<void> _fetchReviews(String placeId) async {
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _showAddBusinessDialog() {
+    _searchController.clear();
+    _searchResults = null;
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (ctx, setModalState) {
+            final l10n = AppLocalizations.of(context)!;
+            return Padding(
+              padding: EdgeInsets.only(
+                left: 20,
+                right: 20,
+                top: 20,
+                bottom: MediaQuery.of(ctx).viewInsets.bottom + 20,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.addBusiness,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      hintText: l10n.searchPlaces,
+                      prefixIcon: const Icon(Icons.search),
+                      suffixIcon: _searchingPlaces
+                          ? const Padding(
+                              padding: EdgeInsets.all(12),
+                              child: SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              ),
+                            )
+                          : IconButton(
+                              icon: const Icon(Icons.send),
+                              onPressed: () async {
+                                if (_searchController.text.trim().isEmpty) return;
+                                setModalState(() => _searchingPlaces = true);
+                                try {
+                                  final result = await _tenantRepo
+                                      .searchPlaces(_searchController.text.trim());
+                                  setModalState(() {
+                                    _searchResults = result.results;
+                                    _searchingPlaces = false;
+                                  });
+                                } catch (e) {
+                                  setModalState(() => _searchingPlaces = false);
+                                  if (mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(e.toString()),
+                                        backgroundColor: AppColors.error,
+                                      ),
+                                    );
+                                  }
+                                }
+                              },
+                            ),
+                    ),
+                    onSubmitted: (value) async {
+                      if (value.trim().isEmpty) return;
+                      setModalState(() => _searchingPlaces = true);
+                      try {
+                        final result = await _tenantRepo.searchPlaces(value.trim());
+                        setModalState(() {
+                          _searchResults = result.results;
+                          _searchingPlaces = false;
+                        });
+                      } catch (e) {
+                        setModalState(() => _searchingPlaces = false);
+                      }
+                    },
+                  ),
+                  if (_searchResults != null) ...[
+                    const SizedBox(height: 12),
+                    if (_searchResults!.isEmpty)
+                      Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Center(
+                          child: Text(
+                            l10n.noPlaces,
+                            style: TextStyle(color: AppColors.textMuted),
+                          ),
+                        ),
+                      )
+                    else
+                      ConstrainedBox(
+                        constraints: const BoxConstraints(maxHeight: 300),
+                        child: ListView.builder(
+                          shrinkWrap: true,
+                          itemCount: _searchResults!.length,
+                          itemBuilder: (ctx, i) {
+                            final place = _searchResults![i];
+                            return ListTile(
+                              leading: const Icon(Icons.place,
+                                  color: AppColors.primary),
+                              title: Text(
+                                place.name,
+                                style: const TextStyle(fontSize: 14),
+                              ),
+                              subtitle: Text(
+                                place.address ?? place.placeId,
+                                style: const TextStyle(fontSize: 12),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              trailing: const Icon(Icons.add_circle_outline,
+                                  color: AppColors.success),
+                              onTap: () async {
+                                Navigator.pop(ctx);
+                                try {
+                                  await _tenantRepo.confirmPlaceId(place.placeId);
+                                  if (mounted) {
+                                    await ref
+                                        .read(authProvider.notifier)
+                                        .refreshProfile();
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                            '${place.name} added successfully!'),
+                                        backgroundColor: AppColors.success,
+                                      ),
+                                    );
+                                  }
+                                } catch (e) {
+                                  if (mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(e.toString()),
+                                        backgroundColor: AppColors.error,
+                                      ),
+                                    );
+                                  }
+                                }
+                              },
+                            );
+                          },
+                        ),
+                      ),
+                  ],
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> _fetchReviews() async {
     setState(() => _fetchingReviews = true);
     try {
-      final result = await _tenantRepo.fetchReviews(placeId);
+      final results = await _tenantRepo.fetchReviews();
       if (mounted) {
         final l10n = AppLocalizations.of(context)!;
+        final totalNew = results.fold<int>(0, (sum, r) => sum + r.reviewsNew);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(l10n.reviewsFetched(result.reviewsNew)),
+            content: Text(l10n.reviewsFetched(totalNew)),
             backgroundColor: AppColors.success,
           ),
         );
+        await ref.read(authProvider.notifier).refreshProfile();
         ref.read(dashboardProvider.notifier).load();
       }
     } catch (e) {
@@ -228,17 +402,60 @@ class _ActiveDashboardState extends ConsumerState<ActiveDashboard> {
                   ),
                 ),
 
-              // Place IDs + Fetch Reviews
-              if (tenant != null && tenant.placeIds.isNotEmpty) ...[
-                Text(
-                  l10n.placeIds,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                    color: AppColors.textPrimary,
-                  ),
+              // Place IDs + Fetch Reviews + Add Business
+              if (tenant != null) ...[
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        l10n.placeIds,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 32,
+                      child: ElevatedButton.icon(
+                        onPressed: _showAddBusinessDialog,
+                        icon: const Icon(Icons.add, size: 16),
+                        label: Text(l10n.addBusiness,
+                            style: const TextStyle(fontSize: 12)),
+                        style: ElevatedButton.styleFrom(
+                          padding:
+                              const EdgeInsets.symmetric(horizontal: 12),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 8),
+                if (tenant.placeIds.isEmpty)
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: AppColors.border),
+                    ),
+                    child: Column(
+                      children: [
+                        Icon(Icons.storefront,
+                            size: 40, color: AppColors.textMuted),
+                        const SizedBox(height: 8),
+                        Text(
+                          l10n.noPlaces,
+                          style: TextStyle(
+                            color: AppColors.textMuted,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ...tenant.placeIds.map((placeId) => Container(
                       margin: const EdgeInsets.only(bottom: 8),
                       padding: const EdgeInsets.symmetric(
@@ -264,35 +481,32 @@ class _ActiveDashboardState extends ConsumerState<ActiveDashboard> {
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          SizedBox(
-                            height: 30,
-                            child: ElevatedButton.icon(
-                              onPressed: _fetchingReviews
-                                  ? null
-                                  : () => _fetchReviews(placeId),
-                              icon: _fetchingReviews
-                                  ? const SizedBox(
-                                      width: 14,
-                                      height: 14,
-                                      child: CircularProgressIndicator(
-                                          strokeWidth: 2),
-                                    )
-                                  : const Icon(Icons.download, size: 14),
-                              label: Text(
-                                l10n.fetchReviews,
-                                style: const TextStyle(fontSize: 11),
-                              ),
-                              style: ElevatedButton.styleFrom(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 10),
-                              ),
-                            ),
-                          ),
+                          const Icon(Icons.check_circle,
+                              size: 18, color: AppColors.success),
                         ],
                       ),
                     )),
+                if (tenant.placeIds.isNotEmpty)
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: _fetchingReviews ? null : _fetchReviews,
+                      icon: _fetchingReviews
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(
+                                  strokeWidth: 2, color: Colors.white),
+                            )
+                          : const Icon(Icons.download_rounded),
+                      label: Text(_fetchingReviews
+                          ? l10n.fetchingReviews
+                          : l10n.fetchReviews),
+                    ),
+                  ),
                 const SizedBox(height: 16),
               ],
+
 
               // Stats cards
               if (dashboard.isLoading && stats == null)
