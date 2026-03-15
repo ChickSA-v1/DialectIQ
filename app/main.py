@@ -55,9 +55,10 @@ app.include_router(place_router)
 @app.on_event("startup")
 async def run_migrations():
     """Auto-add new columns on startup (idempotent)."""
-    from app.database import engine
+    from app.database import _get_engine
     from sqlalchemy import text
 
+    engine = _get_engine()
     async with engine.begin() as conn:
         await conn.execute(text(
             "ALTER TABLE tenants ADD COLUMN IF NOT EXISTS "
