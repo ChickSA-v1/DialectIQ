@@ -90,12 +90,12 @@ class Tenant(Base):
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
 
-    # Relationships
-    users: Mapped[list["User"]] = relationship(back_populates="tenant", lazy="selectin")
-    documents: Mapped[list["Document"]] = relationship(back_populates="tenant", lazy="selectin")
-    subscriptions: Mapped[list["Subscription"]] = relationship(back_populates="tenant", lazy="selectin")
-    invoices: Mapped[list["Invoice"]] = relationship(back_populates="tenant", lazy="selectin")
-    reviews: Mapped[list["Review"]] = relationship(back_populates="tenant", lazy="noload")
+    # Relationships — passive_deletes=True lets the DB ON DELETE CASCADE handle it
+    users: Mapped[list["User"]] = relationship(back_populates="tenant", lazy="selectin", cascade="all, delete-orphan", passive_deletes=True)
+    documents: Mapped[list["Document"]] = relationship(back_populates="tenant", lazy="selectin", cascade="all, delete-orphan", passive_deletes=True)
+    subscriptions: Mapped[list["Subscription"]] = relationship(back_populates="tenant", lazy="selectin", cascade="all, delete-orphan", passive_deletes=True)
+    invoices: Mapped[list["Invoice"]] = relationship(back_populates="tenant", lazy="selectin", cascade="all, delete-orphan", passive_deletes=True)
+    reviews: Mapped[list["Review"]] = relationship(back_populates="tenant", lazy="noload", passive_deletes=True)
 
 
 # ── User ───────────────────────────────────────────────────────────────
@@ -167,7 +167,7 @@ class Subscription(Base):
     )
 
     tenant: Mapped["Tenant"] = relationship(back_populates="subscriptions")
-    invoices: Mapped[list["Invoice"]] = relationship(back_populates="subscription", lazy="selectin")
+    invoices: Mapped[list["Invoice"]] = relationship(back_populates="subscription", lazy="selectin", cascade="all, delete-orphan", passive_deletes=True)
 
 
 # ── Invoice ────────────────────────────────────────────────────────────
@@ -242,7 +242,8 @@ class Review(Base):
     )
 
     analysis: Mapped["AnalysisResult | None"] = relationship(
-        back_populates="review", uselist=False, lazy="selectin"
+        back_populates="review", uselist=False, lazy="selectin",
+        cascade="all, delete-orphan", passive_deletes=True,
     )
     tenant: Mapped["Tenant | None"] = relationship(back_populates="reviews")
 
