@@ -19,12 +19,13 @@ class PaymentRepository {
   }
 
   /// Submit bank transfer receipt
-  Future<BankTransferResponse> bankTransfer(File receiptFile) async {
+  Future<BankTransferResponse> bankTransfer(File receiptFile, String invoiceId) async {
     final formData = FormData.fromMap({
-      'receipt': await MultipartFile.fromFile(
+      'file': await MultipartFile.fromFile(
         receiptFile.path,
         filename: receiptFile.path.split('/').last,
       ),
+      'invoice_id': invoiceId,
     });
     final response = await _dio.post(
       '/api/v1/payments/bank-transfer',

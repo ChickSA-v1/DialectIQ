@@ -60,12 +60,31 @@ class _PaymentViewState extends ConsumerState<PaymentView> {
     }
   }
 
+  String? get _latestInvoiceId {
+    final invoices = ref.read(authProvider).profile?.invoices;
+    if (invoices == null || invoices.isEmpty) return null;
+    // Find the latest pending invoice, or fall back to the first invoice
+    final pending = invoices.where((i) => i.status == 'pending').toList();
+    return pending.isNotEmpty ? pending.last.id : invoices.last.id;
+  }
+
   Future<void> _submitBankTransfer() async {
     if (_receiptFile == null) return;
 
+    final invoiceId = _latestInvoiceId;
+    if (invoiceId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('No invoice found. Please contact support.'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
+    }
+
     final result = await ref
         .read(paymentProvider.notifier)
-        .submitBankTransfer(_receiptFile!);
+        .submitBankTransfer(_receiptFile!, invoiceId);
 
     if (result != null && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(

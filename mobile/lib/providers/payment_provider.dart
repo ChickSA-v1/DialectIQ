@@ -67,10 +67,10 @@ class PaymentNotifier extends StateNotifier<PaymentState> {
   }
 
   /// Submit bank transfer receipt
-  Future<BankTransferResponse?> submitBankTransfer(File receipt) async {
+  Future<BankTransferResponse?> submitBankTransfer(File receipt, String invoiceId) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
-      final result = await _repo.bankTransfer(receipt);
+      final result = await _repo.bankTransfer(receipt, invoiceId);
       state = state.copyWith(isLoading: false, bankTransfer: result);
       return result;
     } catch (e) {
