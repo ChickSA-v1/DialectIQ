@@ -8,6 +8,8 @@ import '../app/theme.dart';
 import '../providers/auth_provider.dart';
 import '../providers/profile_provider.dart';
 import '../providers/locale_provider.dart';
+import '../widgets/animated_glass_background.dart';
+import '../widgets/fade_slide_in.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -27,14 +29,14 @@ class SettingsScreen extends ConsumerWidget {
         scrolledUnderElevation: 0,
         title: Text(l10n.settings),
       ),
-      body: Container(
-        decoration: const BoxDecoration(gradient: AppColors.bgGradient),
+      body: AnimatedGlassBackground(
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
             // Profile section
             if (profile != null) ...[
-              ClipRRect(
+              FadeSlideIn(
+                child: ClipRRect(
                 borderRadius: BorderRadius.circular(20),
                 child: BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
@@ -120,11 +122,14 @@ class SettingsScreen extends ConsumerWidget {
                   ),
                 ),
               ),
+              ),
               const SizedBox(height: 16),
             ],
 
             // Language switcher
-            ClipRRect(
+            FadeSlideIn(
+              delay: const Duration(milliseconds: 100),
+              child: ClipRRect(
               borderRadius: BorderRadius.circular(20),
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
@@ -157,11 +162,14 @@ class SettingsScreen extends ConsumerWidget {
                 ),
               ),
             ),
+            ),
 
             const SizedBox(height: 16),
 
             // Logout
-            ClipRRect(
+            FadeSlideIn(
+              delay: const Duration(milliseconds: 200),
+              child: ClipRRect(
               borderRadius: BorderRadius.circular(20),
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
@@ -212,11 +220,14 @@ class SettingsScreen extends ConsumerWidget {
                 ),
               ),
             ),
+            ),
 
             const SizedBox(height: 16),
 
             // Delete Account
-            ClipRRect(
+            FadeSlideIn(
+              delay: const Duration(milliseconds: 300),
+              child: ClipRRect(
               borderRadius: BorderRadius.circular(20),
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
@@ -312,6 +323,7 @@ class SettingsScreen extends ConsumerWidget {
                   ),
                 ),
               ),
+            ),
             ),
           ],
         ),

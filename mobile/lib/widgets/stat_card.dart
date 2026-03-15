@@ -1,6 +1,8 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../app/theme.dart';
+import 'animated_counter.dart';
+import 'breathing_glow.dart';
 
 class StatCard extends StatelessWidget {
   final String label;
@@ -31,29 +33,28 @@ class StatCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 42,
-                height: 42,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      color.withValues(alpha: 0.25),
-                      color.withValues(alpha: 0.10),
-                    ],
-                  ),
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: color.withValues(alpha: 0.20),
-                      blurRadius: 12,
+              BreathingGlow(
+                glowColor: color,
+                minBlur: 8,
+                maxBlur: 20,
+                child: Container(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        color.withValues(alpha: 0.25),
+                        color.withValues(alpha: 0.10),
+                      ],
                     ),
-                  ],
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(icon, color: color, size: 22),
                 ),
-                child: Icon(icon, color: color, size: 22),
               ),
               const SizedBox(height: 14),
-              Text(
-                value,
+              AnimatedCounter(
+                value: value,
                 style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,

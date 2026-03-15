@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:dialectiq/l10n/app_localizations.dart';
 import '../../app/theme.dart';
+import '../../widgets/fade_slide_in.dart';
 import '../../widgets/gradient_button.dart';
 
 class StepBusiness extends StatefulWidget {
@@ -66,83 +67,103 @@ class _StepBusinessState extends State<StepBusiness> {
         key: _formKey,
         child: Column(
           children: [
-            TextFormField(
-              controller: _nameArCtrl,
-              style: const TextStyle(color: AppColors.textPrimary),
-              decoration: InputDecoration(
-                labelText: l10n.businessNameAr,
-                prefixIcon: const Icon(Icons.business),
-              ),
-              validator: (v) =>
-                  v == null || v.trim().isEmpty ? l10n.requiredField : null,
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _nameEnCtrl,
-              style: const TextStyle(color: AppColors.textPrimary),
-              decoration: InputDecoration(
-                labelText: l10n.businessNameEn,
-                prefixIcon: const Icon(Icons.business_center),
+            FadeSlideIn(
+              delay: const Duration(milliseconds: 0),
+              child: TextFormField(
+                controller: _nameArCtrl,
+                style: const TextStyle(color: AppColors.textPrimary),
+                decoration: InputDecoration(
+                  labelText: l10n.businessNameAr,
+                  prefixIcon: const Icon(Icons.business),
+                ),
+                validator: (v) =>
+                    v == null || v.trim().isEmpty ? l10n.requiredField : null,
               ),
             ),
             const SizedBox(height: 16),
-            TextFormField(
-              controller: _emailCtrl,
-              keyboardType: TextInputType.emailAddress,
-              style: const TextStyle(color: AppColors.textPrimary),
-              decoration: InputDecoration(
-                labelText: l10n.ownerEmail,
-                prefixIcon: const Icon(Icons.email_outlined),
+            FadeSlideIn(
+              delay: const Duration(milliseconds: 80),
+              child: TextFormField(
+                controller: _nameEnCtrl,
+                style: const TextStyle(color: AppColors.textPrimary),
+                decoration: InputDecoration(
+                  labelText: l10n.businessNameEn,
+                  prefixIcon: const Icon(Icons.business_center),
+                ),
               ),
-              validator: (v) {
-                if (v == null || v.trim().isEmpty) return l10n.requiredField;
-                if (!v.contains('@')) return l10n.invalidEmail;
-                return null;
-              },
             ),
             const SizedBox(height: 16),
-            TextFormField(
-              controller: _phoneCtrl,
-              keyboardType: TextInputType.phone,
-              style: const TextStyle(color: AppColors.textPrimary),
-              decoration: InputDecoration(
-                labelText: l10n.ownerPhone,
-                prefixIcon: const Icon(Icons.phone),
+            FadeSlideIn(
+              delay: const Duration(milliseconds: 160),
+              child: TextFormField(
+                controller: _emailCtrl,
+                keyboardType: TextInputType.emailAddress,
+                style: const TextStyle(color: AppColors.textPrimary),
+                decoration: InputDecoration(
+                  labelText: l10n.ownerEmail,
+                  prefixIcon: const Icon(Icons.email_outlined),
+                ),
+                validator: (v) {
+                  if (v == null || v.trim().isEmpty) return l10n.requiredField;
+                  if (!v.contains('@')) return l10n.invalidEmail;
+                  return null;
+                },
               ),
-              validator: (v) =>
-                  v == null || v.trim().isEmpty ? l10n.requiredField : null,
             ),
             const SizedBox(height: 16),
-            TextFormField(
-              controller: _passwordCtrl,
-              obscureText: true,
-              style: const TextStyle(color: AppColors.textPrimary),
-              decoration: InputDecoration(
-                labelText: l10n.createPassword,
-                prefixIcon: const Icon(Icons.lock_outlined),
+            FadeSlideIn(
+              delay: const Duration(milliseconds: 240),
+              child: TextFormField(
+                controller: _phoneCtrl,
+                keyboardType: TextInputType.phone,
+                style: const TextStyle(color: AppColors.textPrimary),
+                decoration: InputDecoration(
+                  labelText: l10n.ownerPhone,
+                  prefixIcon: const Icon(Icons.phone),
+                ),
+                validator: (v) =>
+                    v == null || v.trim().isEmpty ? l10n.requiredField : null,
               ),
-              validator: (v) {
-                if (v == null || v.isEmpty) return l10n.requiredField;
-                if (v.length < 6) return 'Min 6 characters';
-                return null;
-              },
             ),
             const SizedBox(height: 16),
-            TextFormField(
-              controller: _confirmCtrl,
-              obscureText: true,
-              style: const TextStyle(color: AppColors.textPrimary),
-              decoration: InputDecoration(
-                labelText: l10n.confirmPassword,
-                prefixIcon: const Icon(Icons.lock),
+            FadeSlideIn(
+              delay: const Duration(milliseconds: 320),
+              child: TextFormField(
+                controller: _passwordCtrl,
+                obscureText: true,
+                style: const TextStyle(color: AppColors.textPrimary),
+                decoration: InputDecoration(
+                  labelText: l10n.createPassword,
+                  prefixIcon: const Icon(Icons.lock_outlined),
+                ),
+                validator: (v) {
+                  if (v == null || v.isEmpty) return l10n.requiredField;
+                  if (v.length < 6) return 'Min 6 characters';
+                  return null;
+                },
               ),
-              validator: (v) {
-                if (v != _passwordCtrl.text) return l10n.passwordMismatch;
-                return null;
-              },
+            ),
+            const SizedBox(height: 16),
+            FadeSlideIn(
+              delay: const Duration(milliseconds: 400),
+              child: TextFormField(
+                controller: _confirmCtrl,
+                obscureText: true,
+                style: const TextStyle(color: AppColors.textPrimary),
+                decoration: InputDecoration(
+                  labelText: l10n.confirmPassword,
+                  prefixIcon: const Icon(Icons.lock),
+                ),
+                validator: (v) {
+                  if (v != _passwordCtrl.text) return l10n.passwordMismatch;
+                  return null;
+                },
+              ),
             ),
             const SizedBox(height: 28),
-            GradientButton(
+            FadeSlideIn(
+              delay: const Duration(milliseconds: 480),
+              child: GradientButton(
               label: l10n.next,
               icon: Icons.arrow_forward,
               onPressed: () {
@@ -156,6 +177,7 @@ class _StepBusinessState extends State<StepBusiness> {
                   });
                 }
               },
+            ),
             ),
           ],
         ),

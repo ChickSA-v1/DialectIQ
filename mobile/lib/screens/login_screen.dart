@@ -6,6 +6,9 @@ import 'package:dialectiq/l10n/app_localizations.dart';
 
 import '../app/theme.dart';
 import '../providers/auth_provider.dart';
+import '../widgets/animated_glass_background.dart';
+import '../widgets/breathing_glow.dart';
+import '../widgets/fade_slide_in.dart';
 import '../widgets/gradient_button.dart';
 import '../widgets/locale_switcher.dart';
 
@@ -48,8 +51,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.bgStart,
-      body: Container(
-        decoration: const BoxDecoration(gradient: AppColors.bgGradient),
+      body: AnimatedGlassBackground(
         child: SafeArea(
           child: Center(
             child: SingleChildScrollView(
@@ -58,57 +60,67 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 children: [
                   const SizedBox(height: 16),
 
-                  // Glass logo
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(20),
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                      child: Container(
-                        width: 68,
-                        height: 68,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              AppColors.accentStart.withValues(alpha: 0.25),
-                              AppColors.accentEnd.withValues(alpha: 0.15),
-                            ],
-                          ),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.20),
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.accentStart
-                                  .withValues(alpha: 0.25),
-                              blurRadius: 24,
+                  // Glass logo with breathing glow
+                  FadeSlideIn(
+                    child: BreathingGlow(
+                      glowColor: AppColors.accentStart,
+                      minBlur: 12,
+                      maxBlur: 28,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(20),
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                          child: Container(
+                            width: 68,
+                            height: 68,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  AppColors.accentStart
+                                      .withValues(alpha: 0.25),
+                                  AppColors.accentEnd
+                                      .withValues(alpha: 0.15),
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.20),
+                              ),
                             ),
-                          ],
-                        ),
-                        child: const Icon(
-                          Icons.analytics_rounded,
-                          size: 38,
-                          color: Colors.white,
+                            child: const Icon(
+                              Icons.analytics_rounded,
+                              size: 38,
+                              color: Colors.white,
+                            ),
+                          ),
                         ),
                       ),
                     ),
                   ),
                   const SizedBox(height: 16),
-                  const Text(
-                    'DialectIQ',
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
-                      letterSpacing: 1,
+
+                  FadeSlideIn(
+                    delay: const Duration(milliseconds: 80),
+                    child: const Text(
+                      'DialectIQ',
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                        letterSpacing: 1,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Text(
-                    l10n.login,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: AppColors.textSecondary,
+
+                  FadeSlideIn(
+                    delay: const Duration(milliseconds: 150),
+                    child: Text(
+                      l10n.login,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 32),
@@ -118,51 +130,61 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     key: _formKey,
                     child: Column(
                       children: [
-                        TextFormField(
-                          controller: _emailController,
-                          keyboardType: TextInputType.emailAddress,
-                          textInputAction: TextInputAction.next,
-                          style:
-                              const TextStyle(color: AppColors.textPrimary),
-                          decoration: InputDecoration(
-                            labelText: l10n.email,
-                            prefixIcon: const Icon(Icons.email_outlined),
+                        FadeSlideIn(
+                          delay: const Duration(milliseconds: 220),
+                          child: TextFormField(
+                            controller: _emailController,
+                            keyboardType: TextInputType.emailAddress,
+                            textInputAction: TextInputAction.next,
+                            style: const TextStyle(
+                                color: AppColors.textPrimary),
+                            decoration: InputDecoration(
+                              labelText: l10n.email,
+                              prefixIcon:
+                                  const Icon(Icons.email_outlined),
+                            ),
+                            validator: (v) {
+                              if (v == null || v.trim().isEmpty) {
+                                return l10n.requiredField;
+                              }
+                              if (!v.contains('@')) {
+                                return l10n.invalidEmail;
+                              }
+                              return null;
+                            },
                           ),
-                          validator: (v) {
-                            if (v == null || v.trim().isEmpty) {
-                              return l10n.requiredField;
-                            }
-                            if (!v.contains('@')) return l10n.invalidEmail;
-                            return null;
-                          },
                         ),
                         const SizedBox(height: 16),
-                        TextFormField(
-                          controller: _passwordController,
-                          obscureText: _obscure,
-                          textInputAction: TextInputAction.done,
-                          onFieldSubmitted: (_) => _submit(),
-                          style:
-                              const TextStyle(color: AppColors.textPrimary),
-                          decoration: InputDecoration(
-                            labelText: l10n.password,
-                            prefixIcon: const Icon(Icons.lock_outlined),
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                _obscure
-                                    ? Icons.visibility_off
-                                    : Icons.visibility,
+                        FadeSlideIn(
+                          delay: const Duration(milliseconds: 300),
+                          child: TextFormField(
+                            controller: _passwordController,
+                            obscureText: _obscure,
+                            textInputAction: TextInputAction.done,
+                            onFieldSubmitted: (_) => _submit(),
+                            style: const TextStyle(
+                                color: AppColors.textPrimary),
+                            decoration: InputDecoration(
+                              labelText: l10n.password,
+                              prefixIcon:
+                                  const Icon(Icons.lock_outlined),
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  _obscure
+                                      ? Icons.visibility_off
+                                      : Icons.visibility,
+                                ),
+                                onPressed: () => setState(
+                                    () => _obscure = !_obscure),
                               ),
-                              onPressed: () =>
-                                  setState(() => _obscure = !_obscure),
                             ),
+                            validator: (v) {
+                              if (v == null || v.isEmpty) {
+                                return l10n.requiredField;
+                              }
+                              return null;
+                            },
                           ),
-                          validator: (v) {
-                            if (v == null || v.isEmpty) {
-                              return l10n.requiredField;
-                            }
-                            return null;
-                          },
                         ),
                       ],
                     ),
@@ -192,36 +214,45 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   const SizedBox(height: 20),
 
                   // Submit
-                  GradientButton(
-                    label: l10n.loginButton,
-                    isLoading: auth.isLoading,
-                    onPressed: _submit,
+                  FadeSlideIn(
+                    delay: const Duration(milliseconds: 400),
+                    child: GradientButton(
+                      label: l10n.loginButton,
+                      isLoading: auth.isLoading,
+                      onPressed: _submit,
+                    ),
                   ),
 
                   const SizedBox(height: 20),
 
                   // Register link
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(l10n.noAccount,
-                          style: const TextStyle(
-                              color: AppColors.textSecondary)),
-                      TextButton(
-                        onPressed: () => context.go('/register'),
-                        child: Text(
-                          l10n.registerNow,
-                          style: const TextStyle(
-                              color: AppColors.accentStart),
+                  FadeSlideIn(
+                    delay: const Duration(milliseconds: 500),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(l10n.noAccount,
+                            style: const TextStyle(
+                                color: AppColors.textSecondary)),
+                        TextButton(
+                          onPressed: () => context.go('/register'),
+                          child: Text(
+                            l10n.registerNow,
+                            style: const TextStyle(
+                                color: AppColors.accentStart),
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
 
                   const SizedBox(height: 24),
 
                   // Language switcher at bottom
-                  const LocaleSwitcher(),
+                  FadeSlideIn(
+                    delay: const Duration(milliseconds: 600),
+                    child: const LocaleSwitcher(),
+                  ),
                 ],
               ),
             ),

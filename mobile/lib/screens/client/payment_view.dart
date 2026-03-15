@@ -11,6 +11,8 @@ import '../../app/theme.dart';
 import '../../core/constants.dart';
 import '../../providers/payment_provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../widgets/animated_glass_background.dart';
+import '../../widgets/fade_slide_in.dart';
 import '../../widgets/gradient_button.dart';
 import '../../widgets/glass_card.dart';
 import '../../widgets/locale_switcher.dart';
@@ -92,14 +94,14 @@ class _PaymentViewState extends ConsumerState<PaymentView> {
           ),
         ],
       ),
-      body: Container(
-        decoration: const BoxDecoration(gradient: AppColors.bgGradient),
+      body: AnimatedGlassBackground(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
           child: Column(
             children: [
               // Header
-              GlassCard(
+              FadeSlideIn(
+                child: GlassCard(
                 child: Column(
                   children: [
                     Container(
@@ -149,21 +151,27 @@ class _PaymentViewState extends ConsumerState<PaymentView> {
                   ],
                 ),
               ),
+              ),
 
               const SizedBox(height: 24),
 
               // Card payment
-              GradientButton(
+              FadeSlideIn(
+                delay: const Duration(milliseconds: 150),
+                child: GradientButton(
                 label: l10n.payWithCard,
                 icon: Icons.credit_card,
                 isLoading: payment.isLoading,
                 onPressed: _payWithCard,
               ),
+              ),
 
               const SizedBox(height: 16),
 
               // Divider
-              Row(
+              FadeSlideIn(
+                delay: const Duration(milliseconds: 250),
+                child: Row(
                 children: [
                   Expanded(
                       child: Divider(
@@ -183,11 +191,14 @@ class _PaymentViewState extends ConsumerState<PaymentView> {
                           color: Colors.white.withValues(alpha: 0.10))),
                 ],
               ),
+              ),
 
               const SizedBox(height: 16),
 
               // Bank transfer details
-              ClipRRect(
+              FadeSlideIn(
+                delay: const Duration(milliseconds: 350),
+                child: ClipRRect(
                 borderRadius: BorderRadius.circular(20),
                 child: BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
@@ -216,11 +227,14 @@ class _PaymentViewState extends ConsumerState<PaymentView> {
                   ),
                 ),
               ),
+              ),
 
               const SizedBox(height: 16),
 
               // Upload receipt
-              GestureDetector(
+              FadeSlideIn(
+                delay: const Duration(milliseconds: 450),
+                child: GestureDetector(
                 onTap: _pickReceipt,
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(20),
@@ -270,6 +284,7 @@ class _PaymentViewState extends ConsumerState<PaymentView> {
                     ),
                   ),
                 ),
+              ),
               ),
 
               const SizedBox(height: 16),

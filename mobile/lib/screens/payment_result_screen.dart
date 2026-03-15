@@ -6,6 +6,9 @@ import 'package:dialectiq/l10n/app_localizations.dart';
 import '../app/theme.dart';
 import '../providers/payment_provider.dart';
 import '../providers/auth_provider.dart';
+import '../widgets/animated_glass_background.dart';
+import '../widgets/breathing_glow.dart';
+import '../widgets/fade_slide_in.dart';
 import '../widgets/gradient_button.dart';
 
 class PaymentResultScreen extends ConsumerStatefulWidget {
@@ -39,8 +42,7 @@ class _PaymentResultScreenState extends ConsumerState<PaymentResultScreen> {
     if (payment.isLoading) {
       return Scaffold(
         backgroundColor: AppColors.bgStart,
-        body: Container(
-          decoration: const BoxDecoration(gradient: AppColors.bgGradient),
+        body: AnimatedGlassBackground(
           child: Center(
             child: CircularProgressIndicator(
               valueColor: AlwaysStoppedAnimation(
@@ -57,8 +59,7 @@ class _PaymentResultScreenState extends ConsumerState<PaymentResultScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.bgStart,
-      body: Container(
-        decoration: const BoxDecoration(gradient: AppColors.bgGradient),
+      body: AnimatedGlassBackground(
         child: SafeArea(
           child: Center(
             child: Padding(
@@ -66,58 +67,84 @@ class _PaymentResultScreenState extends ConsumerState<PaymentResultScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Container(
-                    width: 88,
-                    height: 88,
-                    decoration: BoxDecoration(
-                      color: statusColor.withValues(alpha: 0.12),
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: statusColor.withValues(alpha: 0.25),
-                          blurRadius: 28,
+                  // Animated icon with elastic scale + breathing glow
+                  TweenAnimationBuilder<double>(
+                    tween: Tween(begin: 0.0, end: 1.0),
+                    duration: const Duration(milliseconds: 800),
+                    curve: Curves.elasticOut,
+                    builder: (context, value, child) {
+                      return Opacity(
+                        opacity: value.clamp(0.0, 1.0),
+                        child: Transform.scale(
+                          scale: value,
+                          child: child,
                         ),
-                      ],
-                    ),
-                    child: Icon(
-                      isPaid ? Icons.check_circle : Icons.error,
-                      size: 52,
-                      color: statusColor,
+                      );
+                    },
+                    child: BreathingGlow(
+                      glowColor: statusColor,
+                      minBlur: 16,
+                      maxBlur: 36,
+                      child: Container(
+                        width: 88,
+                        height: 88,
+                        decoration: BoxDecoration(
+                          color: statusColor.withValues(alpha: 0.12),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          isPaid ? Icons.check_circle : Icons.error,
+                          size: 52,
+                          color: statusColor,
+                        ),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 28),
-                  Text(
-                    isPaid ? l10n.paymentSuccess : l10n.paymentFailed,
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
+
+                  FadeSlideIn(
+                    delay: const Duration(milliseconds: 300),
+                    child: Text(
+                      isPaid ? l10n.paymentSuccess : l10n.paymentFailed,
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
-                    textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 12),
-                  Text(
-                    isPaid
-                        ? l10n.paymentSuccessMsg
-                        : l10n.paymentFailedMsg,
-                    style: const TextStyle(
-                      fontSize: 15,
-                      color: AppColors.textSecondary,
-                      height: 1.5,
+
+                  FadeSlideIn(
+                    delay: const Duration(milliseconds: 500),
+                    child: Text(
+                      isPaid
+                          ? l10n.paymentSuccessMsg
+                          : l10n.paymentFailedMsg,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        color: AppColors.textSecondary,
+                        height: 1.5,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
-                    textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 36),
-                  GradientButton(
-                    label: isPaid ? l10n.goToDashboard : l10n.retry,
-                    icon: isPaid ? Icons.dashboard : Icons.refresh,
-                    onPressed: () {
-                      if (isPaid) {
-                        context.go('/client');
-                      } else {
-                        context.pop();
-                      }
-                    },
+
+                  FadeSlideIn(
+                    delay: const Duration(milliseconds: 700),
+                    child: GradientButton(
+                      label: isPaid ? l10n.goToDashboard : l10n.retry,
+                      icon: isPaid ? Icons.dashboard : Icons.refresh,
+                      onPressed: () {
+                        if (isPaid) {
+                          context.go('/client');
+                        } else {
+                          context.pop();
+                        }
+                      },
+                    ),
                   ),
                 ],
               ),

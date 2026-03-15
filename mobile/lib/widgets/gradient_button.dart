@@ -21,8 +21,25 @@ class GradientButton extends StatefulWidget {
   State<GradientButton> createState() => _GradientButtonState();
 }
 
-class _GradientButtonState extends State<GradientButton> {
+class _GradientButtonState extends State<GradientButton>
+    with SingleTickerProviderStateMixin {
   bool _pressed = false;
+  late AnimationController _shimmerController;
+
+  @override
+  void initState() {
+    super.initState();
+    _shimmerController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2500),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _shimmerController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -62,35 +79,67 @@ class _GradientButtonState extends State<GradientButton> {
                   ]
                 : null,
           ),
-          child: Center(
-            child: widget.isLoading
-                ? const SizedBox(
-                    width: 22,
-                    height: 22,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2.5,
-                      valueColor: AlwaysStoppedAnimation(Colors.white),
+          child: Stack(
+            children: [
+              // Shimmer sweep overlay
+              if (enabled)
+                Positioned.fill(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(14),
+                    child: AnimatedBuilder(
+                      animation: _shimmerController,
+                      builder: (context, _) {
+                        final value = _shimmerController.value * 4 - 2;
+                        return Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment(value - 1, 0),
+                              end: Alignment(value + 1, 0),
+                              colors: [
+                                Colors.transparent,
+                                Colors.white.withValues(alpha: 0.12),
+                                Colors.transparent,
+                              ],
+                              stops: const [0.0, 0.5, 1.0],
+                            ),
+                          ),
+                        );
+                      },
                     ),
-                  )
-                : Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (widget.icon != null) ...[
-                        Icon(widget.icon, color: Colors.white, size: 20),
-                        const SizedBox(width: 8),
-                      ],
-                      Text(
-                        widget.label,
-                        style: TextStyle(
-                          color: enabled
-                              ? Colors.white
-                              : AppColors.textMuted,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
                   ),
+                ),
+              // Content
+              Center(
+                child: widget.isLoading
+                    ? const SizedBox(
+                        width: 22,
+                        height: 22,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.5,
+                          valueColor: AlwaysStoppedAnimation(Colors.white),
+                        ),
+                      )
+                    : Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (widget.icon != null) ...[
+                            Icon(widget.icon, color: Colors.white, size: 20),
+                            const SizedBox(width: 8),
+                          ],
+                          Text(
+                            widget.label,
+                            style: TextStyle(
+                              color: enabled
+                                  ? Colors.white
+                                  : AppColors.textMuted,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ],
+                      ),
+              ),
+            ],
           ),
         ),
       ),

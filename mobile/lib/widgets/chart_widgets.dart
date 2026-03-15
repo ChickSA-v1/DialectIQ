@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../app/theme.dart';
+import 'fade_slide_in.dart';
 
 class BreakdownPieChart extends StatelessWidget {
   final String title;
@@ -55,7 +56,9 @@ class BreakdownPieChart extends StatelessWidget {
       );
     }).toList();
 
-    return ClipRRect(
+    return FadeSlideIn(
+      duration: const Duration(milliseconds: 800),
+      child: ClipRRect(
       borderRadius: BorderRadius.circular(20),
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
@@ -82,6 +85,8 @@ class BreakdownPieChart extends StatelessWidget {
                     centerSpaceRadius: 30,
                     sectionsSpace: 2,
                   ),
+                  swapAnimationDuration: const Duration(milliseconds: 800),
+                  swapAnimationCurve: Curves.easeOutCubic,
                 ),
               ),
               const SizedBox(height: 12),
@@ -122,6 +127,7 @@ class BreakdownPieChart extends StatelessWidget {
           ),
         ),
       ),
+    ),
     );
   }
 }

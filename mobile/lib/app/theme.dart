@@ -2,6 +2,8 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../widgets/animated_glass_background.dart';
+
 /// DialectIQ Glassmorphism Design System
 class AppColors {
   // ── Background gradient ──
@@ -115,10 +117,7 @@ class GlassScaffold extends StatelessWidget {
       backgroundColor: AppColors.bgStart,
       appBar: appBar,
       floatingActionButton: floatingActionButton,
-      body: Container(
-        decoration: const BoxDecoration(gradient: AppColors.bgGradient),
-        child: child,
-      ),
+      body: AnimatedGlassBackground(child: child),
     );
   }
 }

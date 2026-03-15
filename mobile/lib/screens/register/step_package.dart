@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:dialectiq/l10n/app_localizations.dart';
 import '../../app/theme.dart';
 import '../../core/constants.dart';
+import '../../widgets/fade_slide_in.dart';
 
 class StepPackage extends StatelessWidget {
   final String selectedPackage;
@@ -55,7 +56,9 @@ class StepPackage extends StatelessWidget {
         final pkg = packages[index];
         final isSelected = pkg.key == selectedPackage;
 
-        return GestureDetector(
+        return FadeSlideIn(
+          delay: Duration(milliseconds: index * 150),
+          child: GestureDetector(
           onTap: () => onSelect(pkg.key),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
@@ -151,6 +154,7 @@ class StepPackage extends StatelessWidget {
               ),
             ),
           ),
+        ),
         );
       },
     );

@@ -5,6 +5,7 @@ import 'package:dialectiq/l10n/app_localizations.dart';
 
 import '../../app/theme.dart';
 import '../../repositories/auth_repo.dart';
+import '../../widgets/animated_glass_background.dart';
 import '../../widgets/locale_switcher.dart';
 import 'step_business.dart';
 import 'step_package.dart';
@@ -139,8 +140,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           ),
         ],
       ),
-      body: Container(
-        decoration: const BoxDecoration(gradient: AppColors.bgGradient),
+      body: AnimatedGlassBackground(
         child: Column(
           children: [
             // Step indicator

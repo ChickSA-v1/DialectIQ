@@ -134,28 +134,41 @@ class _ReviewCardState extends State<ReviewCard> {
                       ],
                     ),
 
-                    // Expanded details
-                    if (_expanded) ...[
-                      const SizedBox(height: 14),
-                      Divider(color: Colors.white.withValues(alpha: 0.10)),
-                      const SizedBox(height: 10),
-                      if (r.translatedIntent != null) ...[
-                        _detailRow(l10n.translatedIntent, r.translatedIntent!),
-                        const SizedBox(height: 8),
-                      ],
-                      if (r.suggestedReply != null) ...[
-                        _detailRow(l10n.suggestedReply, r.suggestedReply!),
-                      ],
-                    ],
+                    // Expanded details with smooth animation
+                    AnimatedCrossFade(
+                      firstChild: const SizedBox.shrink(),
+                      secondChild: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 14),
+                          Divider(color: Colors.white.withValues(alpha: 0.10)),
+                          const SizedBox(height: 10),
+                          if (r.translatedIntent != null) ...[
+                            _detailRow(
+                                l10n.translatedIntent, r.translatedIntent!),
+                            const SizedBox(height: 8),
+                          ],
+                          if (r.suggestedReply != null)
+                            _detailRow(l10n.suggestedReply, r.suggestedReply!),
+                        ],
+                      ),
+                      crossFadeState: _expanded
+                          ? CrossFadeState.showSecond
+                          : CrossFadeState.showFirst,
+                      duration: const Duration(milliseconds: 300),
+                      sizeCurve: Curves.easeInOut,
+                    ),
 
-                    // Expand indicator
+                    // Expand indicator with rotation
                     Center(
-                      child: Icon(
-                        _expanded
-                            ? Icons.keyboard_arrow_up
-                            : Icons.keyboard_arrow_down,
-                        color: AppColors.textMuted,
-                        size: 20,
+                      child: AnimatedRotation(
+                        turns: _expanded ? 0.5 : 0.0,
+                        duration: const Duration(milliseconds: 300),
+                        child: const Icon(
+                          Icons.keyboard_arrow_down,
+                          color: AppColors.textMuted,
+                          size: 20,
+                        ),
                       ),
                     ),
                   ],

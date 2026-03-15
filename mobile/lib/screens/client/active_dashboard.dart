@@ -11,6 +11,8 @@ import '../../providers/auth_provider.dart';
 import '../../providers/profile_provider.dart';
 import '../../providers/dashboard_provider.dart';
 import '../../repositories/tenant_repo.dart';
+import '../../widgets/animated_glass_background.dart';
+import '../../widgets/fade_slide_in.dart';
 import '../../widgets/stat_card.dart';
 import '../../widgets/review_card.dart';
 import '../../widgets/chart_widgets.dart';
@@ -332,8 +334,7 @@ class _ActiveDashboardState extends ConsumerState<ActiveDashboard> {
           ),
         ],
       ),
-      body: Container(
-        decoration: const BoxDecoration(gradient: AppColors.bgGradient),
+      body: AnimatedGlassBackground(
         child: RefreshIndicator(
           color: AppColors.accentStart,
           backgroundColor: AppColors.bgEnd,
@@ -349,7 +350,8 @@ class _ActiveDashboardState extends ConsumerState<ActiveDashboard> {
               children: [
                 // Subscription info — glass card with accent gradient
                 if (tenant != null)
-                  ClipRRect(
+                  FadeSlideIn(
+                    child: ClipRRect(
                     borderRadius: BorderRadius.circular(20),
                     child: BackdropFilter(
                       filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
@@ -501,6 +503,7 @@ class _ActiveDashboardState extends ConsumerState<ActiveDashboard> {
                         ),
                       ),
                     ),
+                  ),
                   ),
 
                 // Place IDs + Fetch Reviews + Add Business
@@ -687,26 +690,35 @@ class _ActiveDashboardState extends ConsumerState<ActiveDashboard> {
                     crossAxisSpacing: 12,
                     childAspectRatio: 1.1,
                     children: [
-                      StatCard(
-                        label: l10n.totalReviews,
-                        value: '${stats.totalReviews}',
-                        icon: Icons.rate_review,
-                        iconColor: AppColors.accentStart,
+                      FadeSlideIn(
+                        delay: const Duration(milliseconds: 0),
+                        child: StatCard(
+                          label: l10n.totalReviews,
+                          value: '${stats.totalReviews}',
+                          icon: Icons.rate_review,
+                          iconColor: AppColors.accentStart,
+                        ),
                       ),
-                      StatCard(
-                        label: l10n.avgSentiment,
-                        value: stats.avgSentiment != null
-                            ? '${stats.avgSentiment!.toStringAsFixed(1)}/10'
-                            : 'N/A',
-                        icon: Icons.sentiment_satisfied,
-                        iconColor: AppColors.success,
+                      FadeSlideIn(
+                        delay: const Duration(milliseconds: 100),
+                        child: StatCard(
+                          label: l10n.avgSentiment,
+                          value: stats.avgSentiment != null
+                              ? '${stats.avgSentiment!.toStringAsFixed(1)}/10'
+                              : 'N/A',
+                          icon: Icons.sentiment_satisfied,
+                          iconColor: AppColors.success,
+                        ),
                       ),
-                      StatCard(
-                        label: l10n.avgRating,
-                        value: stats.avgRating?.toStringAsFixed(1) ??
-                            'N/A',
-                        icon: Icons.star,
-                        iconColor: AppColors.warning,
+                      FadeSlideIn(
+                        delay: const Duration(milliseconds: 200),
+                        child: StatCard(
+                          label: l10n.avgRating,
+                          value: stats.avgRating?.toStringAsFixed(1) ??
+                              'N/A',
+                          icon: Icons.star,
+                          iconColor: AppColors.warning,
+                        ),
                       ),
                     ],
                   ),
@@ -817,7 +829,14 @@ class _ActiveDashboardState extends ConsumerState<ActiveDashboard> {
                 else
                   Column(
                     children: reviews
-                        .map((r) => ReviewCard(review: r))
+                        .asMap()
+                        .entries
+                        .map((entry) => FadeSlideIn(
+                              delay: Duration(
+                                  milliseconds: entry.key * 80),
+                              child: ReviewCard(
+                                  review: entry.value),
+                            ))
                         .toList(),
                   ),
 

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../app/theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/profile_provider.dart';
+import '../../widgets/animated_glass_background.dart';
 import 'pending_view.dart';
 import 'rejected_view.dart';
 import 'payment_view.dart';
@@ -33,8 +34,7 @@ class _ClientScreenState extends ConsumerState<ClientScreen> {
     if (auth.isLoading) {
       return Scaffold(
         backgroundColor: AppColors.bgStart,
-        body: Container(
-          decoration: const BoxDecoration(gradient: AppColors.bgGradient),
+        body: AnimatedGlassBackground(
           child: Center(
             child: CircularProgressIndicator(
               valueColor: AlwaysStoppedAnimation(

@@ -10,6 +10,31 @@ import '../screens/client/client_screen.dart';
 import '../screens/settings_screen.dart';
 import '../screens/payment_result_screen.dart';
 
+CustomTransitionPage<void> _fadeScalePage({
+  required LocalKey key,
+  required Widget child,
+}) {
+  return CustomTransitionPage<void>(
+    key: key,
+    child: child,
+    transitionDuration: const Duration(milliseconds: 400),
+    reverseTransitionDuration: const Duration(milliseconds: 300),
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      final curved = CurvedAnimation(
+        parent: animation,
+        curve: Curves.easeOutCubic,
+      );
+      return FadeTransition(
+        opacity: curved,
+        child: ScaleTransition(
+          scale: Tween<double>(begin: 0.95, end: 1.0).animate(curved),
+          child: child,
+        ),
+      );
+    },
+  );
+}
+
 final routerProvider = Provider<GoRouter>((ref) {
   // Use ref.read so the GoRouter is created ONCE.
   // GoRouter reacts to changes via its own refreshListenable.
@@ -47,29 +72,47 @@ final routerProvider = Provider<GoRouter>((ref) {
     routes: [
       GoRoute(
         path: '/',
-        builder: (context, state) => const SplashScreen(),
+        pageBuilder: (context, state) => _fadeScalePage(
+          key: state.pageKey,
+          child: const SplashScreen(),
+        ),
       ),
       GoRoute(
         path: '/login',
-        builder: (context, state) => const LoginScreen(),
+        pageBuilder: (context, state) => _fadeScalePage(
+          key: state.pageKey,
+          child: const LoginScreen(),
+        ),
       ),
       GoRoute(
         path: '/register',
-        builder: (context, state) => const RegisterScreen(),
+        pageBuilder: (context, state) => _fadeScalePage(
+          key: state.pageKey,
+          child: const RegisterScreen(),
+        ),
       ),
       GoRoute(
         path: '/client',
-        builder: (context, state) => const ClientScreen(),
+        pageBuilder: (context, state) => _fadeScalePage(
+          key: state.pageKey,
+          child: const ClientScreen(),
+        ),
       ),
       GoRoute(
         path: '/settings',
-        builder: (context, state) => const SettingsScreen(),
+        pageBuilder: (context, state) => _fadeScalePage(
+          key: state.pageKey,
+          child: const SettingsScreen(),
+        ),
       ),
       GoRoute(
         path: '/payment-result',
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           final invoiceId = state.uri.queryParameters['invoice_id'] ?? '';
-          return PaymentResultScreen(invoiceId: invoiceId);
+          return _fadeScalePage(
+            key: state.pageKey,
+            child: PaymentResultScreen(invoiceId: invoiceId),
+          );
         },
       ),
     ],

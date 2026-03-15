@@ -6,6 +6,7 @@ import 'package:dialectiq/l10n/app_localizations.dart';
 
 import '../../app/theme.dart';
 import '../../core/constants.dart';
+import '../../widgets/fade_slide_in.dart';
 import '../../widgets/gradient_button.dart';
 
 class StepDocuments extends StatelessWidget {
@@ -49,30 +50,38 @@ class StepDocuments extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Commercial registration
-          _FileUploadCard(
-            title: l10n.uploadCommercialReg,
-            file: commercialRegFile,
-            hint: l10n.allowedFormats,
-            onTap: () => _pickFile(onCommercialRegSelected),
+          FadeSlideIn(
+            child: _FileUploadCard(
+              title: l10n.uploadCommercialReg,
+              file: commercialRegFile,
+              hint: l10n.allowedFormats,
+              onTap: () => _pickFile(onCommercialRegSelected),
+            ),
           ),
 
           const SizedBox(height: 20),
 
           // National ID
-          _FileUploadCard(
-            title: l10n.uploadNationalId,
-            file: nationalIdFile,
-            hint: l10n.allowedFormats,
-            onTap: () => _pickFile(onNationalIdSelected),
+          FadeSlideIn(
+            delay: const Duration(milliseconds: 150),
+            child: _FileUploadCard(
+              title: l10n.uploadNationalId,
+              file: nationalIdFile,
+              hint: l10n.allowedFormats,
+              onTap: () => _pickFile(onNationalIdSelected),
+            ),
           ),
 
           const SizedBox(height: 32),
 
-          GradientButton(
-            label: l10n.submit,
-            icon: Icons.check,
-            isLoading: isSubmitting,
-            onPressed: isSubmitting ? null : onSubmit,
+          FadeSlideIn(
+            delay: const Duration(milliseconds: 300),
+            child: GradientButton(
+              label: l10n.submit,
+              icon: Icons.check,
+              isLoading: isSubmitting,
+              onPressed: isSubmitting ? null : onSubmit,
+            ),
           ),
         ],
       ),

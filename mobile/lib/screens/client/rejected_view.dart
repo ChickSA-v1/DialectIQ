@@ -3,6 +3,9 @@ import 'package:go_router/go_router.dart';
 import 'package:dialectiq/l10n/app_localizations.dart';
 
 import '../../app/theme.dart';
+import '../../widgets/animated_glass_background.dart';
+import '../../widgets/breathing_glow.dart';
+import '../../widgets/fade_slide_in.dart';
 import '../../widgets/glass_card.dart';
 import '../../widgets/locale_switcher.dart';
 
@@ -30,32 +33,32 @@ class RejectedView extends StatelessWidget {
           ),
         ],
       ),
-      body: Container(
-        decoration: const BoxDecoration(gradient: AppColors.bgGradient),
+      body: AnimatedGlassBackground(
         child: Center(
           child: Padding(
             padding: const EdgeInsets.all(32),
-            child: GlassCard(
+            child: FadeSlideIn(
+              delay: const Duration(milliseconds: 200),
+              child: GlassCard(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Container(
-                    width: 76,
-                    height: 76,
-                    decoration: BoxDecoration(
-                      color: AppColors.error.withValues(alpha: 0.12),
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.error.withValues(alpha: 0.20),
-                          blurRadius: 20,
-                        ),
-                      ],
-                    ),
-                    child: const Icon(
-                      Icons.cancel_rounded,
-                      size: 42,
-                      color: AppColors.error,
+                  BreathingGlow(
+                    glowColor: AppColors.error,
+                    minBlur: 12,
+                    maxBlur: 28,
+                    child: Container(
+                      width: 76,
+                      height: 76,
+                      decoration: BoxDecoration(
+                        color: AppColors.error.withValues(alpha: 0.12),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.cancel_rounded,
+                        size: 42,
+                        color: AppColors.error,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -109,6 +112,7 @@ class RejectedView extends StatelessWidget {
                   ),
                 ],
               ),
+            ),
             ),
           ),
         ),

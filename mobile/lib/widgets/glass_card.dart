@@ -17,7 +17,7 @@ enum GlassVariant {
   dark,
 }
 
-class GlassCard extends StatelessWidget {
+class GlassCard extends StatefulWidget {
   final Widget child;
   final EdgeInsetsGeometry? padding;
   final double? width;
@@ -39,12 +39,19 @@ class GlassCard extends StatelessWidget {
     this.onTap,
   });
 
+  @override
+  State<GlassCard> createState() => _GlassCardState();
+}
+
+class _GlassCardState extends State<GlassCard> {
+  bool _pressed = false;
+
   BoxDecoration _decoration() {
-    switch (variant) {
+    switch (widget.variant) {
       case GlassVariant.standard:
         return BoxDecoration(
           color: Colors.white.withValues(alpha: 0.08),
-          borderRadius: BorderRadius.circular(borderRadius),
+          borderRadius: BorderRadius.circular(widget.borderRadius),
           border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
           boxShadow: [
             BoxShadow(
@@ -57,7 +64,7 @@ class GlassCard extends StatelessWidget {
       case GlassVariant.medium:
         return BoxDecoration(
           color: Colors.white.withValues(alpha: 0.12),
-          borderRadius: BorderRadius.circular(borderRadius),
+          borderRadius: BorderRadius.circular(widget.borderRadius),
           border: Border.all(color: Colors.white.withValues(alpha: 0.20)),
           boxShadow: [
             BoxShadow(
@@ -77,7 +84,7 @@ class GlassCard extends StatelessWidget {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
-          borderRadius: BorderRadius.circular(borderRadius),
+          borderRadius: BorderRadius.circular(widget.borderRadius),
           border:
               Border.all(color: AppColors.accentStart.withValues(alpha: 0.30)),
           boxShadow: [
@@ -91,7 +98,7 @@ class GlassCard extends StatelessWidget {
       case GlassVariant.dark:
         return BoxDecoration(
           color: Colors.white.withValues(alpha: 0.04),
-          borderRadius: BorderRadius.circular(borderRadius),
+          borderRadius: BorderRadius.circular(widget.borderRadius),
           border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
         );
     }
@@ -99,21 +106,41 @@ class GlassCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(borderRadius),
+    final card = ClipRRect(
+      borderRadius: BorderRadius.circular(widget.borderRadius),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
+        filter: ImageFilter.blur(sigmaX: widget.blur, sigmaY: widget.blur),
         child: GestureDetector(
-          onTap: onTap,
+          onTap: widget.onTap,
+          onTapDown: widget.onTap != null
+              ? (_) => setState(() => _pressed = true)
+              : null,
+          onTapUp: widget.onTap != null
+              ? (_) => setState(() => _pressed = false)
+              : null,
+          onTapCancel: widget.onTap != null
+              ? () => setState(() => _pressed = false)
+              : null,
           child: Container(
-            width: width,
-            height: height,
-            padding: padding ?? const EdgeInsets.all(20),
+            width: widget.width,
+            height: widget.height,
+            padding: widget.padding ?? const EdgeInsets.all(20),
             decoration: _decoration(),
-            child: child,
+            child: widget.child,
           ),
         ),
       ),
     );
+
+    if (widget.onTap != null) {
+      return AnimatedScale(
+        scale: _pressed ? 0.98 : 1.0,
+        duration: const Duration(milliseconds: 100),
+        curve: Curves.easeOut,
+        child: card,
+      );
+    }
+
+    return card;
   }
 }
