@@ -19,14 +19,16 @@ class AuthRepository {
   Future<Map<String, dynamic>> register({
     required String nameAr,
     String? nameEn,
+    required String fullName,
     required String email,
     required String phone,
     required String password,
     required String package,
   }) async {
     final response = await _dio.post('/api/v1/auth/register', data: {
-      'name_ar': nameAr,
-      'name_en': nameEn,
+      'business_name_ar': nameAr,
+      'business_name_en': nameEn,
+      'full_name': fullName,
       'email': email,
       'phone': phone,
       'password': password,
@@ -44,9 +46,10 @@ class AuthRepository {
     final formData = FormData.fromMap({
       'file': await MultipartFile.fromFile(file.path, filename: file.path.split('/').last),
       'doc_type': docType,
+      'tenant_id': tenantId,
     });
     final response = await _dio.post(
-      '/api/v1/auth/tenants/$tenantId/documents',
+      '/api/v1/auth/upload-document',
       data: formData,
     );
     return response.data as Map<String, dynamic>;

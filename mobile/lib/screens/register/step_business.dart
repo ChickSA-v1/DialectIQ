@@ -7,6 +7,7 @@ import '../../widgets/gradient_button.dart';
 class StepBusiness extends StatefulWidget {
   final String nameAr;
   final String nameEn;
+  final String fullName;
   final String email;
   final String phone;
   final String password;
@@ -16,6 +17,7 @@ class StepBusiness extends StatefulWidget {
     super.key,
     required this.nameAr,
     required this.nameEn,
+    required this.fullName,
     required this.email,
     required this.phone,
     required this.password,
@@ -30,6 +32,7 @@ class _StepBusinessState extends State<StepBusiness> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _nameArCtrl;
   late final TextEditingController _nameEnCtrl;
+  late final TextEditingController _fullNameCtrl;
   late final TextEditingController _emailCtrl;
   late final TextEditingController _phoneCtrl;
   late final TextEditingController _passwordCtrl;
@@ -40,6 +43,7 @@ class _StepBusinessState extends State<StepBusiness> {
     super.initState();
     _nameArCtrl = TextEditingController(text: widget.nameAr);
     _nameEnCtrl = TextEditingController(text: widget.nameEn);
+    _fullNameCtrl = TextEditingController(text: widget.fullName);
     _emailCtrl = TextEditingController(text: widget.email);
     _phoneCtrl = TextEditingController(text: widget.phone);
     _passwordCtrl = TextEditingController(text: widget.password);
@@ -50,6 +54,7 @@ class _StepBusinessState extends State<StepBusiness> {
   void dispose() {
     _nameArCtrl.dispose();
     _nameEnCtrl.dispose();
+    _fullNameCtrl.dispose();
     _emailCtrl.dispose();
     _phoneCtrl.dispose();
     _passwordCtrl.dispose();
@@ -96,6 +101,20 @@ class _StepBusinessState extends State<StepBusiness> {
             FadeSlideIn(
               delay: const Duration(milliseconds: 160),
               child: TextFormField(
+                controller: _fullNameCtrl,
+                style: const TextStyle(color: AppColors.textPrimary),
+                decoration: InputDecoration(
+                  labelText: l10n.ownerName,
+                  prefixIcon: const Icon(Icons.person),
+                ),
+                validator: (v) =>
+                    v == null || v.trim().isEmpty ? l10n.requiredField : null,
+              ),
+            ),
+            const SizedBox(height: 16),
+            FadeSlideIn(
+              delay: const Duration(milliseconds: 240),
+              child: TextFormField(
                 controller: _emailCtrl,
                 keyboardType: TextInputType.emailAddress,
                 style: const TextStyle(color: AppColors.textPrimary),
@@ -112,7 +131,7 @@ class _StepBusinessState extends State<StepBusiness> {
             ),
             const SizedBox(height: 16),
             FadeSlideIn(
-              delay: const Duration(milliseconds: 240),
+              delay: const Duration(milliseconds: 320),
               child: TextFormField(
                 controller: _phoneCtrl,
                 keyboardType: TextInputType.phone,
@@ -127,7 +146,7 @@ class _StepBusinessState extends State<StepBusiness> {
             ),
             const SizedBox(height: 16),
             FadeSlideIn(
-              delay: const Duration(milliseconds: 320),
+              delay: const Duration(milliseconds: 400),
               child: TextFormField(
                 controller: _passwordCtrl,
                 obscureText: true,
@@ -138,14 +157,14 @@ class _StepBusinessState extends State<StepBusiness> {
                 ),
                 validator: (v) {
                   if (v == null || v.isEmpty) return l10n.requiredField;
-                  if (v.length < 6) return 'Min 6 characters';
+                  if (v.length < 8) return 'Min 8 characters';
                   return null;
                 },
               ),
             ),
             const SizedBox(height: 16),
             FadeSlideIn(
-              delay: const Duration(milliseconds: 400),
+              delay: const Duration(milliseconds: 480),
               child: TextFormField(
                 controller: _confirmCtrl,
                 obscureText: true,
@@ -162,7 +181,7 @@ class _StepBusinessState extends State<StepBusiness> {
             ),
             const SizedBox(height: 28),
             FadeSlideIn(
-              delay: const Duration(milliseconds: 480),
+              delay: const Duration(milliseconds: 560),
               child: GradientButton(
               label: l10n.next,
               icon: Icons.arrow_forward,
@@ -171,6 +190,7 @@ class _StepBusinessState extends State<StepBusiness> {
                   widget.onNext({
                     'nameAr': _nameArCtrl.text.trim(),
                     'nameEn': _nameEnCtrl.text.trim(),
+                    'fullName': _fullNameCtrl.text.trim(),
                     'email': _emailCtrl.text.trim(),
                     'phone': _phoneCtrl.text.trim(),
                     'password': _passwordCtrl.text,

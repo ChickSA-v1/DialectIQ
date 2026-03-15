@@ -26,6 +26,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   // Form data
   String nameAr = '';
   String nameEn = '';
+  String fullName = '';
   String email = '';
   String phone = '';
   String password = '';
@@ -69,6 +70,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       final result = await repo.register(
         nameAr: nameAr,
         nameEn: nameEn.isNotEmpty ? nameEn : null,
+        fullName: fullName,
         email: email,
         phone: phone,
         password: password,
@@ -90,7 +92,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           await repo.uploadDocument(
             tenantId: tenantId!,
             file: nationalIdFile!,
-            docType: 'national_id',
+            docType: 'owner_id',
           );
         }
       }
@@ -215,6 +217,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   StepBusiness(
                     nameAr: nameAr,
                     nameEn: nameEn,
+                    fullName: fullName,
                     email: email,
                     phone: phone,
                     password: password,
@@ -222,6 +225,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       setState(() {
                         nameAr = data['nameAr']!;
                         nameEn = data['nameEn'] ?? '';
+                        fullName = data['fullName']!;
                         email = data['email']!;
                         phone = data['phone']!;
                         password = data['password']!;
