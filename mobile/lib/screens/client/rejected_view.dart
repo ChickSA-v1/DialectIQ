@@ -16,7 +16,11 @@ class RejectedView extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
+      backgroundColor: AppColors.bgStart,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
         title: Text(l10n.appName),
         actions: [
           const LocaleSwitcher(),
@@ -26,76 +30,85 @@ class RejectedView extends StatelessWidget {
           ),
         ],
       ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(32),
-          child: GlassCard(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 72,
-                  height: 72,
-                  decoration: BoxDecoration(
-                    color: AppColors.error.withValues(alpha: 0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.cancel_rounded,
-                    size: 40,
-                    color: AppColors.error,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Text(
-                  l10n.statusRejected,
-                  style: const TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  l10n.statusRejectedMsg,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: AppColors.textSecondary,
-                    height: 1.6,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                if (reason != null) ...[
-                  const SizedBox(height: 16),
+      body: Container(
+        decoration: const BoxDecoration(gradient: AppColors.bgGradient),
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(32),
+            child: GlassCard(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
                   Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(14),
+                    width: 76,
+                    height: 76,
                     decoration: BoxDecoration(
-                      color: AppColors.error.withValues(alpha: 0.05),
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color: AppColors.error.withValues(alpha: 0.2),
+                      color: AppColors.error.withValues(alpha: 0.12),
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.error.withValues(alpha: 0.20),
+                          blurRadius: 20,
+                        ),
+                      ],
+                    ),
+                    child: const Icon(
+                      Icons.cancel_rounded,
+                      size: 42,
+                      color: AppColors.error,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    l10n.statusRejected,
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    l10n.statusRejectedMsg,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: AppColors.textSecondary,
+                      height: 1.6,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  if (reason != null) ...[
+                    const SizedBox(height: 16),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: AppColors.error.withValues(alpha: 0.10),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: AppColors.error.withValues(alpha: 0.25),
+                        ),
+                      ),
+                      child: Text(
+                        l10n.rejectionReason(reason!),
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: AppColors.error,
+                          height: 1.5,
+                        ),
                       ),
                     ),
-                    child: Text(
-                      l10n.rejectionReason(reason!),
-                      style: const TextStyle(
-                        fontSize: 13,
-                        color: AppColors.error,
-                        height: 1.5,
-                      ),
-                    ),
+                  ],
+                  const SizedBox(height: 24),
+                  OutlinedButton.icon(
+                    onPressed: () {
+                      // TODO: Open email or support link
+                    },
+                    icon: const Icon(Icons.support_agent),
+                    label: Text(l10n.contactSupport),
                   ),
                 ],
-                const SizedBox(height: 24),
-                OutlinedButton.icon(
-                  onPressed: () {
-                    // TODO: Open email or support link
-                  },
-                  icon: const Icon(Icons.support_agent),
-                  label: Text(l10n.contactSupport),
-                ),
-              ],
+              ),
             ),
           ),
         ),

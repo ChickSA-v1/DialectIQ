@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:dialectiq/l10n/app_localizations.dart';
@@ -95,60 +96,67 @@ class _FileUploadCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final hasFile = file != null;
 
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-            color: file != null ? AppColors.success : AppColors.border,
-            style: file != null ? BorderStyle.solid : BorderStyle.none,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: hasFile
+                  ? AppColors.success.withValues(alpha: 0.08)
+                  : Colors.white.withValues(alpha: 0.06),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: hasFile
+                    ? AppColors.success.withValues(alpha: 0.30)
+                    : Colors.white.withValues(alpha: 0.15),
+                width: hasFile ? 2 : 1,
+              ),
+            ),
+            child: Column(
+              children: [
+                Icon(
+                  hasFile ? Icons.check_circle : Icons.cloud_upload_outlined,
+                  size: 40,
+                  color: hasFile ? AppColors.success : AppColors.textMuted,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 15,
+                    color: AppColors.textPrimary,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  hasFile
+                      ? l10n.fileSelected(file!.path.split('/').last)
+                      : l10n.selectFile,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color:
+                        hasFile ? AppColors.success : AppColors.textSecondary,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  hint,
+                  style: const TextStyle(
+                      fontSize: 11, color: AppColors.textMuted),
+                ),
+              ],
+            ),
           ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.03),
-              blurRadius: 8,
-            ),
-          ],
-        ),
-        child: Column(
-          children: [
-            Icon(
-              file != null ? Icons.check_circle : Icons.cloud_upload_outlined,
-              size: 40,
-              color: file != null ? AppColors.success : AppColors.textMuted,
-            ),
-            const SizedBox(height: 12),
-            Text(
-              title,
-              style: const TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 15,
-                color: AppColors.textPrimary,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 6),
-            Text(
-              file != null
-                  ? l10n.fileSelected(file!.path.split('/').last)
-                  : l10n.selectFile,
-              style: TextStyle(
-                fontSize: 12,
-                color: file != null ? AppColors.success : AppColors.textSecondary,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              hint,
-              style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
-            ),
-          ],
         ),
       ),
     );

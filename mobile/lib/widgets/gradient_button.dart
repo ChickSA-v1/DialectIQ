@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../app/theme.dart';
 
-class GradientButton extends StatelessWidget {
+class GradientButton extends StatefulWidget {
   final String label;
   final VoidCallback? onPressed;
   final bool isLoading;
@@ -18,31 +18,52 @@ class GradientButton extends StatelessWidget {
   });
 
   @override
+  State<GradientButton> createState() => _GradientButtonState();
+}
+
+class _GradientButtonState extends State<GradientButton> {
+  bool _pressed = false;
+
+  @override
   Widget build(BuildContext context) {
-    return Container(
-      width: width ?? double.infinity,
-      height: 52,
-      decoration: BoxDecoration(
-        gradient: onPressed != null ? AppColors.gradient : null,
-        color: onPressed == null ? Colors.grey.shade300 : null,
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: onPressed != null
-            ? [
-                BoxShadow(
-                  color: AppColors.primary.withValues(alpha: 0.3),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
-                ),
-              ]
-            : null,
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: isLoading ? null : onPressed,
-          borderRadius: BorderRadius.circular(14),
+    final enabled = widget.onPressed != null && !widget.isLoading;
+
+    return GestureDetector(
+      onTapDown: enabled ? (_) => setState(() => _pressed = true) : null,
+      onTapUp: enabled
+          ? (_) {
+              setState(() => _pressed = false);
+              widget.onPressed?.call();
+            }
+          : null,
+      onTapCancel: () => setState(() => _pressed = false),
+      child: AnimatedScale(
+        scale: _pressed ? 0.96 : 1.0,
+        duration: const Duration(milliseconds: 120),
+        child: Container(
+          width: widget.width ?? double.infinity,
+          height: 52,
+          decoration: BoxDecoration(
+            gradient: enabled ? AppColors.gradient : null,
+            color: enabled ? null : Colors.white.withValues(alpha: 0.06),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: enabled
+                  ? Colors.white.withValues(alpha: 0.20)
+                  : Colors.white.withValues(alpha: 0.08),
+            ),
+            boxShadow: enabled
+                ? [
+                    BoxShadow(
+                      color: AppColors.accentStart.withValues(alpha: 0.35),
+                      blurRadius: 20,
+                      offset: const Offset(0, 6),
+                    ),
+                  ]
+                : null,
+          ),
           child: Center(
-            child: isLoading
+            child: widget.isLoading
                 ? const SizedBox(
                     width: 22,
                     height: 22,
@@ -54,14 +75,16 @@ class GradientButton extends StatelessWidget {
                 : Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      if (icon != null) ...[
-                        Icon(icon, color: Colors.white, size: 20),
+                      if (widget.icon != null) ...[
+                        Icon(widget.icon, color: Colors.white, size: 20),
                         const SizedBox(width: 8),
                       ],
                       Text(
-                        label,
-                        style: const TextStyle(
-                          color: Colors.white,
+                        widget.label,
+                        style: TextStyle(
+                          color: enabled
+                              ? Colors.white
+                              : AppColors.textMuted,
                           fontWeight: FontWeight.w600,
                           fontSize: 16,
                         ),

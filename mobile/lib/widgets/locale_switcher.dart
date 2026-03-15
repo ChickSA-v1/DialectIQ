@@ -14,12 +14,8 @@ class LocaleSwitcher extends ConsumerWidget {
     return GestureDetector(
       onTap: () => ref.read(localeProvider.notifier).toggle(),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          border: Border.all(color: AppColors.border),
-          borderRadius: BorderRadius.circular(20),
-          color: Colors.white,
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: AppColors.glassDecoration(radius: 24),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -27,7 +23,7 @@ class LocaleSwitcher extends ConsumerWidget {
               isArabic ? '🇺🇸' : '🇸🇦',
               style: const TextStyle(fontSize: 16),
             ),
-            const SizedBox(width: 6),
+            const SizedBox(width: 8),
             Text(
               isArabic ? 'EN' : 'عربي',
               style: const TextStyle(

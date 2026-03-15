@@ -120,7 +120,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     ];
 
     return Scaffold(
+      backgroundColor: AppColors.bgStart,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
         title: Text(l10n.register),
         leading: _currentStep > 0 && _currentStep < 3
             ? IconButton(
@@ -135,107 +139,119 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          // Step indicator
-          if (_currentStep < 3)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-              child: Row(
-                children: List.generate(4, (i) {
-                  final isActive = i <= _currentStep;
-                  return Expanded(
-                    child: Container(
-                      height: 4,
-                      margin: const EdgeInsets.symmetric(horizontal: 2),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(2),
-                        color: isActive
-                            ? AppColors.primary
-                            : AppColors.border,
+      body: Container(
+        decoration: const BoxDecoration(gradient: AppColors.bgGradient),
+        child: Column(
+          children: [
+            // Step indicator
+            if (_currentStep < 3)
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                child: Row(
+                  children: List.generate(4, (i) {
+                    final isActive = i <= _currentStep;
+                    return Expanded(
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        height: 4,
+                        margin: const EdgeInsets.symmetric(horizontal: 2),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(2),
+                          gradient: isActive ? AppColors.gradient : null,
+                          color: isActive
+                              ? null
+                              : Colors.white.withValues(alpha: 0.10),
+                        ),
                       ),
-                    ),
-                  );
-                }),
+                    );
+                  }),
+                ),
               ),
-            ),
-          if (_currentStep < 3)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Align(
-                alignment: AlignmentDirectional.centerStart,
-                child: Text(
-                  stepTitles[_currentStep],
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
+            if (_currentStep < 3)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: Text(
+                    stepTitles[_currentStep],
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
                   ),
                 ),
               ),
-            ),
 
-          // Error display
-          if (_error != null)
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: AppColors.error.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Text(
-                  _error!,
-                  style: const TextStyle(color: AppColors.error, fontSize: 13),
+            // Error display
+            if (_error != null)
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppColors.error.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: AppColors.error.withValues(alpha: 0.30),
+                    ),
+                  ),
+                  child: Text(
+                    _error!,
+                    style:
+                        const TextStyle(color: AppColors.error, fontSize: 13),
+                  ),
                 ),
               ),
-            ),
 
-          // Page view
-          Expanded(
-            child: PageView(
-              controller: _pageController,
-              physics: const NeverScrollableScrollPhysics(),
-              children: [
-                StepBusiness(
-                  nameAr: nameAr,
-                  nameEn: nameEn,
-                  email: email,
-                  phone: phone,
-                  password: password,
-                  onNext: (data) {
-                    setState(() {
-                      nameAr = data['nameAr']!;
-                      nameEn = data['nameEn'] ?? '';
-                      email = data['email']!;
-                      phone = data['phone']!;
-                      password = data['password']!;
-                    });
-                    _nextStep();
-                  },
-                ),
-                StepPackage(
-                  selectedPackage: selectedPackage,
-                  onSelect: (pkg) {
-                    setState(() => selectedPackage = pkg);
-                    _nextStep();
-                  },
-                ),
-                StepDocuments(
-                  commercialRegFile: commercialRegFile,
-                  nationalIdFile: nationalIdFile,
-                  isSubmitting: _isSubmitting,
-                  onCommercialRegSelected: (f) => setState(() => commercialRegFile = f),
-                  onNationalIdSelected: (f) => setState(() => nationalIdFile = f),
-                  onSubmit: _submitRegistration,
-                ),
-                const StepSuccess(),
-              ],
+            // Page view
+            Expanded(
+              child: PageView(
+                controller: _pageController,
+                physics: const NeverScrollableScrollPhysics(),
+                children: [
+                  StepBusiness(
+                    nameAr: nameAr,
+                    nameEn: nameEn,
+                    email: email,
+                    phone: phone,
+                    password: password,
+                    onNext: (data) {
+                      setState(() {
+                        nameAr = data['nameAr']!;
+                        nameEn = data['nameEn'] ?? '';
+                        email = data['email']!;
+                        phone = data['phone']!;
+                        password = data['password']!;
+                      });
+                      _nextStep();
+                    },
+                  ),
+                  StepPackage(
+                    selectedPackage: selectedPackage,
+                    onSelect: (pkg) {
+                      setState(() => selectedPackage = pkg);
+                      _nextStep();
+                    },
+                  ),
+                  StepDocuments(
+                    commercialRegFile: commercialRegFile,
+                    nationalIdFile: nationalIdFile,
+                    isSubmitting: _isSubmitting,
+                    onCommercialRegSelected: (f) =>
+                        setState(() => commercialRegFile = f),
+                    onNationalIdSelected: (f) =>
+                        setState(() => nationalIdFile = f),
+                    onSubmit: _submitRegistration,
+                  ),
+                  const StepSuccess(),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

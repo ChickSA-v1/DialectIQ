@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../app/theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/profile_provider.dart';
 import 'pending_view.dart';
@@ -30,8 +31,18 @@ class _ClientScreenState extends ConsumerState<ClientScreen> {
     final tenant = ref.watch(tenantProvider);
 
     if (auth.isLoading) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
+      return Scaffold(
+        backgroundColor: AppColors.bgStart,
+        body: Container(
+          decoration: const BoxDecoration(gradient: AppColors.bgGradient),
+          child: Center(
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation(
+                AppColors.accentStart.withValues(alpha: 0.7),
+              ),
+            ),
+          ),
+        ),
       );
     }
 
@@ -50,7 +61,8 @@ class _ClientScreenState extends ConsumerState<ClientScreen> {
     // approved but needs payment
     if (status == 'approved' ||
         (status == 'payment_pending') ||
-        (latestInvoice == 'pending' || latestInvoice == null && status != 'pending_review')) {
+        (latestInvoice == 'pending' ||
+            latestInvoice == null && status != 'pending_review')) {
       return const PaymentView();
     }
     // default: pending review

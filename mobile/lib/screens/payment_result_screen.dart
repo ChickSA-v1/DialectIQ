@@ -14,7 +14,8 @@ class PaymentResultScreen extends ConsumerStatefulWidget {
   const PaymentResultScreen({super.key, required this.invoiceId});
 
   @override
-  ConsumerState<PaymentResultScreen> createState() => _PaymentResultScreenState();
+  ConsumerState<PaymentResultScreen> createState() =>
+      _PaymentResultScreenState();
 }
 
 class _PaymentResultScreenState extends ConsumerState<PaymentResultScreen> {
@@ -36,68 +37,90 @@ class _PaymentResultScreenState extends ConsumerState<PaymentResultScreen> {
     final payment = ref.watch(paymentProvider);
 
     if (payment.isLoading) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
+      return Scaffold(
+        backgroundColor: AppColors.bgStart,
+        body: Container(
+          decoration: const BoxDecoration(gradient: AppColors.bgGradient),
+          child: Center(
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation(
+                AppColors.accentStart.withValues(alpha: 0.7),
+              ),
+            ),
+          ),
+        ),
       );
     }
 
     final isPaid = payment.status?.status == 'paid';
+    final statusColor = isPaid ? AppColors.success : AppColors.error;
 
     return Scaffold(
-      body: SafeArea(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(32),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 80,
-                  height: 80,
-                  decoration: BoxDecoration(
-                    color: (isPaid ? AppColors.success : AppColors.error)
-                        .withValues(alpha: 0.1),
-                    shape: BoxShape.circle,
+      backgroundColor: AppColors.bgStart,
+      body: Container(
+        decoration: const BoxDecoration(gradient: AppColors.bgGradient),
+        child: SafeArea(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(32),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 88,
+                    height: 88,
+                    decoration: BoxDecoration(
+                      color: statusColor.withValues(alpha: 0.12),
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: statusColor.withValues(alpha: 0.25),
+                          blurRadius: 28,
+                        ),
+                      ],
+                    ),
+                    child: Icon(
+                      isPaid ? Icons.check_circle : Icons.error,
+                      size: 52,
+                      color: statusColor,
+                    ),
                   ),
-                  child: Icon(
-                    isPaid ? Icons.check_circle : Icons.error,
-                    size: 48,
-                    color: isPaid ? AppColors.success : AppColors.error,
+                  const SizedBox(height: 28),
+                  Text(
+                    isPaid ? l10n.paymentSuccess : l10n.paymentFailed,
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
+                    textAlign: TextAlign.center,
                   ),
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  isPaid ? l10n.paymentSuccess : l10n.paymentFailed,
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
+                  const SizedBox(height: 12),
+                  Text(
+                    isPaid
+                        ? l10n.paymentSuccessMsg
+                        : l10n.paymentFailedMsg,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      color: AppColors.textSecondary,
+                      height: 1.5,
+                    ),
+                    textAlign: TextAlign.center,
                   ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  isPaid ? l10n.paymentSuccessMsg : l10n.paymentFailedMsg,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    color: AppColors.textSecondary,
-                    height: 1.5,
+                  const SizedBox(height: 36),
+                  GradientButton(
+                    label: isPaid ? l10n.goToDashboard : l10n.retry,
+                    icon: isPaid ? Icons.dashboard : Icons.refresh,
+                    onPressed: () {
+                      if (isPaid) {
+                        context.go('/client');
+                      } else {
+                        context.pop();
+                      }
+                    },
                   ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 36),
-                GradientButton(
-                  label: isPaid ? l10n.goToDashboard : l10n.retry,
-                  icon: isPaid ? Icons.dashboard : Icons.refresh,
-                  onPressed: () {
-                    if (isPaid) {
-                      context.go('/client');
-                    } else {
-                      context.pop();
-                    }
-                  },
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

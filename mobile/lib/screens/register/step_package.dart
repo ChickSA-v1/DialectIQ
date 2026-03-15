@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:dialectiq/l10n/app_localizations.dart';
 import '../../app/theme.dart';
@@ -25,7 +26,7 @@ class StepPackage extends StatelessWidget {
         maxBiz: packageLimits['basic']!['max_businesses']!,
         maxReviews: packageLimits['basic']!['max_reviews']!,
         icon: Icons.star_outline,
-        color: AppColors.primary,
+        color: AppColors.accentStart,
       ),
       _PackageInfo(
         key: 'advanced',
@@ -34,7 +35,7 @@ class StepPackage extends StatelessWidget {
         maxBiz: packageLimits['advanced']!['max_businesses']!,
         maxReviews: packageLimits['advanced']!['max_reviews']!,
         icon: Icons.star_half,
-        color: const Color(0xFF7C3AED),
+        color: AppColors.accentEnd,
       ),
       _PackageInfo(
         key: 'enterprise',
@@ -43,7 +44,7 @@ class StepPackage extends StatelessWidget {
         maxBiz: packageLimits['enterprise']!['max_businesses']!,
         maxReviews: packageLimits['enterprise']!['max_reviews']!,
         icon: Icons.star,
-        color: const Color(0xFFF59E0B),
+        color: AppColors.warning,
       ),
     ];
 
@@ -59,67 +60,95 @@ class StepPackage extends StatelessWidget {
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
             margin: const EdgeInsets.only(bottom: 16),
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: isSelected ? pkg.color : AppColors.border,
-                width: isSelected ? 2 : 1,
-              ),
-              boxShadow: isSelected
-                  ? [
-                      BoxShadow(
-                        color: pkg.color.withValues(alpha: 0.15),
-                        blurRadius: 16,
-                        offset: const Offset(0, 4),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                child: Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: isSelected
+                      ? BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              pkg.color.withValues(alpha: 0.20),
+                              pkg.color.withValues(alpha: 0.08),
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: pkg.color.withValues(alpha: 0.40),
+                            width: 2,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: pkg.color.withValues(alpha: 0.20),
+                              blurRadius: 20,
+                              offset: const Offset(0, 6),
+                            ),
+                          ],
+                        )
+                      : AppColors.glassDecoration(radius: 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            width: 44,
+                            height: 44,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  pkg.color.withValues(alpha: 0.25),
+                                  pkg.color.withValues(alpha: 0.10),
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: pkg.color.withValues(alpha: 0.20),
+                                  blurRadius: 10,
+                                ),
+                              ],
+                            ),
+                            child: Icon(pkg.icon, color: pkg.color),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              pkg.name,
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
+                          ),
+                          if (isSelected)
+                            Icon(Icons.check_circle, color: pkg.color),
+                        ],
                       ),
-                    ]
-                  : null,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      width: 44,
-                      height: 44,
-                      decoration: BoxDecoration(
-                        color: pkg.color.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Icon(pkg.icon, color: pkg.color),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        pkg.name,
+                      const SizedBox(height: 14),
+                      Text(
+                        '${pkg.price.toInt()} ${l10n.sarMonth}',
                         style: TextStyle(
-                          fontSize: 18,
+                          fontSize: 22,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimary,
+                          color: pkg.color,
                         ),
                       ),
-                    ),
-                    if (isSelected)
-                      Icon(Icons.check_circle, color: pkg.color),
-                  ],
-                ),
-                const SizedBox(height: 14),
-                Text(
-                  '${pkg.price.toInt()} ${l10n.sarMonth}',
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: pkg.color,
+                      const SizedBox(height: 10),
+                      _featureRow(
+                          Icons.business, l10n.maxBusinesses(pkg.maxBiz)),
+                      const SizedBox(height: 6),
+                      _featureRow(
+                          Icons.rate_review, l10n.maxReviews(pkg.maxReviews)),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 10),
-                _featureRow(Icons.business, l10n.maxBusinesses(pkg.maxBiz)),
-                const SizedBox(height: 6),
-                _featureRow(Icons.rate_review, l10n.maxReviews(pkg.maxReviews)),
-              ],
+              ),
             ),
           ),
         );
@@ -134,7 +163,8 @@ class StepPackage extends StatelessWidget {
         const SizedBox(width: 8),
         Text(
           text,
-          style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+          style:
+              const TextStyle(fontSize: 13, color: AppColors.textSecondary),
         ),
       ],
     );

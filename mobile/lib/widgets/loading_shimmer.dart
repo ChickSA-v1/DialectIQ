@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../app/theme.dart';
 
 class LoadingShimmer extends StatefulWidget {
   final double width;
@@ -52,10 +53,10 @@ class _LoadingShimmerState extends State<LoadingShimmer>
             gradient: LinearGradient(
               begin: Alignment(_animation.value - 1, 0),
               end: Alignment(_animation.value, 0),
-              colors: const [
-                Color(0xFFEEEEEE),
-                Color(0xFFF5F5F5),
-                Color(0xFFEEEEEE),
+              colors: [
+                Colors.white.withValues(alpha: 0.05),
+                Colors.white.withValues(alpha: 0.12),
+                Colors.white.withValues(alpha: 0.05),
               ],
             ),
           ),
@@ -73,16 +74,12 @@ class StatCardShimmer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
-      ),
+      decoration: AppColors.glassDecoration(radius: 20),
       child: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          LoadingShimmer(width: 40, height: 40, borderRadius: 10),
-          SizedBox(height: 12),
+          LoadingShimmer(width: 42, height: 42, borderRadius: 12),
+          SizedBox(height: 14),
           LoadingShimmer(width: 80, height: 28),
           SizedBox(height: 8),
           LoadingShimmer(width: 100, height: 14),
@@ -101,11 +98,7 @@ class ReviewCardShimmer extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
-      ),
+      decoration: AppColors.glassDecoration(radius: 20),
       child: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:dialectiq/l10n/app_localizations.dart';
+import '../../app/theme.dart';
 import '../../widgets/gradient_button.dart';
 
 class StepBusiness extends StatefulWidget {
@@ -67,15 +68,18 @@ class _StepBusinessState extends State<StepBusiness> {
           children: [
             TextFormField(
               controller: _nameArCtrl,
+              style: const TextStyle(color: AppColors.textPrimary),
               decoration: InputDecoration(
                 labelText: l10n.businessNameAr,
                 prefixIcon: const Icon(Icons.business),
               ),
-              validator: (v) => v == null || v.trim().isEmpty ? l10n.requiredField : null,
+              validator: (v) =>
+                  v == null || v.trim().isEmpty ? l10n.requiredField : null,
             ),
             const SizedBox(height: 16),
             TextFormField(
               controller: _nameEnCtrl,
+              style: const TextStyle(color: AppColors.textPrimary),
               decoration: InputDecoration(
                 labelText: l10n.businessNameEn,
                 prefixIcon: const Icon(Icons.business_center),
@@ -85,6 +89,7 @@ class _StepBusinessState extends State<StepBusiness> {
             TextFormField(
               controller: _emailCtrl,
               keyboardType: TextInputType.emailAddress,
+              style: const TextStyle(color: AppColors.textPrimary),
               decoration: InputDecoration(
                 labelText: l10n.ownerEmail,
                 prefixIcon: const Icon(Icons.email_outlined),
@@ -99,16 +104,19 @@ class _StepBusinessState extends State<StepBusiness> {
             TextFormField(
               controller: _phoneCtrl,
               keyboardType: TextInputType.phone,
+              style: const TextStyle(color: AppColors.textPrimary),
               decoration: InputDecoration(
                 labelText: l10n.ownerPhone,
                 prefixIcon: const Icon(Icons.phone),
               ),
-              validator: (v) => v == null || v.trim().isEmpty ? l10n.requiredField : null,
+              validator: (v) =>
+                  v == null || v.trim().isEmpty ? l10n.requiredField : null,
             ),
             const SizedBox(height: 16),
             TextFormField(
               controller: _passwordCtrl,
               obscureText: true,
+              style: const TextStyle(color: AppColors.textPrimary),
               decoration: InputDecoration(
                 labelText: l10n.createPassword,
                 prefixIcon: const Icon(Icons.lock_outlined),
@@ -123,6 +131,7 @@ class _StepBusinessState extends State<StepBusiness> {
             TextFormField(
               controller: _confirmCtrl,
               obscureText: true,
+              style: const TextStyle(color: AppColors.textPrimary),
               decoration: InputDecoration(
                 labelText: l10n.confirmPassword,
                 prefixIcon: const Icon(Icons.lock),

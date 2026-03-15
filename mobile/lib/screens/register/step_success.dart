@@ -18,19 +18,25 @@ class StepSuccess extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-            width: 80,
-            height: 80,
+            width: 88,
+            height: 88,
             decoration: BoxDecoration(
-              color: AppColors.success.withValues(alpha: 0.1),
+              color: AppColors.success.withValues(alpha: 0.12),
               shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.success.withValues(alpha: 0.25),
+                  blurRadius: 28,
+                ),
+              ],
             ),
             child: const Icon(
               Icons.check_circle,
-              size: 48,
+              size: 52,
               color: AppColors.success,
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 28),
           Text(
             l10n.regSuccess,
             style: const TextStyle(

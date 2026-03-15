@@ -61,7 +61,8 @@ class FilterBar extends StatelessWidget {
           TextButton.icon(
             onPressed: onClear,
             icon: const Icon(Icons.clear_all, size: 18),
-            label: Text(l10n.clearFilters, style: const TextStyle(fontSize: 12)),
+            label:
+                Text(l10n.clearFilters, style: const TextStyle(fontSize: 12)),
             style: TextButton.styleFrom(
               foregroundColor: AppColors.textSecondary,
             ),
@@ -79,26 +80,31 @@ class FilterBar extends StatelessWidget {
   }) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-      decoration: BoxDecoration(
-        border: Border.all(color: AppColors.border),
-        borderRadius: BorderRadius.circular(10),
-        color: Colors.white,
-      ),
+      decoration: AppColors.glassDecoration(radius: 12),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
-          hint: Text(label, style: const TextStyle(fontSize: 13)),
+          hint: Text(label,
+              style: const TextStyle(
+                  fontSize: 13, color: AppColors.textSecondary)),
           value: value,
           isDense: true,
-          icon: const Icon(Icons.arrow_drop_down, size: 18),
+          dropdownColor: AppColors.bgEnd,
+          icon: const Icon(Icons.arrow_drop_down,
+              size: 18, color: AppColors.textSecondary),
+          style: const TextStyle(fontSize: 13, color: AppColors.textPrimary),
           items: [
             DropdownMenuItem<String>(
               value: null,
-              child: Text('All $label', style: const TextStyle(fontSize: 13)),
+              child: Text('All $label',
+                  style: const TextStyle(
+                      fontSize: 13, color: AppColors.textPrimary)),
             ),
             ...items.map(
               (e) => DropdownMenuItem(
                 value: e,
-                child: Text(e, style: const TextStyle(fontSize: 13)),
+                child: Text(e,
+                    style: const TextStyle(
+                        fontSize: 13, color: AppColors.textPrimary)),
               ),
             ),
           ],
