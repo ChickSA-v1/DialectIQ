@@ -412,11 +412,39 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get deleteAccountConfirm =>
-      'هذا الإجراء لا يمكن التراجع عنه. سيتم حذف جميع بياناتك وتقييماتك ومستنداتك وسجل المدفوعات نهائياً. هل أنت متأكد؟';
+      'هذا الإجراء لا يمكن التراجع عنه. سيتم حذف جميع بياناتك وتقييماتك ومستنداتك وسجل المدفوعات نهائياً.';
 
   @override
   String get deleteAccountButton => 'حذف نهائي';
 
   @override
   String get deleteAccountSuccess => 'تم حذف حسابك بنجاح';
+
+  @override
+  String get deleteReasonTitle => 'لماذا تريد حذف حسابك؟';
+
+  @override
+  String get deleteReasonNotUseful => 'التطبيق غير مفيد لنشاطي التجاري';
+
+  @override
+  String get deleteReasonTooExpensive => 'الأسعار مرتفعة جداً';
+
+  @override
+  String get deleteReasonSwitchingService => 'سأنتقل إلى خدمة أخرى';
+
+  @override
+  String get deleteReasonPrivacyConcerns =>
+      'لدي مخاوف تتعلق بالخصوصية أو البيانات';
+
+  @override
+  String get deleteReasonTechnicalIssues => 'واجهت مشاكل تقنية';
+
+  @override
+  String get deleteReasonOther => 'سبب آخر';
+
+  @override
+  String get deleteReasonOtherHint => 'يرجى إخبارنا بالسبب...';
+
+  @override
+  String get deleteReasonRequired => 'يرجى اختيار سبب للمتابعة';
 }

@@ -416,7 +416,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deleteAccountConfirm =>
-      'This action is irreversible. All your data, reviews, documents, and payment history will be permanently deleted. Are you sure?';
+      'This action is irreversible. All your data, reviews, documents, and payment history will be permanently deleted.';
 
   @override
   String get deleteAccountButton => 'Delete Permanently';
@@ -424,4 +424,32 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get deleteAccountSuccess =>
       'Your account has been deleted successfully';
+
+  @override
+  String get deleteReasonTitle => 'Why are you leaving?';
+
+  @override
+  String get deleteReasonNotUseful => 'The app is not useful for my business';
+
+  @override
+  String get deleteReasonTooExpensive => 'The pricing is too expensive';
+
+  @override
+  String get deleteReasonSwitchingService =>
+      'I\'m switching to another service';
+
+  @override
+  String get deleteReasonPrivacyConcerns => 'I have privacy or data concerns';
+
+  @override
+  String get deleteReasonTechnicalIssues => 'I experienced technical issues';
+
+  @override
+  String get deleteReasonOther => 'Other';
+
+  @override
+  String get deleteReasonOtherHint => 'Please tell us why...';
+
+  @override
+  String get deleteReasonRequired => 'Please select a reason to continue';
 }

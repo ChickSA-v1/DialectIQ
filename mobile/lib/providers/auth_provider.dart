@@ -94,13 +94,13 @@ class AuthState extends ChangeNotifier {
   }
 
   /// Delete account permanently
-  Future<bool> deleteAccount() async {
+  Future<bool> deleteAccount({String? reason}) async {
     _error = null;
     _isLoading = true;
     notifyListeners();
 
     try {
-      await _repo.deleteAccount();
+      await _repo.deleteAccount(reason: reason);
       await _logout();
       _isLoading = false;
       notifyListeners();

@@ -153,7 +153,17 @@
 
   "deleteAccount": "Delete Account",
   "deleteAccountDesc": "Permanently delete your account and all data",
-  "deleteAccountConfirm": "This action is irreversible. All your data, reviews, documents, and payment history will be permanently deleted. Are you sure?",
+  "deleteAccountConfirm": "This action is irreversible. All your data, reviews, documents, and payment history will be permanently deleted.",
   "deleteAccountButton": "Delete Permanently",
-  "deleteAccountSuccess": "Your account has been deleted successfully"
+  "deleteAccountSuccess": "Your account has been deleted successfully",
+
+  "deleteReasonTitle": "Why are you leaving?",
+  "deleteReasonNotUseful": "The app is not useful for my business",
+  "deleteReasonTooExpensive": "The pricing is too expensive",
+  "deleteReasonSwitchingService": "I'm switching to another service",
+  "deleteReasonPrivacyConcerns": "I have privacy or data concerns",
+  "deleteReasonTechnicalIssues": "I experienced technical issues",
+  "deleteReasonOther": "Other",
+  "deleteReasonOtherHint": "Please tell us why...",
+  "deleteReasonRequired": "Please select a reason to continue"
 }

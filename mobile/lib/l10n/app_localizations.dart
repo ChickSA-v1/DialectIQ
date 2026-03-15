@@ -869,7 +869,7 @@ abstract class AppLocalizations {
   /// No description provided for @deleteAccountConfirm.
   ///
   /// In en, this message translates to:
-  /// **'This action is irreversible. All your data, reviews, documents, and payment history will be permanently deleted. Are you sure?'**
+  /// **'This action is irreversible. All your data, reviews, documents, and payment history will be permanently deleted.'**
   String get deleteAccountConfirm;
 
   /// No description provided for @deleteAccountButton.
@@ -883,6 +883,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your account has been deleted successfully'**
   String get deleteAccountSuccess;
+
+  /// No description provided for @deleteReasonTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Why are you leaving?'**
+  String get deleteReasonTitle;
+
+  /// No description provided for @deleteReasonNotUseful.
+  ///
+  /// In en, this message translates to:
+  /// **'The app is not useful for my business'**
+  String get deleteReasonNotUseful;
+
+  /// No description provided for @deleteReasonTooExpensive.
+  ///
+  /// In en, this message translates to:
+  /// **'The pricing is too expensive'**
+  String get deleteReasonTooExpensive;
+
+  /// No description provided for @deleteReasonSwitchingService.
+  ///
+  /// In en, this message translates to:
+  /// **'I\'m switching to another service'**
+  String get deleteReasonSwitchingService;
+
+  /// No description provided for @deleteReasonPrivacyConcerns.
+  ///
+  /// In en, this message translates to:
+  /// **'I have privacy or data concerns'**
+  String get deleteReasonPrivacyConcerns;
+
+  /// No description provided for @deleteReasonTechnicalIssues.
+  ///
+  /// In en, this message translates to:
+  /// **'I experienced technical issues'**
+  String get deleteReasonTechnicalIssues;
+
+  /// No description provided for @deleteReasonOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get deleteReasonOther;
+
+  /// No description provided for @deleteReasonOtherHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Please tell us why...'**
+  String get deleteReasonOtherHint;
+
+  /// No description provided for @deleteReasonRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a reason to continue'**
+  String get deleteReasonRequired;
 }
 
 class _AppLocalizationsDelegate

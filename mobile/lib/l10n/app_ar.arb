@@ -153,7 +153,17 @@
 
   "deleteAccount": "حذف الحساب",
   "deleteAccountDesc": "حذف حسابك وجميع بياناتك نهائياً",
-  "deleteAccountConfirm": "هذا الإجراء لا يمكن التراجع عنه. سيتم حذف جميع بياناتك وتقييماتك ومستنداتك وسجل المدفوعات نهائياً. هل أنت متأكد؟",
+  "deleteAccountConfirm": "هذا الإجراء لا يمكن التراجع عنه. سيتم حذف جميع بياناتك وتقييماتك ومستنداتك وسجل المدفوعات نهائياً.",
   "deleteAccountButton": "حذف نهائي",
-  "deleteAccountSuccess": "تم حذف حسابك بنجاح"
+  "deleteAccountSuccess": "تم حذف حسابك بنجاح",
+
+  "deleteReasonTitle": "لماذا تريد حذف حسابك؟",
+  "deleteReasonNotUseful": "التطبيق غير مفيد لنشاطي التجاري",
+  "deleteReasonTooExpensive": "الأسعار مرتفعة جداً",
+  "deleteReasonSwitchingService": "سأنتقل إلى خدمة أخرى",
+  "deleteReasonPrivacyConcerns": "لدي مخاوف تتعلق بالخصوصية أو البيانات",
+  "deleteReasonTechnicalIssues": "واجهت مشاكل تقنية",
+  "deleteReasonOther": "سبب آخر",
+  "deleteReasonOtherHint": "يرجى إخبارنا بالسبب...",
+  "deleteReasonRequired": "يرجى اختيار سبب للمتابعة"
 }

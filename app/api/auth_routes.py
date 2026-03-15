@@ -5,7 +5,7 @@ Auth endpoints: register, login, upload documents, profile, place-id confirmatio
 import uuid
 
 import structlog
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
+from fastapi import APIRouter, Body, Depends, File, Form, HTTPException, UploadFile, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -13,6 +13,7 @@ from app.database import get_db
 from app.deps import get_current_user
 from app.models import Document, Invoice, Tenant, User
 from app.schemas import (
+    DeleteAccountRequest,
     InvoiceInfo,
     ConfirmPlaceIdRequest,
     ConfirmPlaceIdResponse,
@@ -272,6 +273,7 @@ async def get_profile(
 async def delete_account(
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
+    body: DeleteAccountRequest | None = Body(default=None),
 ):
     """Delete the current user's account and all associated data."""
     # Delete the tenant (cascades to documents, subscriptions, invoices, users)
@@ -285,7 +287,8 @@ async def delete_account(
         await db.delete(user)
 
     await db.commit()
-    log.info("account_deleted", user_id=str(user.id), email=user.email)
+    deletion_reason = body.reason if body else None
+    log.info("account_deleted", user_id=str(user.id), email=user.email, deletion_reason=deletion_reason)
     return {"message": "Account deleted successfully"}
 
 

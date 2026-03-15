@@ -254,71 +254,7 @@ class SettingsScreen extends ConsumerWidget {
                       ),
                     ),
                     onTap: () {
-                      showDialog(
-                        context: context,
-                        builder: (ctx) => AlertDialog(
-                          backgroundColor: AppColors.bgEnd,
-                          title: Row(
-                            children: [
-                              const Icon(Icons.warning_amber_rounded,
-                                  color: AppColors.error, size: 28),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                  child: Text(l10n.deleteAccount,
-                                      style: const TextStyle(
-                                          color:
-                                              AppColors.textPrimary))),
-                            ],
-                          ),
-                          content: Text(l10n.deleteAccountConfirm,
-                              style: const TextStyle(
-                                  color: AppColors.textSecondary)),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.pop(ctx),
-                              child: Text(l10n.cancel),
-                            ),
-                            TextButton(
-                              onPressed: () async {
-                                Navigator.pop(ctx);
-                                final success = await ref
-                                    .read(authProvider.notifier)
-                                    .deleteAccount();
-                                if (success && context.mounted) {
-                                  context.go('/login');
-                                  ScaffoldMessenger.of(context)
-                                      .showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                          l10n.deleteAccountSuccess),
-                                      backgroundColor:
-                                          AppColors.success,
-                                    ),
-                                  );
-                                } else if (context.mounted) {
-                                  ScaffoldMessenger.of(context)
-                                      .showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        ref
-                                                .read(authProvider)
-                                                .error ??
-                                            l10n.error,
-                                      ),
-                                      backgroundColor: AppColors.error,
-                                    ),
-                                  );
-                                }
-                              },
-                              child: Text(
-                                l10n.deleteAccountButton,
-                                style: const TextStyle(
-                                    color: AppColors.error),
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
+                      _showDeleteAccountDialog(context, ref, l10n);
                     },
                   ),
                 ),
@@ -326,6 +262,281 @@ class SettingsScreen extends ConsumerWidget {
             ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  void _showDeleteAccountDialog(
+      BuildContext context, WidgetRef ref, AppLocalizations l10n) {
+    String? selectedReason;
+    String otherReasonText = '';
+    bool showValidation = false;
+    final otherController = TextEditingController();
+
+    final reasons = <String, String>{
+      'not_useful': l10n.deleteReasonNotUseful,
+      'too_expensive': l10n.deleteReasonTooExpensive,
+      'switching_service': l10n.deleteReasonSwitchingService,
+      'privacy_concerns': l10n.deleteReasonPrivacyConcerns,
+      'technical_issues': l10n.deleteReasonTechnicalIssues,
+    };
+
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (ctx, setDialogState) {
+            final isOtherSelected = selectedReason == 'other';
+            final canDelete = selectedReason != null &&
+                (selectedReason != 'other' ||
+                    otherReasonText.trim().isNotEmpty);
+
+            String? computedReason() {
+              if (selectedReason == null) return null;
+              if (selectedReason == 'other') {
+                return otherReasonText.trim().isNotEmpty
+                    ? otherReasonText.trim()
+                    : null;
+              }
+              return selectedReason;
+            }
+
+            return AlertDialog(
+              backgroundColor: AppColors.bgEnd,
+              insetPadding:
+                  const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+              title: Row(
+                children: [
+                  const Icon(Icons.warning_amber_rounded,
+                      color: AppColors.error, size: 28),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(l10n.deleteAccount,
+                        style: const TextStyle(
+                            color: AppColors.textPrimary)),
+                  ),
+                ],
+              ),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Warning text
+                    Text(
+                      l10n.deleteAccountConfirm,
+                      style: const TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 13,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+
+                    // "Why are you leaving?" subtitle
+                    Text(
+                      l10n.deleteReasonTitle,
+                      style: const TextStyle(
+                        color: AppColors.textPrimary,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 15,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+
+                    // Predefined reasons
+                    ...reasons.entries.map((entry) => _buildReasonTile(
+                          label: entry.value,
+                          value: entry.key,
+                          groupValue: selectedReason,
+                          onChanged: (val) {
+                            setDialogState(() {
+                              selectedReason = val;
+                              showValidation = false;
+                            });
+                          },
+                        )),
+
+                    // "Other" option
+                    _buildReasonTile(
+                      label: l10n.deleteReasonOther,
+                      value: 'other',
+                      groupValue: selectedReason,
+                      onChanged: (val) {
+                        setDialogState(() {
+                          selectedReason = val;
+                          showValidation = false;
+                        });
+                      },
+                    ),
+
+                    // "Other" text field
+                    if (isOtherSelected) ...[
+                      const SizedBox(height: 8),
+                      TextField(
+                        controller: otherController,
+                        maxLines: 2,
+                        maxLength: 500,
+                        style:
+                            const TextStyle(color: AppColors.textPrimary),
+                        decoration: InputDecoration(
+                          hintText: l10n.deleteReasonOtherHint,
+                          hintStyle:
+                              const TextStyle(color: AppColors.textMuted),
+                          filled: true,
+                          fillColor:
+                              Colors.white.withValues(alpha: 0.06),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(
+                                color: Colors.white
+                                    .withValues(alpha: 0.15)),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(
+                                color: Colors.white
+                                    .withValues(alpha: 0.15)),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(
+                                color: AppColors.accentStart, width: 2),
+                          ),
+                          counterStyle:
+                              const TextStyle(color: AppColors.textMuted),
+                        ),
+                        onChanged: (text) {
+                          setDialogState(() {
+                            otherReasonText = text;
+                          });
+                        },
+                      ),
+                    ],
+
+                    // Validation message
+                    if (showValidation) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        l10n.deleteReasonRequired,
+                        style: const TextStyle(
+                          color: AppColors.error,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: Text(l10n.cancel),
+                ),
+                TextButton(
+                  onPressed: () async {
+                    if (!canDelete) {
+                      setDialogState(() {
+                        showValidation = true;
+                      });
+                      return;
+                    }
+
+                    Navigator.pop(ctx);
+                    final success = await ref
+                        .read(authProvider.notifier)
+                        .deleteAccount(reason: computedReason());
+                    if (success && context.mounted) {
+                      context.go('/login');
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(l10n.deleteAccountSuccess),
+                          backgroundColor: AppColors.success,
+                        ),
+                      );
+                    } else if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            ref.read(authProvider).error ?? l10n.error,
+                          ),
+                          backgroundColor: AppColors.error,
+                        ),
+                      );
+                    }
+                  },
+                  child: Text(
+                    l10n.deleteAccountButton,
+                    style: TextStyle(
+                      color: canDelete
+                          ? AppColors.error
+                          : AppColors.error.withValues(alpha: 0.40),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  static Widget _buildReasonTile({
+    required String label,
+    required String value,
+    required String? groupValue,
+    required ValueChanged<String?> onChanged,
+  }) {
+    final isSelected = groupValue == value;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: () => onChanged(value),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+            decoration: BoxDecoration(
+              color: isSelected
+                  ? AppColors.error.withValues(alpha: 0.08)
+                  : Colors.transparent,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isSelected
+                    ? AppColors.error.withValues(alpha: 0.30)
+                    : Colors.transparent,
+              ),
+            ),
+            child: Row(
+              children: [
+                Radio<String>(
+                  value: value,
+                  groupValue: groupValue,
+                  onChanged: onChanged,
+                  activeColor: AppColors.error,
+                  fillColor: WidgetStateProperty.resolveWith((states) {
+                    if (states.contains(WidgetState.selected)) {
+                      return AppColors.error;
+                    }
+                    return AppColors.textMuted;
+                  }),
+                ),
+                Expanded(
+                  child: Text(
+                    label,
+                    style: TextStyle(
+                      color: isSelected
+                          ? AppColors.textPrimary
+                          : AppColors.textSecondary,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );

@@ -299,3 +299,9 @@ class FetchReviewsResponse(BaseModel):
     reviews_new: int
     reviews_analyzed: int
     message: str
+
+
+# ── Delete Account schemas ───────────────────────────────────────────
+
+class DeleteAccountRequest(BaseModel):
+    reason: str | None = Field(None, max_length=500, description="Reason for account deletion")

@@ -62,7 +62,10 @@ class AuthRepository {
   }
 
   /// Delete current user account
-  Future<void> deleteAccount() async {
-    await _dio.delete('/api/v1/auth/me');
+  Future<void> deleteAccount({String? reason}) async {
+    await _dio.delete(
+      '/api/v1/auth/me',
+      data: reason != null ? {'reason': reason} : null,
+    );
   }
 }
