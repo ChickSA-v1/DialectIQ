@@ -154,6 +154,7 @@ class TenantInfo(BaseModel):
     api_key: str | None = None
     rejection_reason: str | None = None
     latest_invoice_status: str | None = None
+    card_payment_enabled: bool = False
     created_at: datetime
 
 
@@ -200,6 +201,7 @@ class EditTenantRequest(BaseModel):
     email: str | None = Field(None, max_length=255)
     phone: str | None = Field(None, max_length=20)
     package: str | None = Field(None, pattern=r"^(basic|advanced|enterprise)$")
+    card_payment_enabled: bool | None = None
 
 
 class TenantListResponse(BaseModel):

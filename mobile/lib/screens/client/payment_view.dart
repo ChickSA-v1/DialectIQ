@@ -27,6 +27,11 @@ class PaymentView extends ConsumerStatefulWidget {
 class _PaymentViewState extends ConsumerState<PaymentView> {
   File? _receiptFile;
 
+  bool get _cardPaymentEnabled {
+    final profile = ref.read(authProvider).profile;
+    return profile?.tenant?.cardPaymentEnabled ?? false;
+  }
+
   Future<void> _payWithCard() async {
     final checkout =
         await ref.read(paymentProvider.notifier).initiateCheckout();
@@ -155,45 +160,47 @@ class _PaymentViewState extends ConsumerState<PaymentView> {
 
               const SizedBox(height: 24),
 
-              // Card payment
-              FadeSlideIn(
-                delay: const Duration(milliseconds: 150),
-                child: GradientButton(
-                label: l10n.payWithCard,
-                icon: Icons.credit_card,
-                isLoading: payment.isLoading,
-                onPressed: _payWithCard,
-              ),
-              ),
+              // Card payment (only shown when enabled by admin)
+              if (_cardPaymentEnabled) ...[
+                FadeSlideIn(
+                  delay: const Duration(milliseconds: 150),
+                  child: GradientButton(
+                  label: l10n.payWithCard,
+                  icon: Icons.credit_card,
+                  isLoading: payment.isLoading,
+                  onPressed: _payWithCard,
+                ),
+                ),
 
-              const SizedBox(height: 16),
+                const SizedBox(height: 16),
 
-              // Divider
-              FadeSlideIn(
-                delay: const Duration(milliseconds: 250),
-                child: Row(
-                children: [
-                  Expanded(
-                      child: Divider(
-                          color: Colors.white.withValues(alpha: 0.10))),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Text(
-                      'OR',
-                      style: TextStyle(
-                        color: AppColors.textMuted,
-                        fontSize: 12,
+                // Divider
+                FadeSlideIn(
+                  delay: const Duration(milliseconds: 250),
+                  child: Row(
+                  children: [
+                    Expanded(
+                        child: Divider(
+                            color: Colors.white.withValues(alpha: 0.10))),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Text(
+                        'OR',
+                        style: TextStyle(
+                          color: AppColors.textMuted,
+                          fontSize: 12,
+                        ),
                       ),
                     ),
-                  ),
-                  Expanded(
-                      child: Divider(
-                          color: Colors.white.withValues(alpha: 0.10))),
-                ],
-              ),
-              ),
+                    Expanded(
+                        child: Divider(
+                            color: Colors.white.withValues(alpha: 0.10))),
+                  ],
+                ),
+                ),
 
-              const SizedBox(height: 16),
+                const SizedBox(height: 16),
+              ],
 
               // Bank transfer details
               FadeSlideIn(

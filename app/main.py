@@ -52,6 +52,19 @@ app.include_router(payment_router)
 app.include_router(place_router)
 
 
+@app.on_event("startup")
+async def run_migrations():
+    """Auto-add new columns on startup (idempotent)."""
+    from app.database import engine
+    from sqlalchemy import text
+
+    async with engine.begin() as conn:
+        await conn.execute(text(
+            "ALTER TABLE tenants ADD COLUMN IF NOT EXISTS "
+            "card_payment_enabled BOOLEAN NOT NULL DEFAULT FALSE"
+        ))
+
+
 @app.get("/health", tags=["infra"])
 async def health_check() -> dict[str, str]:
     return {"status": "ok", "service": "dialectiq"}

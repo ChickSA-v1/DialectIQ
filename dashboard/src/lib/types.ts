@@ -80,6 +80,7 @@ export interface TenantInfo {
   max_reviews_per_month: number;
   reviews_used_this_month: number;
   api_key: string | null;
+  card_payment_enabled: boolean;
   created_at: string;
 }
 

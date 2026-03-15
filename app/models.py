@@ -79,6 +79,10 @@ class Tenant(Base):
     max_reviews_per_month: Mapped[int] = mapped_column(Integer, nullable=False, default=500)
     reviews_used_this_month: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     rejection_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
+    card_payment_enabled: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False,
+        comment="Whether card payment (HyperPay) is enabled for this tenant",
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )

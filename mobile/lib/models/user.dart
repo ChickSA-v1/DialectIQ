@@ -74,6 +74,7 @@ class TenantInfo {
   final String? apiKey;
   final String? rejectionReason;
   final String? latestInvoiceStatus;
+  final bool cardPaymentEnabled;
   final String? createdAt;
 
   TenantInfo({
@@ -92,6 +93,7 @@ class TenantInfo {
     this.apiKey,
     this.rejectionReason,
     this.latestInvoiceStatus,
+    this.cardPaymentEnabled = false,
     this.createdAt,
   });
 
@@ -111,6 +113,7 @@ class TenantInfo {
     apiKey: json['api_key'] as String?,
     rejectionReason: json['rejection_reason'] as String?,
     latestInvoiceStatus: json['latest_invoice_status'] as String?,
+    cardPaymentEnabled: json['card_payment_enabled'] as bool? ?? false,
     createdAt: json['created_at'] as String?,
   );
 }

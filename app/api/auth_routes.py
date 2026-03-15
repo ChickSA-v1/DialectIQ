@@ -237,6 +237,7 @@ async def get_profile(
                 api_key=tenant.api_key,
                 rejection_reason=tenant.rejection_reason,
                 latest_invoice_status=latest_invoice_status,
+                card_payment_enabled=tenant.card_payment_enabled,
                 created_at=tenant.created_at,
             )
 

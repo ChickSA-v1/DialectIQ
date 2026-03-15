@@ -91,7 +91,9 @@ async def list_registrations(
                     max_businesses=t.max_businesses,
                     max_reviews_per_month=t.max_reviews_per_month,
                     reviews_used_this_month=t.reviews_used_this_month,
-                    api_key=t.api_key, created_at=t.created_at,
+                    api_key=t.api_key,
+                    card_payment_enabled=t.card_payment_enabled,
+                    created_at=t.created_at,
                 ),
                 documents=[
                     DocumentInfo(
@@ -306,6 +308,7 @@ async def list_tenants(
                 api_key=t.api_key,
                 rejection_reason=t.rejection_reason,
                 latest_invoice_status=latest_inv.status if latest_inv else None,
+                card_payment_enabled=t.card_payment_enabled,
                 created_at=t.created_at,
             )
         )
@@ -407,6 +410,9 @@ async def edit_tenant(
         tenant.max_businesses = limits["max_businesses"]
         tenant.max_reviews_per_month = limits["max_reviews_per_month"]
         updated_fields.append("package")
+    if req.card_payment_enabled is not None:
+        tenant.card_payment_enabled = req.card_payment_enabled
+        updated_fields.append("card_payment_enabled")
 
     await db.commit()
     log.info("tenant_edited", tenant_id=tenant_id, fields=updated_fields)

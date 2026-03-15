@@ -54,6 +54,7 @@ export default function TenantsPage() {
     email: "",
     phone: "",
     package: "",
+    card_payment_enabled: false,
   });
   const [editSaving, setEditSaving] = useState(false);
 
@@ -138,6 +139,7 @@ export default function TenantsPage() {
       email: tenant.email,
       phone: tenant.phone,
       package: tenant.package,
+      card_payment_enabled: tenant.card_payment_enabled ?? false,
     });
   };
 
@@ -738,6 +740,38 @@ export default function TenantsPage() {
                   <option value="advanced">{t("package.advanced")}</option>
                   <option value="enterprise">{t("package.enterprise")}</option>
                 </select>
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Card Payment (HyperPay)
+                  </label>
+                  <p className="text-xs text-gray-400">
+                    Enable online card payment for this tenant
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setEditForm({
+                      ...editForm,
+                      card_payment_enabled: !editForm.card_payment_enabled,
+                    })
+                  }
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    editForm.card_payment_enabled
+                      ? "bg-indigo-600"
+                      : "bg-gray-300"
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      editForm.card_payment_enabled
+                        ? "translate-x-6"
+                        : "translate-x-1"
+                    }`}
+                  />
+                </button>
               </div>
             </div>
             <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-gray-200">
