@@ -384,13 +384,14 @@ class AppLocalizationsAr extends AppLocalizations {
   String get bankDetails => 'تفاصيل التحويل البنكي';
 
   @override
-  String get bankName => 'البنك الأهلي السعودي (SNB)';
+  String get bankName => 'البنك: بنك الإنماء';
 
   @override
-  String get iban => 'آيبان: SA0000000000000000000000';
+  String get iban => 'آيبان: SA0405000068207124593000';
 
   @override
-  String get accountHolder => 'صاحب الحساب: شركة DataWeave';
+  String get accountHolder =>
+      'صاحب الحساب: شركة داتاويف للاتصالات وتقنية المعلومات';
 
   @override
   String get transferRef => 'المرجع: بريدك الإلكتروني';

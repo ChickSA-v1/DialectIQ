@@ -815,19 +815,19 @@ abstract class AppLocalizations {
   /// No description provided for @bankName.
   ///
   /// In en, this message translates to:
-  /// **'Saudi National Bank (SNB)'**
+  /// **'Bank: Alinma Bank'**
   String get bankName;
 
   /// No description provided for @iban.
   ///
   /// In en, this message translates to:
-  /// **'IBAN: SA0000000000000000000000'**
+  /// **'IBAN: SA0405000068207124593000'**
   String get iban;
 
   /// No description provided for @accountHolder.
   ///
   /// In en, this message translates to:
-  /// **'Account Holder: DataWeave LLC'**
+  /// **'Account Holder: DataWeave ICT Co.'**
   String get accountHolder;
 
   /// No description provided for @transferRef.

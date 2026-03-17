@@ -142,9 +142,9 @@
   "dialectBreakdown": "Dialect Breakdown",
 
   "bankDetails": "Bank Transfer Details",
-  "bankName": "Saudi National Bank (SNB)",
-  "iban": "IBAN: SA0000000000000000000000",
-  "accountHolder": "Account Holder: DataWeave LLC",
+  "bankName": "Bank: Alinma Bank",
+  "iban": "IBAN: SA0405000068207124593000",
+  "accountHolder": "Account Holder: DataWeave ICT Co.",
   "transferRef": "Reference: Your email address",
 
   "pendingApproval": "Pending Approval",

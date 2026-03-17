@@ -81,6 +81,8 @@ export interface TenantInfo {
   reviews_used_this_month: number;
   api_key: string | null;
   card_payment_enabled: boolean;
+  subscription_starts_at: string | null;
+  subscription_expires_at: string | null;
   created_at: string;
 }
 

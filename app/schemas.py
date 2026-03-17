@@ -155,6 +155,8 @@ class TenantInfo(BaseModel):
     rejection_reason: str | None = None
     latest_invoice_status: str | None = None
     card_payment_enabled: bool = False
+    subscription_starts_at: datetime | None = None
+    subscription_expires_at: datetime | None = None
     created_at: datetime
 
 

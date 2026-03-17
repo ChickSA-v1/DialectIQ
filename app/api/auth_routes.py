@@ -309,6 +309,16 @@ async def get_profile(
             invoices = inv_r.scalars().all()
             latest_invoice_status = invoices[0].status if invoices else None
 
+            # Get active subscription dates
+            from app.models import Subscription
+            sub_r = await db.execute(
+                select(Subscription)
+                .where(Subscription.tenant_id == tenant.id, Subscription.status == "active")
+                .order_by(Subscription.created_at.desc())
+                .limit(1)
+            )
+            active_sub = sub_r.scalar_one_or_none()
+
             tenant_info = TenantInfo(
                 id=tenant.id,
                 name_ar=tenant.name_ar,
@@ -326,6 +336,8 @@ async def get_profile(
                 rejection_reason=tenant.rejection_reason,
                 latest_invoice_status=latest_invoice_status,
                 card_payment_enabled=tenant.card_payment_enabled,
+                subscription_starts_at=active_sub.starts_at if active_sub else None,
+                subscription_expires_at=active_sub.expires_at if active_sub else None,
                 created_at=tenant.created_at,
             )
 

@@ -34,6 +34,8 @@ import {
   Building2,
   Upload,
   FileCheck,
+  CalendarDays,
+  BarChart3,
 } from "lucide-react";
 
 const HYPERPAY_SCRIPT_URL =
@@ -206,9 +208,7 @@ function ClientDashboard() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="bg-white/20 backdrop-blur-sm border border-white/30 text-white font-bold text-lg w-10 h-10 rounded-xl flex items-center justify-center">
-                D
-              </div>
+              <img src="/images/logo.png" alt="DialectIQ" className="w-10 h-10 rounded-xl" />
               <div>
                 <h1 className="text-lg font-bold text-white">
                   {tenant?.name_ar || "DialectIQ"}
@@ -590,6 +590,89 @@ function ClientDashboard() {
                 </div>
               </div>
             )}
+
+            {/* Subscription Usage Bar */}
+            {tenant && (() => {
+              const reviewsUsed = tenant.reviews_used_this_month ?? 0;
+              const reviewsMax = tenant.max_reviews_per_month ?? 1;
+              const reviewsRemaining = Math.max(0, reviewsMax - reviewsUsed);
+              const reviewsPct = Math.min((reviewsUsed / reviewsMax) * 100, 100);
+
+              let daysRemaining = 0;
+              let totalDays = 30;
+              let daysPct = 0;
+              if (tenant.subscription_starts_at && tenant.subscription_expires_at) {
+                const start = new Date(tenant.subscription_starts_at).getTime();
+                const end = new Date(tenant.subscription_expires_at).getTime();
+                const now = Date.now();
+                totalDays = Math.max(1, Math.round((end - start) / (1000 * 60 * 60 * 24)));
+                daysRemaining = Math.max(0, Math.round((end - now) / (1000 * 60 * 60 * 24)));
+                daysPct = Math.min(((totalDays - daysRemaining) / totalDays) * 100, 100);
+              }
+
+              return (
+                <div className="glass-card rounded-2xl p-5 animate-slide-up" style={{ animationDelay: "50ms" }}>
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="p-2 rounded-xl bg-amber-50">
+                      <BarChart3 className="w-4 h-4 text-amber-600" />
+                    </div>
+                    <h3 className="font-bold text-gray-800">
+                      {t("client.subscriptionUsage" as any)}
+                    </h3>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {/* Days Remaining */}
+                    <div className="bg-gray-50/80 rounded-xl p-4 border border-gray-100/50">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <CalendarDays className="w-4 h-4 text-cyan-500" />
+                          <span className="text-sm font-medium text-gray-600">
+                            {t("client.daysRemaining" as any)}
+                          </span>
+                        </div>
+                        <span className="text-sm font-bold text-gray-900">
+                          {daysRemaining} <span className="text-xs font-normal text-gray-400">{t("client.of" as any)} {totalDays} {t("client.days" as any)}</span>
+                        </span>
+                      </div>
+                      <div className="h-2.5 bg-gray-200 rounded-full overflow-hidden">
+                        <div
+                          className="h-full rounded-full transition-all duration-500"
+                          style={{
+                            width: `${100 - daysPct}%`,
+                            background: daysRemaining <= 5 ? "#F43F5E" : daysRemaining <= 10 ? "#FBBF24" : "#00D2DF",
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Reviews Remaining */}
+                    <div className="bg-gray-50/80 rounded-xl p-4 border border-gray-100/50">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <MessageSquareText className="w-4 h-4 text-emerald-500" />
+                          <span className="text-sm font-medium text-gray-600">
+                            {t("client.reviewsRemaining" as any)}
+                          </span>
+                        </div>
+                        <span className="text-sm font-bold text-gray-900">
+                          {reviewsRemaining} <span className="text-xs font-normal text-gray-400">{t("client.of" as any)} {reviewsMax} {t("client.reviews" as any)}</span>
+                        </span>
+                      </div>
+                      <div className="h-2.5 bg-gray-200 rounded-full overflow-hidden">
+                        <div
+                          className="h-full rounded-full transition-all duration-500"
+                          style={{
+                            width: `${100 - reviewsPct}%`,
+                            background: reviewsRemaining <= 50 ? "#F43F5E" : reviewsRemaining <= 150 ? "#FBBF24" : "#10B981",
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
 
             {/* API Key card */}
             <div className="glass-card rounded-2xl p-5 animate-slide-up" style={{ animationDelay: "100ms" }}>

@@ -387,13 +387,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bankDetails => 'Bank Transfer Details';
 
   @override
-  String get bankName => 'Saudi National Bank (SNB)';
+  String get bankName => 'Bank: Alinma Bank';
 
   @override
-  String get iban => 'IBAN: SA0000000000000000000000';
+  String get iban => 'IBAN: SA0405000068207124593000';
 
   @override
-  String get accountHolder => 'Account Holder: DataWeave LLC';
+  String get accountHolder => 'Account Holder: DataWeave ICT Co.';
 
   @override
   String get transferRef => 'Reference: Your email address';
