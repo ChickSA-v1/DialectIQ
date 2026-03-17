@@ -452,4 +452,95 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deleteReasonRequired => 'Please select a reason to continue';
+
+  @override
+  String get upgradePackage => 'Upgrade Package';
+
+  @override
+  String get upgradePackageDesc => 'Unlock more businesses and reviews';
+
+  @override
+  String get upgradeTitle => 'Upgrade Your Plan';
+
+  @override
+  String get upgradeSubtitle =>
+      'Select your new package to unlock more features';
+
+  @override
+  String get currentPackage => 'Current';
+
+  @override
+  String upgradeButton(String package) {
+    return 'Upgrade to $package';
+  }
+
+  @override
+  String get upgradePaymentTitle => 'Upgrade Payment';
+
+  @override
+  String upgradePaymentMsg(String package) {
+    return 'Complete the payment to upgrade your subscription to $package.';
+  }
+
+  @override
+  String get upgradeSuccess => 'Package Upgraded!';
+
+  @override
+  String upgradeSuccessMsg(String package) {
+    return 'Your subscription has been upgraded to $package. Enjoy the new limits!';
+  }
+
+  @override
+  String get upgradeNotAvailable => 'You are on the highest package';
+
+  @override
+  String get forgotPassword => 'Forgot Password';
+
+  @override
+  String get forgotPasswordLink => 'Forgot Password?';
+
+  @override
+  String get forgotPasswordMsg =>
+      'Enter your email address and we\'ll send you a verification code to reset your password.';
+
+  @override
+  String get sendResetCode => 'Send Reset Code';
+
+  @override
+  String get enterResetCode => 'Enter Code';
+
+  @override
+  String get enterResetCodeMsg =>
+      'We\'ve sent a 6-digit code to your email. Please enter it below.';
+
+  @override
+  String get resetCode => 'Verification Code';
+
+  @override
+  String get resetCodeInvalid => 'Code must be 6 digits';
+
+  @override
+  String get verifyCode => 'Verify Code';
+
+  @override
+  String get resendCode => 'Didn\'t receive the code? Send again';
+
+  @override
+  String get newPassword => 'New Password';
+
+  @override
+  String get newPasswordMsg => 'Create a new password for your account.';
+
+  @override
+  String get passwordTooShort => 'Password must be at least 8 characters';
+
+  @override
+  String get resetPasswordButton => 'Reset Password';
+
+  @override
+  String get resetPasswordSuccess => 'Password Reset!';
+
+  @override
+  String get resetPasswordSuccessMsg =>
+      'Your password has been reset successfully. You can now login with your new password.';
 }

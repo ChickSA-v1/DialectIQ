@@ -33,4 +33,13 @@ class PaymentRepository {
     );
     return BankTransferResponse.fromJson(response.data as Map<String, dynamic>);
   }
+
+  /// Request a subscription upgrade
+  Future<UpgradeResponse> requestUpgrade(String targetPackage) async {
+    final response = await _dio.post(
+      '/api/v1/payments/upgrade',
+      data: {'target_package': targetPackage},
+    );
+    return UpgradeResponse.fromJson(response.data as Map<String, dynamic>);
+  }
 }

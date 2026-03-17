@@ -13,7 +13,8 @@ Dio createDio() {
     baseUrl: apiBaseUrl,
     connectTimeout: const Duration(seconds: 15),
     receiveTimeout: const Duration(seconds: 15),
-    headers: {'Content-Type': 'application/json'},
+    // Don't set Content-Type here — Dio auto-detects:
+    // application/json for Map/object, multipart/form-data for FormData
   ));
 
   dio.interceptors.add(AuthInterceptor());

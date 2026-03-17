@@ -68,4 +68,26 @@ class AuthRepository {
       data: reason != null ? {'reason': reason} : null,
     );
   }
+
+  /// Send password reset code to email
+  Future<void> forgotPassword(String email) async {
+    await _dio.post('/api/v1/auth/forgot-password', data: {'email': email});
+  }
+
+  /// Verify the reset code
+  Future<void> verifyResetCode(String email, String code) async {
+    await _dio.post('/api/v1/auth/verify-reset-code', data: {
+      'email': email,
+      'code': code,
+    });
+  }
+
+  /// Reset password with verified code
+  Future<void> resetPassword(String email, String code, String newPassword) async {
+    await _dio.post('/api/v1/auth/reset-password', data: {
+      'email': email,
+      'code': code,
+      'new_password': newPassword,
+    });
+  }
 }

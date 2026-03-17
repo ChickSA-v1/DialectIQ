@@ -447,4 +447,94 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get deleteReasonRequired => 'يرجى اختيار سبب للمتابعة';
+
+  @override
+  String get upgradePackage => 'ترقية الباقة';
+
+  @override
+  String get upgradePackageDesc => 'افتح المزيد من الأنشطة التجارية والتقييمات';
+
+  @override
+  String get upgradeTitle => 'ترقية خطتك';
+
+  @override
+  String get upgradeSubtitle => 'اختر باقتك الجديدة للحصول على مزايا أكثر';
+
+  @override
+  String get currentPackage => 'الحالية';
+
+  @override
+  String upgradeButton(String package) {
+    return 'ترقية إلى $package';
+  }
+
+  @override
+  String get upgradePaymentTitle => 'دفع الترقية';
+
+  @override
+  String upgradePaymentMsg(String package) {
+    return 'أتم الدفع لترقية اشتراكك إلى $package.';
+  }
+
+  @override
+  String get upgradeSuccess => 'تمت ترقية الباقة!';
+
+  @override
+  String upgradeSuccessMsg(String package) {
+    return 'تمت ترقية اشتراكك إلى $package. استمتع بالحدود الجديدة!';
+  }
+
+  @override
+  String get upgradeNotAvailable => 'أنت على أعلى باقة';
+
+  @override
+  String get forgotPassword => 'نسيت كلمة المرور';
+
+  @override
+  String get forgotPasswordLink => 'نسيت كلمة المرور؟';
+
+  @override
+  String get forgotPasswordMsg =>
+      'أدخل بريدك الإلكتروني وسنرسل لك رمز تحقق لإعادة تعيين كلمة المرور.';
+
+  @override
+  String get sendResetCode => 'إرسال رمز التحقق';
+
+  @override
+  String get enterResetCode => 'أدخل الرمز';
+
+  @override
+  String get enterResetCodeMsg =>
+      'أرسلنا رمزاً مكوناً من 6 أرقام إلى بريدك الإلكتروني. يرجى إدخاله أدناه.';
+
+  @override
+  String get resetCode => 'رمز التحقق';
+
+  @override
+  String get resetCodeInvalid => 'الرمز يجب أن يكون 6 أرقام';
+
+  @override
+  String get verifyCode => 'تحقق من الرمز';
+
+  @override
+  String get resendCode => 'لم تستلم الرمز؟ أرسل مرة أخرى';
+
+  @override
+  String get newPassword => 'كلمة المرور الجديدة';
+
+  @override
+  String get newPasswordMsg => 'أنشئ كلمة مرور جديدة لحسابك.';
+
+  @override
+  String get passwordTooShort => 'كلمة المرور يجب أن تكون 8 أحرف على الأقل';
+
+  @override
+  String get resetPasswordButton => 'إعادة تعيين كلمة المرور';
+
+  @override
+  String get resetPasswordSuccess => 'تم تغيير كلمة المرور!';
+
+  @override
+  String get resetPasswordSuccessMsg =>
+      'تم إعادة تعيين كلمة المرور بنجاح. يمكنك الآن تسجيل الدخول بكلمة المرور الجديدة.';
 }

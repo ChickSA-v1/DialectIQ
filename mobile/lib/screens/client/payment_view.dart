@@ -18,7 +18,14 @@ import '../../widgets/glass_card.dart';
 import '../../widgets/locale_switcher.dart';
 
 class PaymentView extends ConsumerStatefulWidget {
-  const PaymentView({super.key});
+  final String? invoiceId;
+  final bool isUpgrade;
+
+  const PaymentView({
+    super.key,
+    this.invoiceId,
+    this.isUpgrade = false,
+  });
 
   @override
   ConsumerState<PaymentView> createState() => _PaymentViewState();
@@ -26,6 +33,13 @@ class PaymentView extends ConsumerStatefulWidget {
 
 class _PaymentViewState extends ConsumerState<PaymentView> {
   File? _receiptFile;
+
+  @override
+  void initState() {
+    super.initState();
+    // Clear any stale error from a previous session
+    Future.microtask(() => ref.read(paymentProvider.notifier).reset());
+  }
 
   bool get _cardPaymentEnabled {
     final profile = ref.read(authProvider).profile;
@@ -61,9 +75,12 @@ class _PaymentViewState extends ConsumerState<PaymentView> {
   }
 
   String? get _latestInvoiceId {
+    // If an explicit invoice ID was passed (upgrade flow), use it
+    if (widget.invoiceId != null) return widget.invoiceId;
+
+    // Original logic for initial payment flow
     final invoices = ref.read(authProvider).profile?.invoices;
     if (invoices == null || invoices.isEmpty) return null;
-    // Find the latest pending invoice, or fall back to the first invoice
     final pending = invoices.where((i) => i.status == 'pending').toList();
     return pending.isNotEmpty ? pending.last.id : invoices.last.id;
   }
@@ -147,15 +164,19 @@ class _PaymentViewState extends ConsumerState<PaymentView> {
                           ),
                         ],
                       ),
-                      child: const Icon(
-                        Icons.payment_rounded,
+                      child: Icon(
+                        widget.isUpgrade
+                            ? Icons.upgrade_rounded
+                            : Icons.payment_rounded,
                         size: 36,
                         color: Colors.white,
                       ),
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      l10n.paymentRequired,
+                      widget.isUpgrade
+                          ? l10n.upgradePaymentTitle
+                          : l10n.paymentRequired,
                       style: const TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
@@ -164,7 +185,10 @@ class _PaymentViewState extends ConsumerState<PaymentView> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      l10n.paymentRequiredMsg,
+                      widget.isUpgrade
+                          ? l10n.upgradePaymentMsg(
+                              ref.read(paymentProvider).upgrade?.targetPackage ?? '')
+                          : l10n.paymentRequiredMsg,
                       style: const TextStyle(
                         fontSize: 14,
                         color: AppColors.textSecondary,

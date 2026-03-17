@@ -4,31 +4,45 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../widgets/animated_glass_background.dart';
 
-/// DialectIQ Glassmorphism Design System
+/// DialectIQ Design System — Brand Identity
 class AppColors {
+  // ── Primary Colors ──
+  static const deepNavy = Color(0xFF0B1B3D);       // Deep Navy
+  static const vibrantCyan = Color(0xFF00D2DF);     // Vibrant Cyan
+
+  // ── Secondary / Accent Colors ──
+  static const goldenYellow = Color(0xFFFBBF24);    // Golden Yellow
+  static const emeraldGreen = Color(0xFF10B981);     // Emerald Green
+  static const coralRed = Color(0xFFF43F5E);         // Coral Red
+
+  // ── Neutral Colors ──
+  static const slateText = Color(0xFF334155);        // Slate Text
+  static const lightBg = Color(0xFFF8FAFC);          // Light Background
+  static const pureWhite = Color(0xFFFFFFFF);        // Pure White
+
   // ── Background gradient ──
-  static const bgStart = Color(0xFF0F0B1E);
-  static const bgEnd = Color(0xFF1A1035);
+  static const bgStart = Color(0xFF0B1B3D);          // Deep Navy
+  static const bgEnd = Color(0xFF091530);            // Deeper Navy
   static const bgGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
     colors: [bgStart, bgEnd],
   );
 
-  // ── Accent gradient ──
-  static const accentStart = Color(0xFF6366F1);
-  static const accentEnd = Color(0xFFA855F7);
+  // ── Accent gradient (Cyan → Golden) ──
+  static const accentStart = Color(0xFF00D2DF);      // Vibrant Cyan
+  static const accentEnd = Color(0xFFFBBF24);        // Golden Yellow
   static const gradient = LinearGradient(
     colors: [accentStart, accentEnd],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
-  // ── Legacy aliases (keep for backward compat) ──
-  static const primary = accentStart;
-  static const primaryStart = accentStart;
-  static const primaryEnd = accentEnd;
-  static const primaryLight = Color(0xFF312E81); // dark indigo for subtle bg
+  // ── Legacy aliases ──
+  static const primary = vibrantCyan;
+  static const primaryStart = vibrantCyan;
+  static const primaryEnd = goldenYellow;
+  static const primaryLight = Color(0xFF0E2247);     // Dark navy for subtle bg
 
   // ── Glass tokens ──
   static final glassWhite = Colors.white.withValues(alpha: 0.08);
@@ -36,10 +50,10 @@ class AppColors {
   static final glassBorder = Colors.white.withValues(alpha: 0.15);
   static final glassHighlight = Colors.white.withValues(alpha: 0.20);
 
-  // ── Semantic colors (brightened for dark bg) ──
-  static const success = Color(0xFF34D399);
-  static const error = Color(0xFFF87171);
-  static const warning = Color(0xFFFBBF24);
+  // ── Semantic colors ──
+  static const success = Color(0xFF10B981);           // Emerald Green
+  static const error = Color(0xFFF43F5E);             // Coral Red
+  static const warning = Color(0xFFFBBF24);           // Golden Yellow
 
   // ── Text on dark background ──
   static const textPrimary = Color(0xFFF1F5F9);
@@ -47,7 +61,7 @@ class AppColors {
   static const textMuted = Color(0xFF64748B);
 
   // ── Surface & borders (glass-aware) ──
-  static const surface = Color(0xFF0F0B1E);
+  static const surface = Color(0xFF0B1B3D);
   static final cardBg = Colors.white.withValues(alpha: 0.08);
   static final border = Colors.white.withValues(alpha: 0.15);
 

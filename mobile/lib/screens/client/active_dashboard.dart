@@ -424,6 +424,42 @@ class _ActiveDashboardState extends ConsumerState<ActiveDashboard> {
                                 minHeight: 6,
                               ),
                             ),
+                            // Upgrade button
+                            if (tenant.package != 'enterprise') ...[
+                              const SizedBox(height: 10),
+                              GestureDetector(
+                                onTap: () => context.push('/upgrade'),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color:
+                                        Colors.white.withValues(alpha: 0.12),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: Colors.white
+                                          .withValues(alpha: 0.20),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(Icons.upgrade,
+                                          size: 14, color: Colors.white),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        l10n.upgradePackage,
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
                             // API Key
                             if (tenant.apiKey != null) ...[
                               const SizedBox(height: 12),

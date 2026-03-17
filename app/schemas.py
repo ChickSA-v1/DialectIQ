@@ -305,3 +305,34 @@ class FetchReviewsResponse(BaseModel):
 
 class DeleteAccountRequest(BaseModel):
     reason: str | None = Field(None, max_length=500, description="Reason for account deletion")
+
+
+# ── Upgrade schemas ─────────────────────────────────────────────────
+
+class UpgradeRequest(BaseModel):
+    target_package: str = Field(..., pattern=r"^(basic|advanced|enterprise)$")
+
+
+class UpgradeResponse(BaseModel):
+    subscription_id: UUID
+    invoice_id: UUID
+    amount_sar: float
+    target_package: str
+    message: str
+
+
+# ── Forgot Password schemas ──────────────────────────────────────────
+
+class ForgotPasswordRequest(BaseModel):
+    email: str = Field(..., max_length=255)
+
+
+class VerifyResetCodeRequest(BaseModel):
+    email: str = Field(..., max_length=255)
+    code: str = Field(..., min_length=6, max_length=6)
+
+
+class ResetPasswordRequest(BaseModel):
+    email: str = Field(..., max_length=255)
+    code: str = Field(..., min_length=6, max_length=6)
+    new_password: str = Field(..., min_length=8, max_length=128)

@@ -59,3 +59,28 @@ class BankTransferResponse {
         message: json['message'] as String,
       );
 }
+
+class UpgradeResponse {
+  final String subscriptionId;
+  final String invoiceId;
+  final double amountSar;
+  final String targetPackage;
+  final String message;
+
+  UpgradeResponse({
+    required this.subscriptionId,
+    required this.invoiceId,
+    required this.amountSar,
+    required this.targetPackage,
+    required this.message,
+  });
+
+  factory UpgradeResponse.fromJson(Map<String, dynamic> json) =>
+      UpgradeResponse(
+        subscriptionId: json['subscription_id'] as String,
+        invoiceId: json['invoice_id'] as String,
+        amountSar: (json['amount_sar'] as num).toDouble(),
+        targetPackage: json['target_package'] as String,
+        message: json['message'] as String,
+      );
+}

@@ -2,7 +2,9 @@
 Auth endpoints: register, login, upload documents, profile, place-id confirmation.
 """
 
+import random
 import uuid
+from datetime import datetime, timedelta, timezone
 
 import structlog
 from fastapi import APIRouter, Body, Depends, File, Form, HTTPException, UploadFile, status
@@ -14,6 +16,7 @@ from app.deps import get_current_user
 from app.models import Document, Invoice, Tenant, User
 from app.schemas import (
     DeleteAccountRequest,
+    ForgotPasswordRequest,
     InvoiceInfo,
     ConfirmPlaceIdRequest,
     ConfirmPlaceIdResponse,
@@ -26,8 +29,10 @@ from app.schemas import (
     PlaceSearchResult,
     RegisterRequest,
     RegisterResponse,
+    ResetPasswordRequest,
     TenantInfo,
     UserProfile,
+    VerifyResetCodeRequest,
 )
 from app.security import create_access_token, hash_password, verify_password
 from app.services.places import (
@@ -36,7 +41,7 @@ from app.services.places import (
     resolve_maps_url,
     search_places,
 )
-from app.services.email import send_new_registration_email
+from app.services.email import send_new_registration_email, send_password_reset_email
 from app.services.storage import upload_document
 
 log = structlog.get_logger()
@@ -48,6 +53,10 @@ PACKAGE_LIMITS = {
     "advanced": {"max_businesses": 5, "max_reviews_per_month": 2000},
     "enterprise": {"max_businesses": 999, "max_reviews_per_month": 999999},
 }
+
+# In-memory store for password reset codes: email -> (code, expires_at)
+_reset_codes: dict[str, tuple[str, datetime]] = {}
+RESET_CODE_TTL_MINUTES = 10
 
 ALLOWED_EXTENSIONS = {"pdf", "jpg", "jpeg", "png"}
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB
@@ -198,6 +207,84 @@ async def login(req: LoginRequest, db: AsyncSession = Depends(get_db)):
         tenant_id=tenant_id,
         tenant_status=tenant_status,
     )
+
+
+# ── Forgot Password ───────────────────────────────────────────────────
+@router.post("/forgot-password", status_code=200)
+async def forgot_password(req: ForgotPasswordRequest, db: AsyncSession = Depends(get_db)):
+    """Send a 6-digit reset code to the user's email."""
+    result = await db.execute(select(User).where(User.email == req.email))
+    user = result.scalar_one_or_none()
+
+    # Always return success to prevent email enumeration
+    if not user:
+        log.info("forgot_password_unknown_email", email=req.email)
+        return {"message": "If this email is registered, a reset code has been sent."}
+
+    code = f"{random.randint(0, 999999):06d}"
+    expires = datetime.now(timezone.utc) + timedelta(minutes=RESET_CODE_TTL_MINUTES)
+    _reset_codes[req.email.lower()] = (code, expires)
+
+    try:
+        await send_password_reset_email(req.email, code)
+    except Exception:
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, "Failed to send reset email. Please try again.")
+
+    log.info("forgot_password_code_sent", email=req.email)
+    return {"message": "If this email is registered, a reset code has been sent."}
+
+
+@router.post("/verify-reset-code", status_code=200)
+async def verify_reset_code(req: VerifyResetCodeRequest):
+    """Verify that the reset code is correct (before showing new-password form)."""
+    email = req.email.lower()
+    entry = _reset_codes.get(email)
+
+    if not entry:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "No reset code found. Please request a new one.")
+
+    code, expires = entry
+    if datetime.now(timezone.utc) > expires:
+        _reset_codes.pop(email, None)
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Reset code has expired. Please request a new one.")
+
+    if req.code != code:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Invalid reset code.")
+
+    return {"message": "Code verified successfully."}
+
+
+@router.post("/reset-password", status_code=200)
+async def reset_password(req: ResetPasswordRequest, db: AsyncSession = Depends(get_db)):
+    """Reset password using email + verified code + new password."""
+    email = req.email.lower()
+    entry = _reset_codes.get(email)
+
+    if not entry:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "No reset code found. Please request a new one.")
+
+    code, expires = entry
+    if datetime.now(timezone.utc) > expires:
+        _reset_codes.pop(email, None)
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Reset code has expired. Please request a new one.")
+
+    if req.code != code:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Invalid reset code.")
+
+    # Update password
+    result = await db.execute(select(User).where(User.email == req.email))
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "User not found.")
+
+    user.password_hash = hash_password(req.new_password)
+    await db.commit()
+
+    # Consume the code
+    _reset_codes.pop(email, None)
+
+    log.info("password_reset_success", email=req.email)
+    return {"message": "Password has been reset successfully."}
 
 
 # ── Profile ────────────────────────────────────────────────────────────

@@ -9,6 +9,9 @@ import '../screens/register/register_screen.dart';
 import '../screens/client/client_screen.dart';
 import '../screens/settings_screen.dart';
 import '../screens/payment_result_screen.dart';
+import '../screens/client/upgrade_screen.dart';
+import '../screens/client/payment_view.dart';
+import '../screens/forgot_password_screen.dart';
 
 CustomTransitionPage<void> _fadeScalePage({
   required LocalKey key,
@@ -55,7 +58,7 @@ final routerProvider = Provider<GoRouter>((ref) {
 
       // Not loading & not logged in → go to login
       // (splash '/' is also redirected to /login once loading is done)
-      final authRoutes = ['/login', '/register'];
+      final authRoutes = ['/login', '/register', '/forgot-password'];
       final isAuthRoute = authRoutes.contains(path);
 
       if (!isLoggedIn && !isAuthRoute && path != '/') {
@@ -82,6 +85,13 @@ final routerProvider = Provider<GoRouter>((ref) {
         pageBuilder: (context, state) => _fadeScalePage(
           key: state.pageKey,
           child: const LoginScreen(),
+        ),
+      ),
+      GoRoute(
+        path: '/forgot-password',
+        pageBuilder: (context, state) => _fadeScalePage(
+          key: state.pageKey,
+          child: const ForgotPasswordScreen(),
         ),
       ),
       GoRoute(
@@ -112,6 +122,23 @@ final routerProvider = Provider<GoRouter>((ref) {
           return _fadeScalePage(
             key: state.pageKey,
             child: PaymentResultScreen(invoiceId: invoiceId),
+          );
+        },
+      ),
+      GoRoute(
+        path: '/upgrade',
+        pageBuilder: (context, state) => _fadeScalePage(
+          key: state.pageKey,
+          child: const UpgradeScreen(),
+        ),
+      ),
+      GoRoute(
+        path: '/upgrade-payment',
+        pageBuilder: (context, state) {
+          final invoiceId = state.uri.queryParameters['invoice_id'] ?? '';
+          return _fadeScalePage(
+            key: state.pageKey,
+            child: PaymentView(invoiceId: invoiceId, isUpgrade: true),
           );
         },
       ),

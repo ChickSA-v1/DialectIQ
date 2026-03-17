@@ -14,13 +14,28 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import get_db
 from app.deps import get_current_user, require_admin, require_owner
 from app.models import Invoice, Subscription, Tenant, User
-from app.schemas import BankTransferUploadResponse, CheckoutRequest, CheckoutResponse, PaymentStatusResponse
+from app.schemas import (
+    BankTransferUploadResponse,
+    CheckoutRequest,
+    CheckoutResponse,
+    PaymentStatusResponse,
+    UpgradeRequest,
+    UpgradeResponse,
+)
 from app.security import generate_api_key
 from app.services.hyperpay import create_checkout, get_payment_status
 from app.services.storage import download_blob, upload_document
 
 ALLOWED_RECEIPT_EXTENSIONS = {"pdf", "jpg", "jpeg", "png"}
 MAX_RECEIPT_SIZE = 10 * 1024 * 1024  # 10 MB
+
+PACKAGE_ORDER = ["basic", "advanced", "enterprise"]
+PACKAGE_PRICES = {"basic": 500.0, "advanced": 1500.0, "enterprise": 2500.0}
+PACKAGE_LIMITS = {
+    "basic": {"max_businesses": 1, "max_reviews_per_month": 500},
+    "advanced": {"max_businesses": 5, "max_reviews_per_month": 2000},
+    "enterprise": {"max_businesses": 999, "max_reviews_per_month": 999999},
+}
 
 log = structlog.get_logger()
 router = APIRouter(prefix="/api/v1/payments", tags=["payments"])
@@ -47,15 +62,31 @@ async def _activate_tenant_after_payment(invoice: Invoice, db: AsyncSession) -> 
         select(Tenant).where(Tenant.id == invoice.tenant_id)
     )
     tenant = t_r.scalar_one_or_none()
-    if tenant and tenant.status != "active":
-        tenant.status = "active"
-        if not tenant.api_key:
-            tenant.api_key = generate_api_key()
-        log.info(
-            "tenant_auto_activated",
-            tenant_id=str(tenant.id),
-            api_key=tenant.api_key[:12] + "...",
-        )
+    if tenant:
+        # Activate if not yet active (initial payment)
+        if tenant.status != "active":
+            tenant.status = "active"
+            if not tenant.api_key:
+                tenant.api_key = generate_api_key()
+            log.info(
+                "tenant_auto_activated",
+                tenant_id=str(tenant.id),
+                api_key=tenant.api_key[:12] + "...",
+            )
+
+        # Upgrade package if the subscription is for a higher package
+        if sub and sub.package != tenant.package:
+            old_package = tenant.package
+            tenant.package = sub.package
+            limits = PACKAGE_LIMITS.get(sub.package, PACKAGE_LIMITS["basic"])
+            tenant.max_businesses = limits["max_businesses"]
+            tenant.max_reviews_per_month = limits["max_reviews_per_month"]
+            log.info(
+                "tenant_package_upgraded",
+                tenant_id=str(tenant.id),
+                from_package=old_package,
+                to_package=sub.package,
+            )
 
     # 3) Activate the owner user
     owner_r = await db.execute(
@@ -487,4 +518,83 @@ async def view_bank_transfer_receipt(
             "Content-Disposition": f"inline; filename*=UTF-8''{filename_encoded}",
             "Cache-Control": "private, max-age=300",
         },
+    )
+
+
+# ── Subscription upgrade ─────────────────────────────────────────────
+@router.post("/upgrade", response_model=UpgradeResponse)
+async def request_upgrade(
+    req: UpgradeRequest,
+    user: User = Depends(require_owner),
+    db: AsyncSession = Depends(get_db),
+):
+    """Request a subscription upgrade to a higher package."""
+    # 1) Fetch tenant
+    t_r = await db.execute(select(Tenant).where(Tenant.id == user.tenant_id))
+    tenant = t_r.scalar_one_or_none()
+    if not tenant:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Tenant not found")
+    if tenant.status != "active":
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Tenant must be active to upgrade")
+
+    # 2) Validate upgrade direction
+    current_idx = PACKAGE_ORDER.index(tenant.package)
+    target_idx = PACKAGE_ORDER.index(req.target_package)
+    if target_idx <= current_idx:
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST,
+            f"Cannot upgrade from {tenant.package} to {req.target_package}. "
+            "Target package must be higher than current.",
+        )
+
+    # 3) Check no pending upgrade invoice exists for this target
+    pending_r = await db.execute(
+        select(Invoice)
+        .join(Subscription)
+        .where(
+            Invoice.tenant_id == tenant.id,
+            Invoice.status == "pending",
+            Subscription.package == req.target_package,
+        )
+    )
+    if pending_r.scalar_one_or_none():
+        raise HTTPException(
+            status.HTTP_409_CONFLICT,
+            "An upgrade invoice is already pending for this package",
+        )
+
+    # 4) Create subscription
+    sub = Subscription(
+        tenant_id=tenant.id,
+        package=req.target_package,
+        status="pending_payment",
+    )
+    db.add(sub)
+    await db.flush()
+
+    # 5) Create invoice
+    amount = PACKAGE_PRICES.get(req.target_package, 2500.0)
+    invoice = Invoice(
+        tenant_id=tenant.id,
+        subscription_id=sub.id,
+        amount_sar=amount,
+        status="pending",
+    )
+    db.add(invoice)
+    await db.commit()
+
+    log.info(
+        "upgrade_requested",
+        tenant_id=str(tenant.id),
+        from_package=tenant.package,
+        to_package=req.target_package,
+        amount=amount,
+    )
+
+    return UpgradeResponse(
+        subscription_id=sub.id,
+        invoice_id=invoice.id,
+        amount_sar=amount,
+        target_package=req.target_package,
+        message=f"Upgrade to {req.target_package} initiated. Please complete payment.",
     )

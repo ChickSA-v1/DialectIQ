@@ -1,9 +1,10 @@
 import logging
 
 import structlog
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import ORJSONResponse
+from fastapi.responses import JSONResponse, ORJSONResponse
 
 from app.api.admin_routes import router as admin_router
 from app.api.auth_routes import place_router, router as auth_router
@@ -42,6 +43,24 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+log = structlog.get_logger()
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    """Log 422 validation errors for debugging."""
+    log.warning(
+        "validation_error",
+        url=str(request.url),
+        method=request.method,
+        errors=exc.errors(),
+    )
+    return JSONResponse(
+        status_code=422,
+        content={"detail": exc.errors()},
+    )
+
 
 app.include_router(router)
 app.include_router(webhooks_router)

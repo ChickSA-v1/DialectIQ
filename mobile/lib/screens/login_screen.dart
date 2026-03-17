@@ -60,39 +60,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 children: [
                   const SizedBox(height: 16),
 
-                  // Glass logo with breathing glow
+                  // Logo with breathing glow
                   FadeSlideIn(
                     child: BreathingGlow(
-                      glowColor: AppColors.accentStart,
+                      glowColor: AppColors.vibrantCyan,
                       minBlur: 12,
                       maxBlur: 28,
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(20),
-                        child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                          child: Container(
-                            width: 68,
-                            height: 68,
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [
-                                  AppColors.accentStart
-                                      .withValues(alpha: 0.25),
-                                  AppColors.accentEnd
-                                      .withValues(alpha: 0.15),
-                                ],
-                              ),
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(
-                                color: Colors.white.withValues(alpha: 0.20),
-                              ),
-                            ),
-                            child: const Icon(
-                              Icons.analytics_rounded,
-                              size: 38,
-                              color: Colors.white,
-                            ),
-                          ),
+                        child: Image.asset(
+                          'assets/images/logo.png',
+                          width: 68,
+                          height: 68,
                         ),
                       ),
                     ),
@@ -189,7 +168,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 12),
+
+                  // Forgot password link
+                  Align(
+                    alignment: AlignmentDirectional.centerEnd,
+                    child: TextButton(
+                      onPressed: () => context.go('/forgot-password'),
+                      child: Text(
+                        l10n.forgotPasswordLink,
+                        style: const TextStyle(
+                          color: AppColors.accentStart,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
 
                   // Error
                   if (auth.error != null)

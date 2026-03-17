@@ -937,6 +937,168 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please select a reason to continue'**
   String get deleteReasonRequired;
+
+  /// No description provided for @upgradePackage.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade Package'**
+  String get upgradePackage;
+
+  /// No description provided for @upgradePackageDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock more businesses and reviews'**
+  String get upgradePackageDesc;
+
+  /// No description provided for @upgradeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade Your Plan'**
+  String get upgradeTitle;
+
+  /// No description provided for @upgradeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select your new package to unlock more features'**
+  String get upgradeSubtitle;
+
+  /// No description provided for @currentPackage.
+  ///
+  /// In en, this message translates to:
+  /// **'Current'**
+  String get currentPackage;
+
+  /// No description provided for @upgradeButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade to {package}'**
+  String upgradeButton(String package);
+
+  /// No description provided for @upgradePaymentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade Payment'**
+  String get upgradePaymentTitle;
+
+  /// No description provided for @upgradePaymentMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete the payment to upgrade your subscription to {package}.'**
+  String upgradePaymentMsg(String package);
+
+  /// No description provided for @upgradeSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Package Upgraded!'**
+  String get upgradeSuccess;
+
+  /// No description provided for @upgradeSuccessMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Your subscription has been upgraded to {package}. Enjoy the new limits!'**
+  String upgradeSuccessMsg(String package);
+
+  /// No description provided for @upgradeNotAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'You are on the highest package'**
+  String get upgradeNotAvailable;
+
+  /// No description provided for @forgotPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot Password'**
+  String get forgotPassword;
+
+  /// No description provided for @forgotPasswordLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot Password?'**
+  String get forgotPasswordLink;
+
+  /// No description provided for @forgotPasswordMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your email address and we\'ll send you a verification code to reset your password.'**
+  String get forgotPasswordMsg;
+
+  /// No description provided for @sendResetCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Reset Code'**
+  String get sendResetCode;
+
+  /// No description provided for @enterResetCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Code'**
+  String get enterResetCode;
+
+  /// No description provided for @enterResetCodeMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'ve sent a 6-digit code to your email. Please enter it below.'**
+  String get enterResetCodeMsg;
+
+  /// No description provided for @resetCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification Code'**
+  String get resetCode;
+
+  /// No description provided for @resetCodeInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Code must be 6 digits'**
+  String get resetCodeInvalid;
+
+  /// No description provided for @verifyCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify Code'**
+  String get verifyCode;
+
+  /// No description provided for @resendCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Didn\'t receive the code? Send again'**
+  String get resendCode;
+
+  /// No description provided for @newPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'New Password'**
+  String get newPassword;
+
+  /// No description provided for @newPasswordMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a new password for your account.'**
+  String get newPasswordMsg;
+
+  /// No description provided for @passwordTooShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Password must be at least 8 characters'**
+  String get passwordTooShort;
+
+  /// No description provided for @resetPasswordButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset Password'**
+  String get resetPasswordButton;
+
+  /// No description provided for @resetPasswordSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Password Reset!'**
+  String get resetPasswordSuccess;
+
+  /// No description provided for @resetPasswordSuccessMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Your password has been reset successfully. You can now login with your new password.'**
+  String get resetPasswordSuccessMsg;
 }
 
 class _AppLocalizationsDelegate

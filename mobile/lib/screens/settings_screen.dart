@@ -126,6 +126,40 @@ class SettingsScreen extends ConsumerWidget {
               const SizedBox(height: 16),
             ],
 
+            // Upgrade package (only for active non-enterprise tenants)
+            if (tenant != null &&
+                tenant.status == 'active' &&
+                tenant.package != 'enterprise') ...[
+              FadeSlideIn(
+                delay: const Duration(milliseconds: 50),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                    child: Container(
+                      decoration: AppColors.glassDecoration(radius: 20),
+                      child: ListTile(
+                        leading: Icon(Icons.upgrade,
+                            color: AppColors.accentStart),
+                        title: Text(l10n.upgradePackage,
+                            style: const TextStyle(
+                                color: AppColors.textPrimary)),
+                        subtitle: Text(l10n.upgradePackageDesc,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: AppColors.textSecondary,
+                            )),
+                        trailing: Icon(Icons.arrow_forward_ios,
+                            size: 16, color: AppColors.textSecondary),
+                        onTap: () => context.push('/upgrade'),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
+
             // Language switcher
             FadeSlideIn(
               delay: const Duration(milliseconds: 100),

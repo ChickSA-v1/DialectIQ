@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../app/theme.dart';
 import '../widgets/animated_glass_background.dart';
@@ -32,36 +31,15 @@ class SplashScreen extends StatelessWidget {
                   );
                 },
                 child: BreathingGlow(
-                  glowColor: AppColors.accentStart,
+                  glowColor: AppColors.vibrantCyan,
                   minBlur: 16,
                   maxBlur: 36,
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(24),
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-                      child: Container(
-                        width: 88,
-                        height: 88,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              AppColors.accentStart.withValues(alpha: 0.25),
-                              AppColors.accentEnd.withValues(alpha: 0.15),
-                            ],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          borderRadius: BorderRadius.circular(24),
-                          border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.20),
-                          ),
-                        ),
-                        child: const Icon(
-                          Icons.analytics_rounded,
-                          size: 48,
-                          color: Colors.white,
-                        ),
-                      ),
+                    child: Image.asset(
+                      'assets/images/logo.png',
+                      width: 88,
+                      height: 88,
                     ),
                   ),
                 ),
