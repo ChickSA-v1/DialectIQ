@@ -92,14 +92,33 @@ export default function TenantsPage() {
 
   // ── Actions ──
 
-  const handleActivate = async (tenantId: string) => {
+  const handleActivate = async (tenantId: string, force: boolean = false) => {
     setActionLoading(tenantId);
     try {
-      const res = await activateTenant(tenantId);
+      const res = await activateTenant(tenantId, force);
       alert(`${t("admin.activated" as any)} — API Key: ${res.api_key}`);
       await load();
     } catch (err: any) {
-      alert(err.message);
+      // If no paid invoice, offer force activation with disclaimer
+      if (err.message?.includes("No paid invoice")) {
+        const confirmed = window.confirm(
+          "⚠️ تنبيه: لا يوجد فاتورة مدفوعة لهذا العميل.\n\n" +
+          "هل تريد التفعيل بدون فاتورة؟\n" +
+          "Warning: No paid invoice found for this tenant.\n" +
+          "Do you want to activate without an invoice?"
+        );
+        if (confirmed) {
+          try {
+            const res = await activateTenant(tenantId, true);
+            alert(`${t("admin.activated" as any)} (بدون فاتورة) — API Key: ${res.api_key}`);
+            await load();
+          } catch (err2: any) {
+            alert(err2.message);
+          }
+        }
+      } else {
+        alert(err.message);
+      }
     } finally {
       setActionLoading(null);
     }

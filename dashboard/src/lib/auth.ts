@@ -210,9 +210,13 @@ export async function fetchTenants(
 }
 
 export async function activateTenant(
-  tenantId: string
+  tenantId: string,
+  force: boolean = false
 ): Promise<{ message: string; api_key: string }> {
-  const res = await authFetch(`/api/v1/admin/tenants/${tenantId}/activate`, {
+  const url = force
+    ? `/api/v1/admin/tenants/${tenantId}/activate?force=true`
+    : `/api/v1/admin/tenants/${tenantId}/activate`;
+  const res = await authFetch(url, {
     method: "POST",
   });
   if (!res.ok) {

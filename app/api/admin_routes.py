@@ -323,6 +323,7 @@ async def list_tenants(
 @router.post("/tenants/{tenant_id}/activate")
 async def activate_tenant(
     tenant_id: str,
+    force: bool = False,
     _admin: User = Depends(require_admin),
     db: AsyncSession = Depends(get_db),
 ):
@@ -335,7 +336,7 @@ async def activate_tenant(
     if tenant.status == "active":
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Tenant is already active")
 
-    # Check that payment is done
+    # Check that payment is done (unless force=true for admin override)
     inv_r = await db.execute(
         select(Invoice).where(
             Invoice.tenant_id == tenant.id,
@@ -343,7 +344,7 @@ async def activate_tenant(
         )
     )
     paid_invoice = inv_r.scalar_one_or_none()
-    if not paid_invoice:
+    if not paid_invoice and not force:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "No paid invoice found. Payment required before activation.")
 
     # Generate API key
