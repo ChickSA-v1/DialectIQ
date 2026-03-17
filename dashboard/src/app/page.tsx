@@ -16,7 +16,6 @@ import {
   ChevronUp,
   CheckCircle,
   ArrowRight,
-  Play,
   Zap,
   BarChart3,
   Shield,
@@ -242,10 +241,6 @@ function Hero() {
                 {t("landing.hero.cta.primary")}
                 <ArrowRight className="w-4 h-4" />
               </a>
-              <button className="glass-card text-gray-700 font-medium px-8 py-3.5 rounded-xl hover:shadow-lg transition-shadow flex items-center gap-2">
-                <Play className="w-4 h-4 text-cyan-600" />
-                {t("landing.hero.cta.secondary")}
-              </button>
             </div>
 
             {/* Floating stat badges */}
