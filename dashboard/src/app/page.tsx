@@ -347,44 +347,139 @@ function Features() {
   ];
 
   return (
-    <section id="features" className="py-20 md:py-28">
-      <div ref={ref} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="features" className="py-20 md:py-28 relative overflow-hidden">
+      {/* Background decorations */}
+      <div className="absolute top-20 start-0 w-72 h-72 bg-cyan-100/40 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-20 end-0 w-72 h-72 bg-amber-100/40 rounded-full blur-3xl pointer-events-none" />
+
+      <div ref={ref} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         {/* Header */}
         <div className="text-center mb-16">
-          <span className="inline-block bg-cyan-50 text-cyan-700 text-sm font-medium px-4 py-1.5 rounded-full mb-4">
+          <span className="inline-flex items-center gap-2 bg-gradient-to-r from-cyan-50 to-amber-50 border border-cyan-200/60 text-sm font-semibold px-5 py-2 rounded-full mb-5" style={{ color: '#0B1B3D' }}>
+            <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse-soft" />
             {t("landing.features.badge")}
           </span>
-          <h2 className="text-3xl sm:text-4xl font-bold mb-4">{t("landing.features.title")}</h2>
-          <p className="text-gray-600 max-w-xl mx-auto">{t("landing.features.subtitle")}</p>
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-5" style={{ color: '#0B1B3D' }}>{t("landing.features.title")}</h2>
+          <p className="text-gray-500 max-w-2xl mx-auto text-base sm:text-lg">{t("landing.features.subtitle")}</p>
         </div>
 
-        {/* Grid */}
-        <div className="grid sm:grid-cols-2 gap-6 lg:gap-8">
-          {features.map((f, i) => (
-            <div
-              key={i}
-              className="glass-card glass-card-hover rounded-2xl overflow-hidden"
-              style={{ animationDelay: `${i * 0.1}s` }}
-            >
-              <div className={`${f.stripe} h-1`} />
-              <div className="p-6 sm:p-8">
-                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${f.accent} flex items-center justify-center mb-4 shadow-lg`}>
-                  {f.icon}
-                </div>
-                <h3 className="text-lg font-semibold mb-2">{f.title}</h3>
-                <p className="text-gray-600 text-sm leading-relaxed mb-3">{f.desc}</p>
-                {f.pills && (
-                  <div className="flex flex-wrap gap-2">
-                    {f.pills.map((p) => (
-                      <span key={p} className="text-xs bg-cyan-50 text-cyan-700 px-2.5 py-1 rounded-full font-medium">
-                        {p}
-                      </span>
-                    ))}
+        {/* Bento Grid */}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-6">
+          {/* Feature 1 — Large card spanning 2 cols */}
+          <div
+            className="sm:col-span-2 lg:col-span-2 group relative rounded-3xl overflow-hidden border border-gray-200/60 bg-white hover:shadow-xl transition-all duration-500 hover:-translate-y-1"
+            style={{ animationDelay: '0s' }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-cyan-50/80 via-transparent to-amber-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="relative p-8 sm:p-10">
+              <div className="flex items-start justify-between gap-6">
+                <div className="flex-1">
+                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-cyan-500 to-teal-400 flex items-center justify-center mb-5 shadow-lg shadow-cyan-200/50 group-hover:scale-110 transition-transform duration-300">
+                    {features[0].icon}
                   </div>
-                )}
+                  <h3 className="text-xl sm:text-2xl font-bold mb-3" style={{ color: '#0B1B3D' }}>{features[0].title}</h3>
+                  <p className="text-gray-500 text-sm sm:text-base leading-relaxed mb-5 max-w-lg">{features[0].desc}</p>
+                  {features[0].pills && (
+                    <div className="flex flex-wrap gap-2">
+                      {features[0].pills.map((p) => (
+                        <span key={p} className="text-xs font-semibold px-3 py-1.5 rounded-full border border-cyan-200 bg-white text-cyan-700 shadow-sm group-hover:bg-cyan-50 transition-colors">
+                          {p}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <div className="hidden sm:block w-28 h-28 rounded-2xl bg-gradient-to-br from-cyan-100 to-cyan-50 flex items-center justify-center opacity-60 group-hover:opacity-100 transition-opacity">
+                  <Globe className="w-16 h-16 text-cyan-300 mx-auto mt-6" />
+                </div>
               </div>
             </div>
-          ))}
+          </div>
+
+          {/* Feature 2 — Tall card */}
+          <div
+            className="group relative rounded-3xl overflow-hidden border border-gray-200/60 bg-white hover:shadow-xl transition-all duration-500 hover:-translate-y-1"
+            style={{ animationDelay: '0.1s' }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-emerald-50/80 via-transparent to-teal-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="relative p-8">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-400 flex items-center justify-center mb-5 shadow-lg shadow-emerald-200/50 group-hover:scale-110 transition-transform duration-300">
+                {features[1].icon}
+              </div>
+              <h3 className="text-xl font-bold mb-3" style={{ color: '#0B1B3D' }}>{features[1].title}</h3>
+              <p className="text-gray-500 text-sm leading-relaxed">{features[1].desc}</p>
+              {/* Mini chart visual */}
+              <div className="mt-6 flex items-end gap-1.5 h-16">
+                {[40, 65, 45, 80, 55, 90, 70].map((h, i) => (
+                  <div
+                    key={i}
+                    className="flex-1 rounded-t-md bg-gradient-to-t from-emerald-400 to-emerald-200 group-hover:from-emerald-500 group-hover:to-emerald-300 transition-all duration-500"
+                    style={{ height: `${h}%`, transitionDelay: `${i * 50}ms` }}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Feature 3 */}
+          <div
+            className="group relative rounded-3xl overflow-hidden border border-gray-200/60 bg-white hover:shadow-xl transition-all duration-500 hover:-translate-y-1"
+            style={{ animationDelay: '0.2s' }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-amber-50/80 via-transparent to-yellow-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="relative p-8">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-400 to-yellow-400 flex items-center justify-center mb-5 shadow-lg shadow-amber-200/50 group-hover:scale-110 transition-transform duration-300">
+                {features[2].icon}
+              </div>
+              <h3 className="text-xl font-bold mb-3" style={{ color: '#0B1B3D' }}>{features[2].title}</h3>
+              <p className="text-gray-500 text-sm leading-relaxed mb-5">{features[2].desc}</p>
+              {/* Chat bubble visual */}
+              <div className="space-y-2">
+                <div className="bg-gray-100 rounded-2xl rounded-tl-sm px-4 py-2.5 text-xs text-gray-500 w-3/4">
+                  <div className="h-2 bg-gray-200 rounded w-full mb-1" />
+                  <div className="h-2 bg-gray-200 rounded w-2/3" />
+                </div>
+                <div className="bg-gradient-to-r from-amber-400 to-yellow-300 rounded-2xl rounded-tr-sm px-4 py-2.5 text-xs text-white w-3/4 ms-auto shadow-sm">
+                  <div className="h-2 bg-white/40 rounded w-full mb-1" />
+                  <div className="h-2 bg-white/40 rounded w-1/2" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Feature 4 — Wide card spanning 2 cols */}
+          <div
+            className="sm:col-span-2 group relative rounded-3xl overflow-hidden border border-gray-200/60 bg-white hover:shadow-xl transition-all duration-500 hover:-translate-y-1"
+            style={{ animationDelay: '0.3s' }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-rose-50/80 via-transparent to-pink-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="relative p-8 sm:p-10">
+              <div className="flex items-start justify-between gap-6">
+                <div className="flex-1">
+                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-rose-500 to-pink-400 flex items-center justify-center mb-5 shadow-lg shadow-rose-200/50 group-hover:scale-110 transition-transform duration-300">
+                    {features[3].icon}
+                  </div>
+                  <h3 className="text-xl sm:text-2xl font-bold mb-3" style={{ color: '#0B1B3D' }}>{features[3].title}</h3>
+                  <p className="text-gray-500 text-sm sm:text-base leading-relaxed max-w-lg">{features[3].desc}</p>
+                </div>
+                {/* Map pin visual */}
+                <div className="hidden sm:flex items-center gap-3">
+                  {[
+                    { city: "RUH", color: "bg-cyan-400" },
+                    { city: "JED", color: "bg-amber-400" },
+                    { city: "DMM", color: "bg-emerald-400" },
+                  ].map((pin) => (
+                    <div key={pin.city} className="text-center group-hover:scale-105 transition-transform">
+                      <div className={`w-10 h-10 ${pin.color} rounded-full flex items-center justify-center shadow-md mb-1`}>
+                        <MapPin className="w-5 h-5 text-white" />
+                      </div>
+                      <span className="text-[10px] font-bold text-gray-400">{pin.city}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
