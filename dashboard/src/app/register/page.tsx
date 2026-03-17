@@ -109,9 +109,7 @@ function RegisterWizard() {
       <div className="max-w-2xl mx-auto">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 bg-indigo-600 text-white font-bold text-2xl rounded-xl mb-4">
-            D
-          </div>
+          <img src="/images/logo.png" alt="DialectIQ" className="w-14 h-14 rounded-xl mb-4 inline-block" />
           <h1 className="text-2xl font-bold text-gray-900">{t("register.title")}</h1>
           <p className="text-sm text-gray-500 mt-1">{t("register.subtitle")}</p>
         </div>
@@ -123,7 +121,7 @@ function RegisterWizard() {
               <div
                 className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${
                   STEPS.indexOf(step) >= i
-                    ? "bg-indigo-600 text-white"
+                    ? "bg-cyan-600 text-white"
                     : "bg-gray-200 text-gray-500"
                 }`}
               >
@@ -132,7 +130,7 @@ function RegisterWizard() {
               {i < STEPS.length - 1 && (
                 <div
                   className={`w-12 h-0.5 ${
-                    STEPS.indexOf(step) > i ? "bg-indigo-600" : "bg-gray-200"
+                    STEPS.indexOf(step) > i ? "bg-cyan-600" : "bg-gray-200"
                   }`}
                 />
               )}
@@ -150,7 +148,7 @@ function RegisterWizard() {
         {step === "info" && (
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-4">
             <div className="flex items-center gap-2 mb-2">
-              <Building2 className="w-5 h-5 text-indigo-600" />
+              <Building2 className="w-5 h-5 text-cyan-600" />
               <h2 className="text-lg font-semibold text-gray-800">{t("register.businessInfo")}</h2>
             </div>
 
@@ -162,7 +160,7 @@ function RegisterWizard() {
                 <input
                   value={form.business_name_ar}
                   onChange={(e) => setForm({ ...form, business_name_ar: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-cyan-500 outline-none"
                   dir="rtl"
                   required
                 />
@@ -174,7 +172,7 @@ function RegisterWizard() {
                 <input
                   value={form.business_name_en}
                   onChange={(e) => setForm({ ...form, business_name_en: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-cyan-500 outline-none"
                   dir="ltr"
                 />
               </div>
@@ -187,7 +185,7 @@ function RegisterWizard() {
               <input
                 value={form.full_name}
                 onChange={(e) => setForm({ ...form, full_name: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-cyan-500 outline-none"
                 required
               />
             </div>
@@ -201,7 +199,7 @@ function RegisterWizard() {
                   type="email"
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-cyan-500 outline-none"
                   dir="ltr"
                   required
                 />
@@ -214,7 +212,7 @@ function RegisterWizard() {
                   type="tel"
                   value={form.phone}
                   onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-cyan-500 outline-none"
                   dir="ltr"
                   placeholder="+966"
                   required
@@ -230,7 +228,7 @@ function RegisterWizard() {
                 type="password"
                 value={form.password}
                 onChange={(e) => setForm({ ...form, password: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-cyan-500 outline-none"
                 dir="ltr"
                 minLength={8}
                 required
@@ -241,14 +239,14 @@ function RegisterWizard() {
             <button
               onClick={() => setStep("package")}
               disabled={!form.business_name_ar || !form.email || !form.password || !form.full_name || !form.phone}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors disabled:opacity-50"
+              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-cyan-600 text-white rounded-lg text-sm font-medium hover:bg-cyan-700 transition-colors disabled:opacity-50"
             >
               {t("register.next")}
             </button>
 
             <p className="text-center text-sm text-gray-500">
               {t("register.haveAccount")}{" "}
-              <a href="/login" className="text-indigo-600 hover:text-indigo-700 font-medium">
+              <a href="/login" className="text-cyan-600 hover:text-cyan-700 font-medium">
                 {t("auth.login")}
               </a>
             </p>
@@ -259,7 +257,7 @@ function RegisterWizard() {
         {step === "package" && (
           <div className="space-y-4">
             <div className="flex items-center gap-2 mb-2">
-              <CreditCard className="w-5 h-5 text-indigo-600" />
+              <CreditCard className="w-5 h-5 text-cyan-600" />
               <h2 className="text-lg font-semibold text-gray-800">{t("register.choosePackage")}</h2>
             </div>
 
@@ -270,17 +268,17 @@ function RegisterWizard() {
                   onClick={() => setSelectedPkg(pkg.key)}
                   className={`relative bg-white rounded-xl border-2 p-5 text-start transition-all ${
                     selectedPkg === pkg.key
-                      ? "border-indigo-600 shadow-md"
+                      ? "border-cyan-600 shadow-md"
                       : "border-gray-200 hover:border-gray-300"
                   }`}
                 >
                   {selectedPkg === pkg.key && (
                     <div className="absolute top-3 end-3">
-                      <CheckCircle className="w-5 h-5 text-indigo-600" />
+                      <CheckCircle className="w-5 h-5 text-cyan-600" />
                     </div>
                   )}
                   {pkg.key === "advanced" && (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded-full text-xs font-medium mb-2">
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-cyan-100 text-cyan-700 rounded-full text-xs font-medium mb-2">
                       <Sparkles className="w-3 h-3" />
                       {t("register.popular")}
                     </span>
@@ -289,7 +287,7 @@ function RegisterWizard() {
                     {t(`package.${pkg.key}` as any)}
                   </h3>
                   <div className="mt-2">
-                    <span className="text-3xl font-bold text-indigo-600">{pkg.price}</span>
+                    <span className="text-3xl font-bold text-cyan-600">{pkg.price}</span>
                     <span className="text-sm text-gray-500 ms-1">{t("register.sarMonth")}</span>
                   </div>
                   <ul className="mt-3 space-y-1 text-sm text-gray-600">
@@ -319,7 +317,7 @@ function RegisterWizard() {
               <button
                 onClick={handleRegister}
                 disabled={loading}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors disabled:opacity-50"
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-cyan-600 text-white rounded-lg text-sm font-medium hover:bg-cyan-700 transition-colors disabled:opacity-50"
               >
                 {loading ? t("register.submitting") : t("register.submitRegistration")}
               </button>
@@ -331,7 +329,7 @@ function RegisterWizard() {
         {step === "documents" && (
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-4">
             <div className="flex items-center gap-2 mb-2">
-              <FileText className="w-5 h-5 text-indigo-600" />
+              <FileText className="w-5 h-5 text-cyan-600" />
               <h2 className="text-lg font-semibold text-gray-800">{t("register.uploadDocs")}</h2>
             </div>
             <p className="text-sm text-gray-500">{t("register.uploadDocsDesc")}</p>
@@ -341,7 +339,7 @@ function RegisterWizard() {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 {t("register.commercialReg")} *
               </label>
-              <label className="flex items-center gap-3 px-4 py-4 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-indigo-400 transition-colors">
+              <label className="flex items-center gap-3 px-4 py-4 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-cyan-400 transition-colors">
                 <Upload className="w-5 h-5 text-gray-400" />
                 <span className="text-sm text-gray-500">
                   {crFile ? crFile.name : t("register.chooseFile")}
@@ -360,7 +358,7 @@ function RegisterWizard() {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 {t("register.ownerId")} *
               </label>
-              <label className="flex items-center gap-3 px-4 py-4 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-indigo-400 transition-colors">
+              <label className="flex items-center gap-3 px-4 py-4 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-cyan-400 transition-colors">
                 <Upload className="w-5 h-5 text-gray-400" />
                 <span className="text-sm text-gray-500">
                   {idFile ? idFile.name : t("register.chooseFile")}
@@ -379,7 +377,7 @@ function RegisterWizard() {
             <button
               onClick={handleUpload}
               disabled={uploading || !crFile || !idFile}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors disabled:opacity-50"
+              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-cyan-600 text-white rounded-lg text-sm font-medium hover:bg-cyan-700 transition-colors disabled:opacity-50"
             >
               <Upload className="w-4 h-4" />
               {uploading ? t("register.uploading") : t("register.uploadAndSubmit")}
@@ -399,7 +397,7 @@ function RegisterWizard() {
             <p className="text-sm text-gray-500 mb-6">{t("register.successDesc")}</p>
             <a
               href="/login"
-              className="inline-flex items-center gap-2 px-6 py-2.5 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors"
+              className="inline-flex items-center gap-2 px-6 py-2.5 bg-cyan-600 text-white rounded-lg text-sm font-medium hover:bg-cyan-700 transition-colors"
             >
               {t("auth.login")}
             </a>

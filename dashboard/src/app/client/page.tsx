@@ -187,7 +187,7 @@ function ClientDashboard() {
           <div className="w-12 h-12 gradient-primary rounded-2xl flex items-center justify-center mx-auto mb-3 animate-pulse-soft">
             <span className="text-white font-bold text-lg">D</span>
           </div>
-          <Loader2 className="w-5 h-5 animate-spin text-indigo-400 mx-auto" />
+          <Loader2 className="w-5 h-5 animate-spin text-cyan-400 mx-auto" />
         </div>
       </div>
     );
@@ -413,13 +413,13 @@ function ClientDashboard() {
                   </p>
                   <button
                     onClick={() => setPaymentMethod("card")}
-                    className="w-full flex items-center gap-4 p-4 bg-white border-2 border-gray-200 rounded-xl hover:border-indigo-400 hover:bg-indigo-50/30 transition-all group"
+                    className="w-full flex items-center gap-4 p-4 bg-white border-2 border-gray-200 rounded-xl hover:border-cyan-400 hover:bg-cyan-50/30 transition-all group"
                   >
                     <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center shrink-0">
                       <CreditCard className="w-6 h-6 text-white" />
                     </div>
                     <div className="text-start flex-1">
-                      <p className="font-semibold text-gray-900 group-hover:text-indigo-700 transition-colors">
+                      <p className="font-semibold text-gray-900 group-hover:text-cyan-700 transition-colors">
                         {t("payment.cardPayment" as any)}
                       </p>
                       <p className="text-xs text-gray-500 mt-0.5">
@@ -449,7 +449,7 @@ function ClientDashboard() {
                 <div className="space-y-3">
                   <button
                     onClick={() => setPaymentMethod(null)}
-                    className="text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+                    className="text-sm text-cyan-600 hover:text-cyan-700 font-medium"
                   >
                     ← {t("register.back")}
                   </button>
@@ -476,7 +476,7 @@ function ClientDashboard() {
                 <div className="space-y-4">
                   <button
                     onClick={() => setPaymentMethod(null)}
-                    className="text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+                    className="text-sm text-cyan-600 hover:text-cyan-700 font-medium"
                   >
                     ← {t("register.back")}
                   </button>
@@ -505,7 +505,7 @@ function ClientDashboard() {
                     <p className="text-xs text-gray-500">
                       {t("payment.uploadReceiptDesc" as any)}
                     </p>
-                    <label className="flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-indigo-400 hover:bg-indigo-50/20 transition-colors">
+                    <label className="flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-cyan-400 hover:bg-cyan-50/20 transition-colors">
                       <Upload className="w-4 h-4 text-gray-400" />
                       <span className="text-sm text-gray-500">
                         {receiptFile ? receiptFile.name : t("payment.chooseReceipt" as any)}
@@ -557,8 +557,8 @@ function ClientDashboard() {
           <>
             {/* Welcome banner (first visit) */}
             {showWelcome && (
-              <div className="glass-card rounded-2xl p-6 border-indigo-200/50 animate-slide-up overflow-hidden relative">
-                <div className="absolute top-0 end-0 w-32 h-32 bg-gradient-to-bl from-indigo-100/40 to-transparent rounded-bl-full" />
+              <div className="glass-card rounded-2xl p-6 border-cyan-200/50 animate-slide-up overflow-hidden relative">
+                <div className="absolute top-0 end-0 w-32 h-32 bg-gradient-to-bl from-cyan-100/40 to-transparent rounded-bl-full" />
                 <div className="flex items-start gap-4 relative">
                   <div className="p-3 rounded-2xl gradient-primary shrink-0">
                     <Sparkles className="w-6 h-6 text-white" />
@@ -595,8 +595,8 @@ function ClientDashboard() {
             <div className="glass-card rounded-2xl p-5 animate-slide-up" style={{ animationDelay: "100ms" }}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="p-2 rounded-xl bg-indigo-50">
-                    <Key className="w-4 h-4 text-indigo-600" />
+                  <div className="p-2 rounded-xl bg-cyan-50">
+                    <Key className="w-4 h-4 text-cyan-600" />
                   </div>
                   <h3 className="font-bold text-gray-800">
                     {t("client.apiKey")}
@@ -605,7 +605,7 @@ function ClientDashboard() {
                 {tenant?.api_key && (
                   <button
                     onClick={copyKey}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 text-indigo-600 rounded-xl text-sm font-medium hover:bg-indigo-100 transition-colors"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-cyan-50 text-cyan-600 rounded-xl text-sm font-medium hover:bg-cyan-100 transition-colors"
                   >
                     <Copy className="w-3.5 h-3.5" />
                     {copiedKey ? t("admin.copied") : t("client.copy")}
@@ -685,8 +685,8 @@ function ClientDashboard() {
             <div className="glass-card rounded-2xl p-5 animate-slide-up" style={{ animationDelay: "300ms" }}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="p-2 rounded-xl bg-violet-50">
-                    <MessageSquareText className="w-4 h-4 text-violet-600" />
+                  <div className="p-2 rounded-xl bg-amber-50">
+                    <MessageSquareText className="w-4 h-4 text-amber-600" />
                   </div>
                   <h3 className="font-bold text-gray-800">
                     {t("client.fetchReviews")}

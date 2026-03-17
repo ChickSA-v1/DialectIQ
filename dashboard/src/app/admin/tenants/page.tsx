@@ -260,7 +260,7 @@ export default function TenantsPage() {
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+          className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-cyan-500 outline-none"
         >
           <option value="">{t("admin.allStatuses")}</option>
           <option value="active">{t("tenant.active")}</option>
@@ -300,7 +300,7 @@ export default function TenantsPage() {
                 </div>
 
                 {/* Package */}
-                <span className="px-2 py-0.5 bg-indigo-50 text-indigo-700 rounded text-xs font-medium">
+                <span className="px-2 py-0.5 bg-cyan-50 text-cyan-700 rounded text-xs font-medium">
                   {t(`package.${tenant.package}` as any)}
                 </span>
 
@@ -361,7 +361,7 @@ export default function TenantsPage() {
                     onClick={() => togglePlaces(tenant.id)}
                     className={`flex items-center gap-1 px-2.5 py-1.5 border rounded-lg text-xs font-medium transition-colors ${
                       expandedTenant === tenant.id
-                        ? "bg-indigo-50 text-indigo-700 border-indigo-200"
+                        ? "bg-cyan-50 text-cyan-700 border-cyan-200"
                         : "text-gray-600 border-gray-200 hover:bg-gray-50"
                     }`}
                   >
@@ -463,7 +463,7 @@ export default function TenantsPage() {
               {expandedTenant === tenant.id && (
                 <div className="border-t border-gray-200 bg-gray-50 px-4 py-4">
                   <div className="flex items-center gap-2 mb-3">
-                    <MapPin className="w-4 h-4 text-indigo-600" />
+                    <MapPin className="w-4 h-4 text-cyan-600" />
                     <span className="text-sm font-medium text-gray-700">
                       {t("admin.placeIds" as any)}
                     </span>
@@ -570,13 +570,13 @@ export default function TenantsPage() {
                         handlePlaceSearch(tenant.id)
                       }
                       placeholder={t("admin.searchBusiness" as any)}
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-cyan-500 outline-none"
                       dir="auto"
                     />
                     <button
                       onClick={() => handlePlaceSearch(tenant.id)}
                       disabled={placeSearching || !placeSearchQuery.trim()}
-                      className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                      className="flex items-center gap-1.5 px-4 py-2 bg-cyan-600 text-white rounded-lg text-sm font-medium hover:bg-cyan-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
                     >
                       {placeSearching ? (
                         <Loader2 className="w-4 h-4 animate-spin" />
@@ -682,7 +682,7 @@ export default function TenantsPage() {
                   onChange={(e) =>
                     setEditForm({ ...editForm, name_ar: e.target.value })
                   }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-cyan-500 outline-none"
                   dir="rtl"
                 />
               </div>
@@ -695,7 +695,7 @@ export default function TenantsPage() {
                   onChange={(e) =>
                     setEditForm({ ...editForm, name_en: e.target.value })
                   }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-cyan-500 outline-none"
                   dir="ltr"
                 />
               </div>
@@ -708,7 +708,7 @@ export default function TenantsPage() {
                   onChange={(e) =>
                     setEditForm({ ...editForm, email: e.target.value })
                   }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-cyan-500 outline-none"
                   dir="ltr"
                 />
               </div>
@@ -721,7 +721,7 @@ export default function TenantsPage() {
                   onChange={(e) =>
                     setEditForm({ ...editForm, phone: e.target.value })
                   }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-cyan-500 outline-none"
                   dir="ltr"
                 />
               </div>
@@ -734,7 +734,7 @@ export default function TenantsPage() {
                   onChange={(e) =>
                     setEditForm({ ...editForm, package: e.target.value })
                   }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-cyan-500 outline-none"
                 >
                   <option value="basic">{t("package.basic")}</option>
                   <option value="advanced">{t("package.advanced")}</option>
@@ -760,7 +760,7 @@ export default function TenantsPage() {
                   }
                   className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
                     editForm.card_payment_enabled
-                      ? "bg-indigo-600"
+                      ? "bg-cyan-600"
                       : "bg-gray-300"
                   }`}
                 >
@@ -784,7 +784,7 @@ export default function TenantsPage() {
               <button
                 onClick={handleSaveEdit}
                 disabled={editSaving}
-                className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors disabled:opacity-50"
+                className="flex items-center gap-1.5 px-4 py-2 bg-cyan-600 text-white rounded-lg text-sm font-medium hover:bg-cyan-700 transition-colors disabled:opacity-50"
               >
                 {editSaving ? (
                   <Loader2 className="w-4 h-4 animate-spin" />

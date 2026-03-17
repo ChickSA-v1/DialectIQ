@@ -174,7 +174,7 @@ export default function TutorialOverlay({ isActive, onEnd }: TutorialOverlayProp
       {/* Spotlight border glow */}
       {targetRect && (
         <div
-          className="absolute rounded-xl border-2 border-indigo-400/60 pointer-events-none transition-all duration-300"
+          className="absolute rounded-xl border-2 border-cyan-400/60 pointer-events-none transition-all duration-300"
           style={{
             left: targetRect.left - pad,
             top: targetRect.top - pad,
@@ -193,7 +193,7 @@ export default function TutorialOverlay({ isActive, onEnd }: TutorialOverlayProp
         >
           {/* Step indicator */}
           <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-medium text-indigo-500 bg-indigo-50 px-2 py-0.5 rounded-full">
+            <span className="text-xs font-medium text-cyan-500 bg-cyan-50 px-2 py-0.5 rounded-full">
               {step + 1} / {STEPS.length}
             </span>
             <button onClick={onEnd} className="text-gray-400 hover:text-gray-600 transition-colors">
@@ -243,7 +243,7 @@ export default function TutorialOverlay({ isActive, onEnd }: TutorialOverlayProp
               <div
                 key={i}
                 className={`w-1.5 h-1.5 rounded-full transition-all ${
-                  i === step ? "bg-indigo-500 w-4" : "bg-gray-300"
+                  i === step ? "bg-cyan-500 w-4" : "bg-gray-300"
                 }`}
               />
             ))}

@@ -64,12 +64,10 @@ function AdminShell({ children }: { children: React.ReactNode }) {
       <aside className="w-64 bg-white border-e border-gray-200 flex flex-col">
         <div className="p-4 border-b border-gray-200">
           <div className="flex items-center gap-2">
-            <div className="bg-indigo-600 text-white font-bold text-sm w-8 h-8 rounded-lg flex items-center justify-center">
-              D
-            </div>
+            <img src="/images/logo.png" alt="DialectIQ" className="w-8 h-8 rounded-lg" />
             <div>
               <h2 className="font-bold text-gray-900 text-sm">DialectIQ</h2>
-              <div className="flex items-center gap-1 text-xs text-indigo-600">
+              <div className="flex items-center gap-1 text-xs text-cyan-600">
                 <Shield className="w-3 h-3" />
                 {t("admin.panel")}
               </div>
@@ -86,7 +84,7 @@ function AdminShell({ children }: { children: React.ReactNode }) {
                 href={item.href}
                 className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                   isActive
-                    ? "bg-indigo-50 text-indigo-700"
+                    ? "bg-cyan-50 text-cyan-700"
                     : "text-gray-600 hover:bg-gray-50 hover:text-gray-800"
                 }`}
               >

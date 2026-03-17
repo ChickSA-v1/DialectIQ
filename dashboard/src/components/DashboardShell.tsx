@@ -29,18 +29,18 @@ function SectionHeader({
   const { t } = useI18n();
   return (
     <div className="flex items-center gap-3">
-      <div className="p-2 rounded-xl bg-indigo-50">
-        <Icon className="w-4 h-4 text-indigo-500" />
+      <div className="p-2 rounded-xl bg-cyan-50">
+        <Icon className="w-4 h-4 text-cyan-500" />
       </div>
       <h2 className="text-base font-bold text-gray-800">
         {t(titleKey as any)}
       </h2>
       {badge && (
-        <span className="px-2.5 py-0.5 bg-indigo-100 text-indigo-700 rounded-full text-xs font-semibold">
+        <span className="px-2.5 py-0.5 bg-cyan-100 text-cyan-700 rounded-full text-xs font-semibold">
           {badge}
         </span>
       )}
-      <div className="flex-1 h-px bg-gradient-to-r from-indigo-200/60 to-transparent" />
+      <div className="flex-1 h-px bg-gradient-to-r from-cyan-200/60 to-transparent" />
     </div>
   );
 }

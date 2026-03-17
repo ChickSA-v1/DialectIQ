@@ -108,7 +108,7 @@ export default function RegistrationsPage() {
                         ({reg.tenant.name_en})
                       </span>
                     )}
-                    <span className="px-2 py-0.5 bg-indigo-50 text-indigo-700 rounded text-xs font-medium">
+                    <span className="px-2 py-0.5 bg-cyan-50 text-cyan-700 rounded text-xs font-medium">
                       {t(`package.${reg.tenant.package}` as any)}
                     </span>
                   </div>
@@ -153,7 +153,7 @@ export default function RegistrationsPage() {
                         <button
                           key={doc.id}
                           onClick={() => viewDocument(doc.id)}
-                          className="flex items-center gap-2 text-sm text-indigo-600 hover:text-indigo-700 cursor-pointer"
+                          className="flex items-center gap-2 text-sm text-cyan-600 hover:text-cyan-700 cursor-pointer"
                         >
                           <FileText className="w-4 h-4" />
                           {t(`document.${doc.doc_type}` as any)} — {doc.file_name}

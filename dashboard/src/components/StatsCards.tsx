@@ -36,8 +36,8 @@ export default function StatsCards({ stats }: Props) {
       value: stats.total_reviews > 0 ? Number(animatedTotal).toLocaleString() : "0",
       insightKey: "insight.totalReviews",
       icon: MessageSquareText,
-      color: "text-indigo-600",
-      iconBg: "bg-gradient-to-br from-indigo-500 to-violet-500",
+      color: "text-cyan-600",
+      iconBg: "bg-gradient-to-br from-cyan-500 to-teal-500",
       stripe: "gradient-stripe-indigo",
     },
     {
@@ -123,7 +123,7 @@ export default function StatsCards({ stats }: Props) {
                       className="absolute inset-y-0 start-0 rounded-full"
                       style={{
                         width: `${((c.sentimentBar as number) / 10) * 100}%`,
-                        background: `linear-gradient(90deg, #ef4444, #f59e0b, #10b981)`,
+                        background: `linear-gradient(90deg, #F43F5E, #FBBF24, #10B981)`,
                       }}
                     />
                   </div>

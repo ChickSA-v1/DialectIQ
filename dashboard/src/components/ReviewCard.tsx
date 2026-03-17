@@ -131,13 +131,13 @@ export default function ReviewCard({ review }: Props) {
         {(review.category || review.dialect_detected) && (
           <div className="flex flex-wrap gap-2 mt-3">
             {review.category && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-indigo-50 text-indigo-700 rounded-full text-xs font-medium border border-indigo-100">
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-cyan-50 text-cyan-700 rounded-full text-xs font-medium border border-cyan-100">
                 <Tag className="w-3 h-3" />
                 {t(`cat.${review.category}` as any)}
               </span>
             )}
             {review.dialect_detected && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-violet-50 text-violet-700 rounded-full text-xs font-medium border border-violet-100">
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-amber-50 text-amber-700 rounded-full text-xs font-medium border border-amber-100">
                 <Globe className="w-3 h-3" />
                 {t(`dialect.${review.dialect_detected}` as any)}
               </span>
@@ -155,7 +155,7 @@ export default function ReviewCard({ review }: Props) {
           <div className="mt-3 pt-3 border-t border-gray-100/50">
             <button
               onClick={() => setExpanded(!expanded)}
-              className="flex items-center gap-1.5 text-xs text-indigo-600 hover:text-indigo-800 font-medium transition-colors"
+              className="flex items-center gap-1.5 text-xs text-cyan-600 hover:text-cyan-800 font-medium transition-colors"
             >
               {expanded ? (
                 <ChevronUp className="w-3.5 h-3.5" />
@@ -178,17 +178,17 @@ export default function ReviewCard({ review }: Props) {
                   </div>
                 )}
                 {review.suggested_reply && (
-                  <div className="bg-indigo-50/60 rounded-xl p-4 border border-indigo-100/50">
+                  <div className="bg-cyan-50/60 rounded-xl p-4 border border-cyan-100/50">
                     <div className="flex items-center justify-between mb-1.5">
                       <div className="flex items-center gap-1.5">
-                        <MessageSquare className="w-3.5 h-3.5 text-indigo-600" />
-                        <p className="text-xs font-semibold text-indigo-600">
+                        <MessageSquare className="w-3.5 h-3.5 text-cyan-600" />
+                        <p className="text-xs font-semibold text-cyan-600">
                           {t("reviews.suggestedReply")}
                         </p>
                       </div>
                       <button
                         onClick={handleCopyReply}
-                        className="flex items-center gap-1 text-xs text-indigo-500 hover:text-indigo-700 transition-colors"
+                        className="flex items-center gap-1 text-xs text-cyan-500 hover:text-cyan-700 transition-colors"
                       >
                         {replyCopied ? (
                           <>

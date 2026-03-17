@@ -100,9 +100,7 @@ function PrivacyContent() {
           </Link>
           <div className="flex items-center gap-3">
             <Link href="/" className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg gradient-primary flex items-center justify-center text-white font-bold text-xs">
-                D
-              </div>
+              <img src="/images/logo.png" alt="DialectIQ" className="w-7 h-7 rounded-lg" />
               <span className="text-sm font-bold text-gray-900">DialectIQ</span>
             </Link>
             <button
@@ -119,7 +117,7 @@ function PrivacyContent() {
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-10">
         {/* Page title */}
         <div ref={heroRef} className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-50 rounded-full text-indigo-600 text-xs font-medium mb-4">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-cyan-50 rounded-full text-cyan-600 text-xs font-medium mb-4">
             <Scale className="w-4 h-4" />
             {t("privacy.legalDocs" as any)}
           </div>
@@ -136,8 +134,8 @@ function PrivacyContent() {
           <section className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 sm:p-8 mb-6 hover:shadow-md transition-shadow duration-300">
             <AnimatedItem delay={0}>
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center">
-                  <FileText className="w-5 h-5 text-indigo-600" />
+                <div className="w-10 h-10 rounded-xl bg-cyan-50 flex items-center justify-center">
+                  <FileText className="w-5 h-5 text-cyan-600" />
                 </div>
                 <h2 className="text-xl font-bold text-gray-900">
                   {t("privacy.termsTitle" as any)}

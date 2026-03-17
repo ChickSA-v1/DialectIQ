@@ -7,13 +7,20 @@
   --foreground: #0f172a;
 
   /* Primary gradient endpoints */
-  --primary-start: #4F46E5;
-  --primary-end: #7C3AED;
+  --primary-start: #00D2DF;
+  --primary-end: #FBBF24;
+
+  /* Brand colors */
+  --deep-navy: #0B1B3D;
+  --vibrant-cyan: #00D2DF;
+  --golden-yellow: #FBBF24;
+  --emerald-green: #10B981;
+  --coral-red: #F43F5E;
 
   /* Semantic colors */
-  --positive: #059669;
-  --warning: #d97706;
-  --negative: #dc2626;
+  --positive: #10B981;
+  --warning: #FBBF24;
+  --negative: #F43F5E;
 
   /* Glass morphism tokens */
   --glass-bg: rgba(255, 255, 255, 0.72);
@@ -121,7 +128,7 @@
 }
 
 .gradient-header {
-  background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 50%, #6D28D9 100%);
+  background: linear-gradient(135deg, #0B1B3D 0%, #0E2247 50%, #122B56 100%);
 }
 
 .shimmer-bg {
@@ -131,16 +138,16 @@
 }
 
 .gradient-stripe-indigo {
-  background: linear-gradient(90deg, #4F46E5, #7C3AED);
+  background: linear-gradient(90deg, #00D2DF, #FBBF24);
 }
 .gradient-stripe-emerald {
-  background: linear-gradient(90deg, #059669, #14b8a6);
+  background: linear-gradient(90deg, #10B981, #14b8a6);
 }
 .gradient-stripe-amber {
-  background: linear-gradient(90deg, #d97706, #f59e0b);
+  background: linear-gradient(90deg, #FBBF24, #f59e0b);
 }
 .gradient-stripe-rose {
-  background: linear-gradient(90deg, #e11d48, #f43f5e);
+  background: linear-gradient(90deg, #F43F5E, #e11d48);
 }
 
 /* ── Landing Page Utilities ────────────────────────────────────────── */
@@ -169,7 +176,7 @@
 }
 
 .glass-card-dark {
-  background: rgba(15, 23, 42, 0.8);
+  background: rgba(11, 27, 61, 0.85);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
   border: 1px solid rgba(255, 255, 255, 0.1);

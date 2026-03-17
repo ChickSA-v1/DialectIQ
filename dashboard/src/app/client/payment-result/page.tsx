@@ -64,7 +64,7 @@ function PaymentResultContent() {
         {/* Loading */}
         {status === "loading" && (
           <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-10 text-center">
-            <Loader2 className="w-16 h-16 text-indigo-500 mx-auto mb-4 animate-spin" />
+            <Loader2 className="w-16 h-16 text-cyan-500 mx-auto mb-4 animate-spin" />
             <h2 className="text-lg font-bold text-gray-900 mb-2">
               {t("payment.verifying")}
             </h2>
@@ -88,7 +88,7 @@ function PaymentResultContent() {
             </p>
             <button
               onClick={() => router.push("/client")}
-              className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-xl text-base font-semibold hover:bg-indigo-700 transition-colors"
+              className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-cyan-600 text-white rounded-xl text-base font-semibold hover:bg-cyan-700 transition-colors"
             >
               {t("payment.backToDashboard")}
               <ArrowRight className="w-5 h-5" />
@@ -114,7 +114,7 @@ function PaymentResultContent() {
             <div className="space-y-3">
               <button
                 onClick={() => router.push("/client")}
-                className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-xl text-base font-semibold hover:bg-indigo-700 transition-colors"
+                className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-cyan-600 text-white rounded-xl text-base font-semibold hover:bg-cyan-700 transition-colors"
               >
                 <RotateCcw className="w-5 h-5" />
                 {t("payment.tryAgain")}
@@ -139,7 +139,7 @@ export default function PaymentResultPage() {
       <Suspense
         fallback={
           <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-            <Loader2 className="w-8 h-8 text-indigo-500 animate-spin" />
+            <Loader2 className="w-8 h-8 text-cyan-500 animate-spin" />
           </div>
         }
       >

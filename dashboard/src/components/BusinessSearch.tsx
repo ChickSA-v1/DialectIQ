@@ -97,14 +97,14 @@ export default function BusinessSearch({
               if (e.key === "Enter") handleSearch();
             }}
             placeholder={t("client.searchPlaceholder" as any)}
-            className="w-full ps-10 pe-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+            className="w-full ps-10 pe-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-cyan-500 outline-none"
             dir="auto"
           />
         </div>
         <button
           onClick={handleSearch}
           disabled={!query.trim() || searching}
-          className="flex items-center gap-1.5 px-4 py-2.5 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors disabled:opacity-50 shrink-0"
+          className="flex items-center gap-1.5 px-4 py-2.5 bg-cyan-600 text-white rounded-lg text-sm font-medium hover:bg-cyan-700 transition-colors disabled:opacity-50 shrink-0"
         >
           {searching ? (
             <>
@@ -144,11 +144,11 @@ export default function BusinessSearch({
             return (
               <div
                 key={result.place_id}
-                className="flex items-start justify-between gap-3 p-4 bg-gray-50 border border-gray-200 rounded-xl hover:border-indigo-200 transition-colors"
+                className="flex items-start justify-between gap-3 p-4 bg-gray-50 border border-gray-200 rounded-xl hover:border-cyan-200 transition-colors"
               >
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <MapPin className="w-4 h-4 text-indigo-500 shrink-0" />
+                    <MapPin className="w-4 h-4 text-cyan-500 shrink-0" />
                     <h4 className="font-semibold text-gray-900 text-sm truncate">
                       {result.name}
                     </h4>
@@ -157,7 +157,7 @@ export default function BusinessSearch({
                         href={result.maps_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-gray-400 hover:text-indigo-500 shrink-0"
+                        className="text-gray-400 hover:text-cyan-500 shrink-0"
                       >
                         <ExternalLink className="w-3.5 h-3.5" />
                       </a>
@@ -189,7 +189,7 @@ export default function BusinessSearch({
                   className={`shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                     isAdded
                       ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                      : "bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50"
+                      : "bg-cyan-600 text-white hover:bg-cyan-700 disabled:opacity-50"
                   }`}
                 >
                   {confirming === result.place_id ? (

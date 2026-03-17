@@ -54,12 +54,12 @@ export function formatDate(iso: string, locale: string = "en"): string {
 
 // Chart-friendly colors
 export const CHART_COLORS = [
-  "#10b981", // emerald
-  "#f59e0b", // amber
-  "#ef4444", // red
-  "#6366f1", // indigo
-  "#8b5cf6", // violet
-  "#ec4899", // pink
+  "#00D2DF", // vibrant cyan
+  "#FBBF24", // golden yellow
+  "#10B981", // emerald green
+  "#F43F5E", // coral red
+  "#0B1B3D", // deep navy
   "#14b8a6", // teal
   "#f97316", // orange
+  "#FBBF24", // lavender
 ];

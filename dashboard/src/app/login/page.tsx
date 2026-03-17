@@ -38,9 +38,7 @@ function LoginForm() {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 bg-indigo-600 text-white font-bold text-2xl rounded-xl mb-4">
-            D
-          </div>
+          <img src="/images/logo.png" alt="DialectIQ" className="w-14 h-14 rounded-xl mb-4 inline-block" />
           <h1 className="text-2xl font-bold text-gray-900">{t("auth.loginTitle")}</h1>
           <p className="text-sm text-gray-500 mt-1">{t("auth.loginSubtitle")}</p>
         </div>
@@ -62,7 +60,7 @@ function LoginForm() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 outline-none"
               placeholder="name@company.com"
               dir="ltr"
             />
@@ -78,7 +76,7 @@ function LoginForm() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none pe-10"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 outline-none pe-10"
                 dir="ltr"
               />
               <button
@@ -94,7 +92,7 @@ function LoginForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors disabled:opacity-50"
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-cyan-600 text-white rounded-lg text-sm font-medium hover:bg-cyan-700 transition-colors disabled:opacity-50"
           >
             <LogIn className="w-4 h-4" />
             {loading ? t("auth.loggingIn") : t("auth.login")}
@@ -102,7 +100,7 @@ function LoginForm() {
 
           <p className="text-center text-sm text-gray-500">
             {t("auth.noAccount")}{" "}
-            <a href="/register" className="text-indigo-600 hover:text-indigo-700 font-medium">
+            <a href="/register" className="text-cyan-600 hover:text-cyan-700 font-medium">
               {t("auth.registerHere")}
             </a>
           </p>

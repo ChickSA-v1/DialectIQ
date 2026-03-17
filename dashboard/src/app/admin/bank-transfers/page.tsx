@@ -67,7 +67,7 @@ export default function BankTransfersPage() {
   return (
     <div className="max-w-5xl">
       <div className="flex items-center gap-2 mb-6">
-        <Building2 className="w-5 h-5 text-indigo-600" />
+        <Building2 className="w-5 h-5 text-cyan-600" />
         <h1 className="text-xl font-bold text-gray-900">
           {t("admin.bankTransfers" as any)}
         </h1>
@@ -101,7 +101,7 @@ export default function BankTransfersPage() {
                     <span className="font-semibold text-gray-800">
                       {tr.tenant_name}
                     </span>
-                    <span className="px-2 py-0.5 bg-indigo-50 text-indigo-700 rounded text-xs font-medium">
+                    <span className="px-2 py-0.5 bg-cyan-50 text-cyan-700 rounded text-xs font-medium">
                       {t(`package.${tr.package}` as any)}
                     </span>
                   </div>
@@ -145,7 +145,7 @@ export default function BankTransfersPage() {
                     const url = URL.createObjectURL(blob);
                     window.open(url, "_blank");
                   }}
-                  className="flex items-center gap-1 px-3 py-1.5 bg-indigo-50 text-indigo-600 rounded-lg text-xs font-medium hover:bg-indigo-100 transition-colors shrink-0"
+                  className="flex items-center gap-1 px-3 py-1.5 bg-cyan-50 text-cyan-600 rounded-lg text-xs font-medium hover:bg-cyan-100 transition-colors shrink-0"
                 >
                   <ExternalLink className="w-3.5 h-3.5" />
                   {t("admin.viewReceipt" as any)}

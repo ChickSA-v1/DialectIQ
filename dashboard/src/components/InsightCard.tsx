@@ -45,7 +45,7 @@ export default function InsightCard({
         <button
           ref={buttonRef}
           onClick={() => setOpen(!open)}
-          className="text-gray-400 hover:text-indigo-500 transition-colors p-0.5 rounded-full hover:bg-indigo-50"
+          className="text-gray-400 hover:text-cyan-500 transition-colors p-0.5 rounded-full hover:bg-cyan-50"
           aria-label="Info"
         >
           <Info className="w-3.5 h-3.5" />
@@ -70,7 +70,7 @@ export default function InsightCard({
     <div className="mt-2">
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-1.5 text-xs text-indigo-500 hover:text-indigo-700 transition-colors group"
+        className="flex items-center gap-1.5 text-xs text-cyan-500 hover:text-cyan-700 transition-colors group"
       >
         <Info className="w-3.5 h-3.5" />
         <span>{t("insight.learnMore" as any)}</span>
@@ -81,7 +81,7 @@ export default function InsightCard({
         )}
       </button>
       {open && (
-        <div className="mt-2 p-3 rounded-lg bg-indigo-50/60 border border-indigo-100/50 text-xs text-gray-600 leading-relaxed animate-slide-down">
+        <div className="mt-2 p-3 rounded-lg bg-cyan-50/60 border border-cyan-100/50 text-xs text-gray-600 leading-relaxed animate-slide-down">
           {description}
         </div>
       )}

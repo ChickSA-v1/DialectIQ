@@ -69,7 +69,7 @@ export default function Home() {
   if (!ready || (!showLanding && !isLoggedIn())) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <Loader2 className="w-6 h-6 animate-spin text-indigo-500" />
+        <Loader2 className="w-6 h-6 animate-spin text-cyan-500" />
       </div>
     );
   }
@@ -136,21 +136,19 @@ function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
         {/* Logo */}
         <a href="https://d-iq.io" className="flex items-center gap-2">
-          <div className="w-9 h-9 rounded-lg gradient-primary flex items-center justify-center text-white font-bold text-lg">
-            D
-          </div>
+          <img src="/images/logo.png" alt="DialectIQ" className="w-9 h-9 rounded-lg" />
           <span className="text-xl font-bold text-gray-900">DialectIQ</span>
         </a>
 
         {/* Desktop nav */}
         <div className="hidden md:flex items-center gap-8">
-          <button onClick={() => scrollTo("features")} className="text-sm text-gray-600 hover:text-indigo-600 transition-colors">
+          <button onClick={() => scrollTo("features")} className="text-sm text-gray-600 hover:text-cyan-600 transition-colors">
             {t("landing.nav.features")}
           </button>
-          <button onClick={() => scrollTo("pricing")} className="text-sm text-gray-600 hover:text-indigo-600 transition-colors">
+          <button onClick={() => scrollTo("pricing")} className="text-sm text-gray-600 hover:text-cyan-600 transition-colors">
             {t("landing.nav.pricing")}
           </button>
-          <button onClick={() => scrollTo("faq")} className="text-sm text-gray-600 hover:text-indigo-600 transition-colors">
+          <button onClick={() => scrollTo("faq")} className="text-sm text-gray-600 hover:text-cyan-600 transition-colors">
             {t("landing.nav.faq")}
           </button>
         </div>
@@ -163,12 +161,12 @@ function Navbar() {
           >
             {locale === "en" ? "العربية" : "English"}
           </button>
-          <a href="/login" className="text-sm text-gray-700 hover:text-indigo-600 font-medium transition-colors">
+          <a href="/login" className="text-sm text-gray-700 hover:text-cyan-600 font-medium transition-colors">
             {t("landing.nav.login")}
           </a>
           <a
             href="/register"
-            className="gradient-primary text-white text-sm font-semibold px-5 py-2.5 rounded-xl hover:opacity-90 transition-opacity shadow-lg shadow-indigo-200"
+            className="gradient-primary text-white text-sm font-semibold px-5 py-2.5 rounded-xl hover:opacity-90 transition-opacity shadow-lg shadow-cyan-200"
           >
             {t("landing.nav.cta")}
           </a>
@@ -211,8 +209,8 @@ function Hero() {
   return (
     <section className="relative pt-32 pb-20 md:pt-40 md:pb-28 overflow-hidden">
       {/* Decorative blobs */}
-      <div className="blob w-96 h-96 bg-indigo-300/30 -top-20 -left-40" />
-      <div className="blob w-80 h-80 bg-violet-300/25 top-32 -right-32" style={{ animationDelay: "5s" }} />
+      <div className="blob w-96 h-96 bg-cyan-300/30 -top-20 -left-40" />
+      <div className="blob w-80 h-80 bg-amber-300/25 top-32 -right-32" style={{ animationDelay: "5s" }} />
       <div className="blob w-64 h-64 bg-purple-200/20 bottom-0 left-1/4" style={{ animationDelay: "10s" }} />
 
       <div ref={ref} className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -220,7 +218,7 @@ function Hero() {
           {/* Text side */}
           <div className="text-center lg:text-start">
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 bg-indigo-50 border border-indigo-100 text-indigo-700 text-sm font-medium px-4 py-1.5 rounded-full mb-6">
+            <div className="inline-flex items-center gap-2 bg-cyan-50 border border-cyan-100 text-cyan-700 text-sm font-medium px-4 py-1.5 rounded-full mb-6">
               <Sparkles className="w-4 h-4" />
               {t("landing.hero.badge")}
             </div>
@@ -239,13 +237,13 @@ function Hero() {
             <div className="flex flex-col sm:flex-row items-center lg:items-start gap-4 mb-8">
               <a
                 href="/register"
-                className="gradient-primary text-white font-semibold px-8 py-3.5 rounded-xl hover:opacity-90 transition-opacity shadow-lg shadow-indigo-200 flex items-center gap-2"
+                className="gradient-primary text-white font-semibold px-8 py-3.5 rounded-xl hover:opacity-90 transition-opacity shadow-lg shadow-cyan-200 flex items-center gap-2"
               >
                 {t("landing.hero.cta.primary")}
                 <ArrowRight className="w-4 h-4" />
               </a>
               <button className="glass-card text-gray-700 font-medium px-8 py-3.5 rounded-xl hover:shadow-lg transition-shadow flex items-center gap-2">
-                <Play className="w-4 h-4 text-indigo-600" />
+                <Play className="w-4 h-4 text-cyan-600" />
                 {t("landing.hero.cta.secondary")}
               </button>
             </div>
@@ -253,8 +251,8 @@ function Hero() {
             {/* Floating stat badges */}
             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3">
               {[
-                { key: "landing.hero.stat.accuracy" as const, icon: <Zap className="w-4 h-4 text-indigo-600" /> },
-                { key: "landing.hero.stat.dialects" as const, icon: <Globe className="w-4 h-4 text-violet-600" /> },
+                { key: "landing.hero.stat.accuracy" as const, icon: <Zap className="w-4 h-4 text-cyan-600" /> },
+                { key: "landing.hero.stat.dialects" as const, icon: <Globe className="w-4 h-4 text-amber-600" /> },
                 { key: "landing.hero.stat.realtime" as const, icon: <BarChart3 className="w-4 h-4 text-purple-600" /> },
               ].map(({ key, icon }) => (
                 <div
@@ -321,7 +319,7 @@ function Features() {
       icon: <Globe className="w-6 h-6 text-white" />,
       title: t("landing.feature1.title"),
       desc: t("landing.feature1.desc"),
-      accent: "from-indigo-500 to-violet-500",
+      accent: "from-cyan-500 to-amber-500",
       stripe: "gradient-stripe-indigo",
       pills: ["Najdi", "Hijazi", "Sharqi", "MSA", "Arabizi"],
     },
@@ -353,7 +351,7 @@ function Features() {
       <div ref={ref} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-16">
-          <span className="inline-block bg-indigo-50 text-indigo-700 text-sm font-medium px-4 py-1.5 rounded-full mb-4">
+          <span className="inline-block bg-cyan-50 text-cyan-700 text-sm font-medium px-4 py-1.5 rounded-full mb-4">
             {t("landing.features.badge")}
           </span>
           <h2 className="text-3xl sm:text-4xl font-bold mb-4">{t("landing.features.title")}</h2>
@@ -378,7 +376,7 @@ function Features() {
                 {f.pills && (
                   <div className="flex flex-wrap gap-2">
                     {f.pills.map((p) => (
-                      <span key={p} className="text-xs bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-full font-medium">
+                      <span key={p} className="text-xs bg-cyan-50 text-cyan-700 px-2.5 py-1 rounded-full font-medium">
                         {p}
                       </span>
                     ))}
@@ -409,7 +407,7 @@ function HowItWorks() {
     <section className="py-20 md:py-28 bg-gray-50/50">
       <div ref={ref} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <span className="inline-block bg-indigo-50 text-indigo-700 text-sm font-medium px-4 py-1.5 rounded-full mb-4">
+          <span className="inline-block bg-cyan-50 text-cyan-700 text-sm font-medium px-4 py-1.5 rounded-full mb-4">
             {t("landing.how.badge")}
           </span>
           <h2 className="text-3xl sm:text-4xl font-bold">{t("landing.how.title")}</h2>
@@ -417,7 +415,7 @@ function HowItWorks() {
 
         <div className="grid md:grid-cols-3 gap-8 relative">
           {/* Connecting line (desktop) */}
-          <div className="hidden md:block absolute top-24 left-[20%] right-[20%] h-0.5 bg-gradient-to-r from-indigo-200 via-violet-200 to-purple-200" />
+          <div className="hidden md:block absolute top-24 left-[20%] right-[20%] h-0.5 bg-gradient-to-r from-cyan-200 via-amber-200 to-purple-200" />
 
           {steps.map((s, i) => (
             <div key={i} className="relative text-center" style={{ animationDelay: `${i * 0.15}s` }}>
@@ -452,7 +450,7 @@ function DashboardPreview() {
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           {/* Text side */}
           <div>
-            <span className="inline-block bg-indigo-50 text-indigo-700 text-sm font-medium px-4 py-1.5 rounded-full mb-4">
+            <span className="inline-block bg-cyan-50 text-cyan-700 text-sm font-medium px-4 py-1.5 rounded-full mb-4">
               {t("landing.preview.badge")}
             </span>
             <h2 className="text-3xl sm:text-4xl font-bold mb-4">{t("landing.preview.title")}</h2>
@@ -484,7 +482,7 @@ function DashboardPreview() {
             {/* Header */}
             <div className="gradient-header px-6 py-4">
               <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded bg-white/20 flex items-center justify-center text-white text-xs font-bold">D</div>
+                <img src="/images/logo.png" alt="DialectIQ" className="w-6 h-6 rounded" />
                 <span className="text-white font-semibold text-sm">DialectIQ</span>
               </div>
             </div>
@@ -494,7 +492,7 @@ function DashboardPreview() {
               {/* Mini stat cards */}
               <div className="grid grid-cols-4 gap-2">
                 {[
-                  { label: "Reviews", value: "1,247", color: "text-indigo-600" },
+                  { label: "Reviews", value: "1,247", color: "text-cyan-600" },
                   { label: "Sentiment", value: "7.8", color: "text-emerald-600" },
                   { label: "Rating", value: "4.3", color: "text-amber-600" },
                   { label: "Urgent", value: "12", color: "text-red-500" },
@@ -512,19 +510,19 @@ function DashboardPreview() {
                   <div className="text-[10px] text-gray-400 mb-2">Sentiment Trend</div>
                   <div className="flex items-end gap-1 h-12">
                     {[60, 45, 70, 55, 80, 65, 75, 85, 70, 90].map((h, i) => (
-                      <div key={i} className="flex-1 rounded-t bg-gradient-to-t from-indigo-500 to-violet-400" style={{ height: `${h}%` }} />
+                      <div key={i} className="flex-1 rounded-t bg-gradient-to-t from-cyan-500 to-amber-400" style={{ height: `${h}%` }} />
                     ))}
                   </div>
                 </div>
                 <div className="bg-white rounded-lg p-3 shadow-sm">
                   <div className="text-[10px] text-gray-400 mb-2">Dialects</div>
                   <div className="flex items-center justify-center h-12">
-                    <div className="w-12 h-12 rounded-full border-4 border-indigo-500 relative">
-                      <div className="absolute inset-1 rounded-full border-3 border-violet-400 border-t-transparent border-l-transparent" />
+                    <div className="w-12 h-12 rounded-full border-4 border-cyan-500 relative">
+                      <div className="absolute inset-1 rounded-full border-3 border-amber-400 border-t-transparent border-l-transparent" />
                     </div>
                     <div className="ms-2 space-y-0.5">
-                      <div className="flex items-center gap-1 text-[9px] text-gray-500"><div className="w-2 h-2 rounded-full bg-indigo-500" /> Najdi</div>
-                      <div className="flex items-center gap-1 text-[9px] text-gray-500"><div className="w-2 h-2 rounded-full bg-violet-400" /> Hijazi</div>
+                      <div className="flex items-center gap-1 text-[9px] text-gray-500"><div className="w-2 h-2 rounded-full bg-cyan-500" /> Najdi</div>
+                      <div className="flex items-center gap-1 text-[9px] text-gray-500"><div className="w-2 h-2 rounded-full bg-amber-400" /> Hijazi</div>
                       <div className="flex items-center gap-1 text-[9px] text-gray-500"><div className="w-2 h-2 rounded-full bg-purple-300" /> Sharqi</div>
                     </div>
                   </div>
@@ -607,7 +605,7 @@ function Pricing() {
     <section id="pricing" className="py-20 md:py-28 bg-gray-50/50">
       <div ref={ref} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <span className="inline-block bg-indigo-50 text-indigo-700 text-sm font-medium px-4 py-1.5 rounded-full mb-4">
+          <span className="inline-block bg-cyan-50 text-cyan-700 text-sm font-medium px-4 py-1.5 rounded-full mb-4">
             {t("landing.pricing.badge")}
           </span>
           <h2 className="text-3xl sm:text-4xl font-bold mb-4">{t("landing.pricing.title")}</h2>
@@ -620,7 +618,7 @@ function Pricing() {
               key={i}
               className={`rounded-2xl overflow-hidden flex flex-col ${
                 plan.highlighted
-                  ? "ring-2 ring-indigo-500 shadow-elevated scale-[1.02] bg-white"
+                  ? "ring-2 ring-cyan-500 shadow-elevated scale-[1.02] bg-white"
                   : "glass-card"
               }`}
               style={{ animationDelay: `${i * 0.1}s` }}
@@ -654,8 +652,8 @@ function Pricing() {
                   href="/register"
                   className={`block text-center py-3 rounded-xl font-semibold text-sm transition-all ${
                     plan.highlighted
-                      ? "gradient-primary text-white shadow-lg shadow-indigo-200 hover:opacity-90"
-                      : "border border-gray-200 text-gray-700 hover:border-indigo-300 hover:text-indigo-600"
+                      ? "gradient-primary text-white shadow-lg shadow-cyan-200 hover:opacity-90"
+                      : "border border-gray-200 text-gray-700 hover:border-cyan-300 hover:text-cyan-600"
                   }`}
                 >
                   {t("landing.pricing.cta")}
@@ -689,7 +687,7 @@ function FAQ() {
     <section id="faq" className="py-20 md:py-28 bg-gray-50/50">
       <div ref={ref} className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <span className="inline-block bg-indigo-50 text-indigo-700 text-sm font-medium px-4 py-1.5 rounded-full mb-4">
+          <span className="inline-block bg-cyan-50 text-cyan-700 text-sm font-medium px-4 py-1.5 rounded-full mb-4">
             {t("landing.faq.badge")}
           </span>
           <h2 className="text-3xl sm:text-4xl font-bold">{t("landing.faq.title")}</h2>
@@ -749,7 +747,7 @@ function CTABanner() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 relative z-10">
             <a
               href="/register"
-              className="bg-white text-indigo-600 font-semibold px-8 py-3.5 rounded-xl hover:bg-gray-50 transition-colors shadow-lg flex items-center gap-2"
+              className="bg-white text-cyan-600 font-semibold px-8 py-3.5 rounded-xl hover:bg-gray-50 transition-colors shadow-lg flex items-center gap-2"
             >
               {t("landing.cta.button")}
               <ArrowRight className="w-4 h-4" />
@@ -779,9 +777,7 @@ function Footer() {
           {/* Brand */}
           <div className="sm:col-span-2 lg:col-span-1">
             <a href="https://d-iq.io" className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center text-white font-bold text-sm">
-                D
-              </div>
+              <img src="/images/logo.png" alt="DialectIQ" className="w-8 h-8 rounded-lg" />
               <span className="text-lg font-bold text-white">DialectIQ</span>
             </a>
             <p className="text-sm leading-relaxed">{t("landing.footer.desc")}</p>
@@ -821,7 +817,7 @@ function Footer() {
           <div className="flex items-center gap-2">
             <span>{t("landing.footer.builtFor")} 🇸🇦</span>
             <span className="text-gray-600">|</span>
-            <span>{t("landing.footer.builtBy")} <a href="https://dataweave.sa" target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:text-indigo-300 transition-colors font-medium">DataWeave</a></span>
+            <span>{t("landing.footer.builtBy")} <a href="https://dataweave.sa" target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:text-cyan-300 transition-colors font-medium">DataWeave</a></span>
           </div>
         </div>
       </div>

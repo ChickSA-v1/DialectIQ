@@ -25,10 +25,10 @@ const URGENCY_COLORS: Record<string, string> = {
   Low: "#10b981",
 };
 
-const DIALECT_COLORS = ["#7c3aed", "#a855f7", "#c084fc", "#4f46e5", "#818cf8", "#6366f1"];
+const DIALECT_COLORS = ["#00D2DF", "#0B1B3D", "#FBBF24", "#10B981", "#F43F5E", "#14b8a6"];
 
 const CATEGORY_GRADIENT = [
-  "#4f46e5", "#5b5bd6", "#6366f1", "#7c7cf8", "#818cf8", "#a5b4fc", "#c7d2fe", "#e0e7ff",
+  "#0B1B3D", "#0E2247", "#122B56", "#00D2DF", "#33DCE6", "#66E5ED", "#99EFF4", "#CCF7FA",
 ];
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
