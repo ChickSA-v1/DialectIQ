@@ -75,6 +75,8 @@ class TenantInfo {
   final String? rejectionReason;
   final String? latestInvoiceStatus;
   final bool cardPaymentEnabled;
+  final String? subscriptionStartsAt;
+  final String? subscriptionExpiresAt;
   final String? createdAt;
 
   TenantInfo({
@@ -94,6 +96,8 @@ class TenantInfo {
     this.rejectionReason,
     this.latestInvoiceStatus,
     this.cardPaymentEnabled = false,
+    this.subscriptionStartsAt,
+    this.subscriptionExpiresAt,
     this.createdAt,
   });
 
@@ -114,6 +118,8 @@ class TenantInfo {
     rejectionReason: json['rejection_reason'] as String?,
     latestInvoiceStatus: json['latest_invoice_status'] as String?,
     cardPaymentEnabled: json['card_payment_enabled'] as bool? ?? false,
+    subscriptionStartsAt: json['subscription_starts_at'] as String?,
+    subscriptionExpiresAt: json['subscription_expires_at'] as String?,
     createdAt: json['created_at'] as String?,
   );
 }

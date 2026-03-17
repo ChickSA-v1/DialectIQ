@@ -409,21 +409,105 @@ class _ActiveDashboardState extends ConsumerState<ActiveDashboard> {
                               ),
                             ),
                             const SizedBox(height: 8),
-                            // Progress bar
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(4),
-                              child: LinearProgressIndicator(
-                                value: tenant.maxReviewsPerMonth > 0
-                                    ? tenant.reviewsUsedThisMonth /
-                                        tenant.maxReviewsPerMonth
-                                    : 0,
-                                backgroundColor:
-                                    Colors.white.withValues(alpha: 0.12),
-                                valueColor: const AlwaysStoppedAnimation(
-                                    Colors.white),
-                                minHeight: 6,
-                              ),
-                            ),
+                            // Days remaining bar
+                            if (tenant.subscriptionStartsAt != null &&
+                                tenant.subscriptionExpiresAt != null) ...[
+                              const SizedBox(height: 4),
+                              Builder(builder: (context) {
+                                final start = DateTime.parse(
+                                    tenant.subscriptionStartsAt!);
+                                final end = DateTime.parse(
+                                    tenant.subscriptionExpiresAt!);
+                                final now = DateTime.now();
+                                final totalDays =
+                                    end.difference(start).inDays.clamp(1, 9999);
+                                final daysLeft =
+                                    end.difference(now).inDays.clamp(0, totalDays);
+                                final daysPct = daysLeft / totalDays;
+                                final daysColor = daysLeft <= 5
+                                    ? AppColors.error
+                                    : daysLeft <= 10
+                                        ? AppColors.warning
+                                        : AppColors.accentStart;
+                                return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        const Icon(Icons.calendar_today,
+                                            size: 13, color: Colors.white70),
+                                        const SizedBox(width: 6),
+                                        Text(
+                                          l10n.daysRemainingOf(
+                                              daysLeft, totalDays),
+                                          style: const TextStyle(
+                                            color: Colors.white70,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 4),
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(4),
+                                      child: LinearProgressIndicator(
+                                        value: daysPct,
+                                        backgroundColor: Colors.white
+                                            .withValues(alpha: 0.12),
+                                        valueColor:
+                                            AlwaysStoppedAnimation(daysColor),
+                                        minHeight: 6,
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              }),
+                            ],
+                            const SizedBox(height: 10),
+                            // Reviews remaining bar
+                            Builder(builder: (context) {
+                              final used = tenant.reviewsUsedThisMonth;
+                              final max = tenant.maxReviewsPerMonth;
+                              final remaining = (max - used).clamp(0, max);
+                              final pct = max > 0 ? remaining / max : 0.0;
+                              final revColor = remaining <= 50
+                                  ? AppColors.error
+                                  : remaining <= 150
+                                      ? AppColors.warning
+                                      : AppColors.success;
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      const Icon(Icons.rate_review,
+                                          size: 13, color: Colors.white70),
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        l10n.reviewsRemainingOf(
+                                            remaining, max),
+                                        style: const TextStyle(
+                                          color: Colors.white70,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 4),
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(4),
+                                    child: LinearProgressIndicator(
+                                      value: pct,
+                                      backgroundColor:
+                                          Colors.white.withValues(alpha: 0.12),
+                                      valueColor:
+                                          AlwaysStoppedAnimation(revColor),
+                                      minHeight: 6,
+                                    ),
+                                  ),
+                                ],
+                              );
+                            }),
                             // Upgrade button
                             if (tenant.package != 'enterprise') ...[
                               const SizedBox(height: 10),

@@ -372,6 +372,25 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String get subscriptionUsage => 'استخدام الباقة';
+
+  @override
+  String get daysRemaining => 'الأيام المتبقية';
+
+  @override
+  String get reviewsRemaining => 'الطلبات المتبقية';
+
+  @override
+  String daysRemainingOf(int remaining, int total) {
+    return '$remaining من $total يوم';
+  }
+
+  @override
+  String reviewsRemainingOf(int remaining, int total) {
+    return '$remaining من $total طلب';
+  }
+
+  @override
   String get urgencyBreakdown => 'توزيع الأولوية';
 
   @override

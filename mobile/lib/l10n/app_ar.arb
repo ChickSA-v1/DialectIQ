@@ -137,6 +137,14 @@
   "reviewsUsed": "{used} من {total} تقييم مستخدم",
   "@reviewsUsed": { "placeholders": { "used": { "type": "int" }, "total": { "type": "int" } } },
 
+  "subscriptionUsage": "استخدام الباقة",
+  "daysRemaining": "الأيام المتبقية",
+  "reviewsRemaining": "الطلبات المتبقية",
+  "daysRemainingOf": "{remaining} من {total} يوم",
+  "@daysRemainingOf": { "placeholders": { "remaining": { "type": "int" }, "total": { "type": "int" } } },
+  "reviewsRemainingOf": "{remaining} من {total} طلب",
+  "@reviewsRemainingOf": { "placeholders": { "remaining": { "type": "int" }, "total": { "type": "int" } } },
+
   "urgencyBreakdown": "توزيع الأولوية",
   "categoryBreakdown": "توزيع التصنيفات",
   "dialectBreakdown": "توزيع اللهجات",

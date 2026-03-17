@@ -375,6 +375,25 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get subscriptionUsage => 'Subscription Usage';
+
+  @override
+  String get daysRemaining => 'Days Remaining';
+
+  @override
+  String get reviewsRemaining => 'Reviews Remaining';
+
+  @override
+  String daysRemainingOf(int remaining, int total) {
+    return '$remaining of $total days';
+  }
+
+  @override
+  String reviewsRemainingOf(int remaining, int total) {
+    return '$remaining of $total reviews';
+  }
+
+  @override
   String get urgencyBreakdown => 'Urgency Breakdown';
 
   @override

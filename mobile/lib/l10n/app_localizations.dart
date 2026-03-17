@@ -788,6 +788,36 @@ abstract class AppLocalizations {
   /// **'{used} of {total} reviews used'**
   String reviewsUsed(int used, int total);
 
+  /// No description provided for @subscriptionUsage.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription Usage'**
+  String get subscriptionUsage;
+
+  /// No description provided for @daysRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'Days Remaining'**
+  String get daysRemaining;
+
+  /// No description provided for @reviewsRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'Reviews Remaining'**
+  String get reviewsRemaining;
+
+  /// No description provided for @daysRemainingOf.
+  ///
+  /// In en, this message translates to:
+  /// **'{remaining} of {total} days'**
+  String daysRemainingOf(int remaining, int total);
+
+  /// No description provided for @reviewsRemainingOf.
+  ///
+  /// In en, this message translates to:
+  /// **'{remaining} of {total} reviews'**
+  String reviewsRemainingOf(int remaining, int total);
+
   /// No description provided for @urgencyBreakdown.
   ///
   /// In en, this message translates to:

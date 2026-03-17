@@ -137,6 +137,14 @@
   "reviewsUsed": "{used} of {total} reviews used",
   "@reviewsUsed": { "placeholders": { "used": { "type": "int" }, "total": { "type": "int" } } },
 
+  "subscriptionUsage": "Subscription Usage",
+  "daysRemaining": "Days Remaining",
+  "reviewsRemaining": "Reviews Remaining",
+  "daysRemainingOf": "{remaining} of {total} days",
+  "@daysRemainingOf": { "placeholders": { "remaining": { "type": "int" }, "total": { "type": "int" } } },
+  "reviewsRemainingOf": "{remaining} of {total} reviews",
+  "@reviewsRemainingOf": { "placeholders": { "remaining": { "type": "int" }, "total": { "type": "int" } } },
+
   "urgencyBreakdown": "Urgency Breakdown",
   "categoryBreakdown": "Category Breakdown",
   "dialectBreakdown": "Dialect Breakdown",
