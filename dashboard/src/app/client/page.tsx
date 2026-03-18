@@ -11,6 +11,7 @@ import {
   createCheckout,
   fetchReviews,
   uploadBankTransfer,
+  downloadInvoicePdf,
 } from "@/lib/auth";
 import { UserProfile, InvoiceInfo, FetchReviewsResult } from "@/lib/types";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
@@ -36,6 +37,8 @@ import {
   FileCheck,
   CalendarDays,
   BarChart3,
+  FileText,
+  Download,
 } from "lucide-react";
 
 const HYPERPAY_SCRIPT_URL =
@@ -737,6 +740,49 @@ function ClientDashboard() {
                 </p>
               </div>
             </div>
+
+            {/* Invoices */}
+            {profile?.invoices && profile.invoices.length > 0 && (
+              <div className="glass-card rounded-2xl p-5 animate-slide-up" style={{ animationDelay: "250ms" }}>
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="p-2 rounded-xl bg-cyan-50">
+                    <FileText className="w-4 h-4 text-cyan-600" />
+                  </div>
+                  <h3 className="font-bold text-gray-800">
+                    {t("client.invoices" as any)}
+                  </h3>
+                </div>
+                <div className="space-y-2">
+                  {profile.invoices.filter((inv: InvoiceInfo) => inv.status === "paid").map((inv: InvoiceInfo) => (
+                    <div key={inv.id} className="flex items-center justify-between bg-gray-50/80 rounded-xl p-3 border border-gray-100/50">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-lg bg-emerald-50">
+                          <FileText className="w-4 h-4 text-emerald-600" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-gray-800">
+                            {inv.invoice_number || `INV-${inv.id.slice(0, 8)}`}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {inv.total_with_vat?.toLocaleString() || inv.amount_sar.toLocaleString()} {t("register.sarMonth" as any)}
+                            {inv.paid_at && ` • ${new Date(inv.paid_at).toLocaleDateString("ar-SA")}`}
+                          </p>
+                        </div>
+                      </div>
+                      {inv.invoice_pdf_url && (
+                        <button
+                          onClick={() => downloadInvoicePdf(inv.id).catch(() => alert("Failed to download"))}
+                          className="flex items-center gap-1.5 px-3 py-1.5 bg-cyan-50 text-cyan-600 rounded-lg text-xs font-medium hover:bg-cyan-100 transition-colors"
+                        >
+                          <Download className="w-3.5 h-3.5" />
+                          {t("client.downloadInvoice" as any)}
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Place ID management */}
             <div className="glass-card rounded-2xl p-5 animate-slide-up" style={{ animationDelay: "200ms" }}>

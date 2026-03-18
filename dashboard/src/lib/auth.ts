@@ -463,6 +463,23 @@ export async function rejectBankTransfer(
   return res.json();
 }
 
+// ── Invoice PDF Download ─────────────────────────────────────────────
+
+export async function downloadInvoicePdf(invoiceId: string): Promise<void> {
+  const res = await authFetch(`/api/v1/payments/invoice/${invoiceId}/pdf`);
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || "Failed to download invoice");
+  }
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `invoice_${invoiceId}.pdf`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 // ── Place ID API ──────────────────────────────────────────────────────
 
 export async function confirmPlaceId(
