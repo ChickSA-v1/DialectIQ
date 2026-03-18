@@ -19,6 +19,8 @@ import {
   Zap,
   BarChart3,
   Shield,
+  Star,
+  Quote,
 } from "lucide-react";
 
 /* ──────────────────────────── hooks ──────────────────────────── */
@@ -98,10 +100,12 @@ function LandingPage() {
       <Features />
       <HowItWorks />
       <DashboardPreview />
+      <Testimonials />
       <Pricing />
       <FAQ />
       <CTABanner />
       <Footer />
+      <StickyMobileCTA />
     </div>
   );
 }
@@ -647,6 +651,55 @@ function DashboardPreview() {
   );
 }
 
+/* ─────────────── 6b. Testimonials ─────────────── */
+
+function Testimonials() {
+  const { t } = useI18n();
+  const ref = useScrollReveal();
+
+  const testimonials = [
+    { text: t("landing.testimonial1.text"), name: t("landing.testimonial1.name"), role: t("landing.testimonial1.role") },
+    { text: t("landing.testimonial2.text"), name: t("landing.testimonial2.name"), role: t("landing.testimonial2.role") },
+    { text: t("landing.testimonial3.text"), name: t("landing.testimonial3.name"), role: t("landing.testimonial3.role") },
+  ];
+
+  return (
+    <section className="py-20 md:py-28 bg-gray-50/50">
+      <div ref={ref} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-16">
+          <span className="inline-block bg-cyan-50 text-cyan-700 text-sm font-medium px-4 py-1.5 rounded-full mb-4">
+            {t("landing.testimonials.badge")}
+          </span>
+          <h2 className="text-3xl sm:text-4xl font-bold">{t("landing.testimonials.title")}</h2>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-6">
+          {testimonials.map((t, i) => (
+            <div key={i} className="glass-card rounded-2xl p-6 hover:shadow-lg transition-shadow">
+              <div className="flex gap-0.5 mb-4">
+                {[1, 2, 3, 4, 5].map((s) => (
+                  <Star key={s} className="w-4 h-4 text-amber-400 fill-amber-400" />
+                ))}
+              </div>
+              <Quote className="w-8 h-8 text-cyan-200 mb-3" />
+              <p className="text-gray-700 text-sm leading-relaxed mb-6">{t.text}</p>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full gradient-primary flex items-center justify-center text-white font-bold text-sm">
+                  {t.name[0]}
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-gray-900">{t.name}</p>
+                  <p className="text-xs text-gray-500">{t.role}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ─────────────── 7. Pricing ─────────────── */
 
 function Pricing() {
@@ -912,5 +965,31 @@ function Footer() {
         </div>
       </div>
     </footer>
+  );
+}
+
+/* ─────────────── 12. Sticky Mobile CTA ─────────────── */
+
+function StickyMobileCTA() {
+  const { t } = useI18n();
+  const [show, setShow] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setShow(window.scrollY > 600);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  if (!show) return null;
+
+  return (
+    <div className="fixed bottom-0 inset-x-0 z-50 md:hidden p-3 bg-white/90 backdrop-blur-lg border-t border-gray-200 shadow-elevated animate-slide-up">
+      <a
+        href="/register"
+        className="block w-full gradient-primary text-white font-bold text-center py-3.5 rounded-xl shadow-lg shadow-cyan-200"
+      >
+        {t("landing.hero.cta.primary")}
+      </a>
+    </div>
   );
 }
