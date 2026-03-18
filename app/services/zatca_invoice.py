@@ -36,8 +36,8 @@ log = structlog.get_logger()
 # ── Company Info (Seller) ─────────────────────────────────────────────
 SELLER_NAME_AR = "شركة داتاويف للاتصالات وتقنية المعلومات"
 SELLER_NAME_EN = "DataWeave ICT Co."
-SELLER_VAT_NUMBER = "310000000000003"  # Replace with actual VAT TIN
-SELLER_CR_NUMBER = "1010000000"  # Replace with actual CR number
+SELLER_VAT_NUMBER = ""  # VAT TIN not yet extracted
+SELLER_CR_NUMBER = "7052772485"
 SELLER_ADDRESS_AR = "الرياض، المملكة العربية السعودية"
 SELLER_ADDRESS_EN = "Riyadh, Saudi Arabia"
 VAT_RATE = 0.15  # 15% VAT
