@@ -204,6 +204,17 @@ class Invoice(Base):
         comment="Original filename of bank transfer receipt",
     )
     paid_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    # ZATCA-compliant fields
+    invoice_number: Mapped[str | None] = mapped_column(
+        String(50), nullable=True, unique=True,
+        comment="Sequential invoice number e.g. DIQ-2026-000001",
+    )
+    invoice_pdf_url: Mapped[str | None] = mapped_column(
+        String(500), nullable=True,
+        comment="GCS URL for ZATCA-compliant PDF invoice",
+    )
+    vat_amount: Mapped[float | None] = mapped_column(Float, nullable=True, comment="VAT amount (15%)")
+    total_with_vat: Mapped[float | None] = mapped_column(Float, nullable=True, comment="Total including VAT")
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )

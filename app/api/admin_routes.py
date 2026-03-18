@@ -182,6 +182,10 @@ async def get_registration(
                 payment_method=i.payment_method,
                 transfer_receipt_url=i.transfer_receipt_url,
                 transfer_receipt_name=i.transfer_receipt_name,
+                invoice_number=i.invoice_number,
+                invoice_pdf_url=i.invoice_pdf_url,
+                vat_amount=i.vat_amount,
+                total_with_vat=i.total_with_vat,
                 paid_at=i.paid_at, created_at=i.created_at,
             ) for i in invoices
         ],

@@ -122,6 +122,10 @@ export interface InvoiceInfo {
   payment_method: string | null;
   transfer_receipt_url: string | null;
   transfer_receipt_name: string | null;
+  invoice_number: string | null;
+  invoice_pdf_url: string | null;
+  vat_amount: number | null;
+  total_with_vat: number | null;
   paid_at: string | null;
   created_at: string;
 }

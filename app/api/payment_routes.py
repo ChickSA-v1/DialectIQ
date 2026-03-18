@@ -25,6 +25,7 @@ from app.schemas import (
 from app.security import generate_api_key
 from app.services.hyperpay import create_checkout, get_payment_status
 from app.services.storage import download_blob, upload_document
+from app.services.zatca_invoice import generate_zatca_invoice
 
 ALLOWED_RECEIPT_EXTENSIONS = {"pdf", "jpg", "jpeg", "png"}
 MAX_RECEIPT_SIZE = 10 * 1024 * 1024  # 10 MB
@@ -95,6 +96,14 @@ async def _activate_tenant_after_payment(invoice: Invoice, db: AsyncSession) -> 
     owner = owner_r.scalar_one_or_none()
     if owner:
         owner.is_active = True
+
+    # 4) Generate ZATCA-compliant invoice PDF
+    if tenant and not invoice.invoice_number:
+        try:
+            inv_num, pdf_url = await generate_zatca_invoice(invoice, tenant, db)
+            log.info("zatca_invoice_created", invoice_number=inv_num, pdf_url=pdf_url)
+        except Exception as e:
+            log.error("zatca_invoice_failed", error=str(e), invoice_id=str(invoice.id))
 
     log.info("payment_activation_complete", invoice_id=str(invoice.id), tenant_id=str(invoice.tenant_id))
 
@@ -517,6 +526,48 @@ async def view_bank_transfer_receipt(
         headers={
             "Content-Disposition": f"inline; filename*=UTF-8''{filename_encoded}",
             "Cache-Control": "private, max-age=300",
+        },
+    )
+
+
+# ── Download ZATCA invoice PDF ────────────────────────────────────────
+@router.get("/invoice/{invoice_id}/pdf")
+async def download_invoice_pdf(
+    invoice_id: str,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Download the ZATCA-compliant invoice PDF."""
+    result = await db.execute(
+        select(Invoice).where(Invoice.id == uuid.UUID(invoice_id))
+    )
+    invoice = result.scalar_one_or_none()
+    if not invoice:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Invoice not found")
+
+    # Only allow admin or the invoice's tenant owner
+    if user.role != "admin" and user.tenant_id != invoice.tenant_id:
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Access denied")
+
+    if not invoice.invoice_pdf_url:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Invoice PDF not yet generated")
+
+    try:
+        content, content_type = download_blob(invoice.invoice_pdf_url)
+    except Exception as e:
+        log.error("invoice_pdf_download_failed", invoice_id=invoice_id, error=str(e))
+        raise HTTPException(status.HTTP_502_BAD_GATEWAY, "Failed to retrieve invoice from storage")
+
+    from urllib.parse import quote
+    filename = f"invoice_{invoice.invoice_number or invoice_id}.pdf"
+    filename_encoded = quote(filename)
+
+    return Response(
+        content=content,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f"inline; filename*=UTF-8''{filename_encoded}",
+            "Cache-Control": "private, max-age=3600",
         },
     )
 

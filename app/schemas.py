@@ -232,6 +232,10 @@ class InvoiceInfo(BaseModel):
     payment_method: str | None = None
     transfer_receipt_url: str | None = None
     transfer_receipt_name: str | None = None
+    invoice_number: str | None = None
+    invoice_pdf_url: str | None = None
+    vat_amount: float | None = None
+    total_with_vat: float | None = None
     paid_at: datetime | None
     created_at: datetime
 

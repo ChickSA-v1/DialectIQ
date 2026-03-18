@@ -16,3 +16,7 @@ bcrypt==4.0.1
 python-multipart==0.0.20
 google-cloud-storage==2.19.0
 httpx==0.28.1
+reportlab==4.2.5
+qrcode[pil]==8.0
+arabic-reshaper==3.0.0
+python-bidi==0.6.6

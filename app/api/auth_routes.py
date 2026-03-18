@@ -350,6 +350,10 @@ async def get_profile(
                     payment_method=inv.payment_method,
                     transfer_receipt_url=inv.transfer_receipt_url,
                     transfer_receipt_name=inv.transfer_receipt_name,
+                    invoice_number=inv.invoice_number,
+                    invoice_pdf_url=inv.invoice_pdf_url,
+                    vat_amount=inv.vat_amount,
+                    total_with_vat=inv.total_with_vat,
                     paid_at=inv.paid_at,
                     created_at=inv.created_at,
                 )
