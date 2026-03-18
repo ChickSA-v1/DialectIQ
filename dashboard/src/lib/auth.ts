@@ -118,7 +118,12 @@ export async function register(data: {
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.detail || "Registration failed");
+    const detail = typeof err.detail === "string"
+      ? err.detail
+      : Array.isArray(err.detail)
+        ? err.detail.map((e: any) => e.msg).join(", ")
+        : "Registration failed";
+    throw new Error(detail);
   }
   return res.json();
 }
