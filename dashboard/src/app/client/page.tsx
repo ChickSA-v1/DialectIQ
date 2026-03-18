@@ -406,7 +406,8 @@ function ClientDashboard() {
                   </div>
                 )
               ) : !paymentMethod ? (
-                /* Payment method selector */
+                /* Payment method selector — if card disabled, go straight to bank transfer */
+                tenant?.card_payment_enabled ? (
                 <div className="space-y-3">
                   <p className="text-sm font-semibold text-gray-700 text-center mb-4">
                     {t("payment.chooseMethod" as any)}
@@ -444,6 +445,30 @@ function ClientDashboard() {
                     </div>
                   </button>
                 </div>
+                ) : (
+                  /* Card disabled — bank transfer only, auto-select */
+                  <div className="space-y-3">
+                    <p className="text-sm font-semibold text-gray-700 text-center mb-4">
+                      {t("payment.bankTransfer" as any)}
+                    </p>
+                    <button
+                      onClick={() => setPaymentMethod("bank_transfer")}
+                      className="w-full flex items-center gap-4 p-4 bg-white border-2 border-emerald-300 rounded-xl hover:border-emerald-400 hover:bg-emerald-50/30 transition-all group"
+                    >
+                      <div className="w-12 h-12 rounded-xl bg-emerald-600 flex items-center justify-center shrink-0">
+                        <Building2 className="w-6 h-6 text-white" />
+                      </div>
+                      <div className="text-start flex-1">
+                        <p className="font-semibold text-gray-900 group-hover:text-emerald-700 transition-colors">
+                          {t("payment.bankTransfer" as any)}
+                        </p>
+                        <p className="text-xs text-gray-500 mt-0.5">
+                          {t("payment.bankTransferDesc" as any)}
+                        </p>
+                      </div>
+                    </button>
+                  </div>
+                )
               ) : paymentMethod === "card" ? (
                 /* Card payment: Pay Now button */
                 <div className="space-y-3">
