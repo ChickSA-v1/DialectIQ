@@ -13,7 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
 from app.deps import get_current_user
-from app.models import Document, Invoice, Tenant, User
+from app.models import Document, Invoice, Subscription, Tenant, User
 from app.schemas import (
     DeleteAccountRequest,
     ForgotPasswordRequest,
@@ -34,7 +34,7 @@ from app.schemas import (
     UserProfile,
     VerifyResetCodeRequest,
 )
-from app.security import create_access_token, hash_password, verify_password
+from app.security import create_access_token, generate_api_key, hash_password, verify_password
 from app.services.places import (
     fetch_place_reviews,
     get_place_details,
@@ -74,34 +74,50 @@ async def register(req: RegisterRequest, db: AsyncSession = Depends(get_db)):
 
     limits = PACKAGE_LIMITS.get(req.package, PACKAGE_LIMITS["basic"])
 
-    # Create Tenant
+    # Create Tenant — auto-activate with 7-day free trial
+    api_key = generate_api_key()
+    now = datetime.now(timezone.utc)
+    trial_end = now + timedelta(days=7)
+
     tenant = Tenant(
         name_ar=req.business_name_ar,
         name_en=req.business_name_en,
         email=req.email,
         phone=req.phone,
-        status="pending_review",
+        status="active",
         package=req.package,
         place_ids=[],
         max_businesses=limits["max_businesses"],
         max_reviews_per_month=limits["max_reviews_per_month"],
+        api_key=api_key,
     )
     db.add(tenant)
     await db.flush()
 
-    # Create User (owner)
+    # Create User (owner) — active immediately
     user = User(
         tenant_id=tenant.id,
         email=req.email,
         password_hash=hash_password(req.password),
         full_name=req.full_name,
         role="owner",
-        is_active=False,
+        is_active=True,
     )
     db.add(user)
+
+    # Create 7-day trial subscription
+    subscription = Subscription(
+        tenant_id=tenant.id,
+        package=req.package,
+        status="active",
+        starts_at=now,
+        expires_at=trial_end,
+    )
+    db.add(subscription)
+
     await db.commit()
 
-    log.info("tenant_registered", tenant_id=str(tenant.id), email=req.email, package=req.package)
+    log.info("tenant_registered_trial", tenant_id=str(tenant.id), email=req.email, package=req.package, trial_ends=trial_end.isoformat())
 
     # Send admin notification email (non-blocking, never fails registration)
     await send_new_registration_email(
@@ -115,7 +131,7 @@ async def register(req: RegisterRequest, db: AsyncSession = Depends(get_db)):
 
     return RegisterResponse(
         tenant_id=tenant.id,
-        message="Registration submitted. Please upload required documents.",
+        message="Account activated! You have a 7-day free trial.",
     )
 
 

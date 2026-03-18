@@ -7,11 +7,13 @@ import '../../widgets/fade_slide_in.dart';
 
 class StepPackage extends StatelessWidget {
   final String selectedPackage;
+  final bool isSubmitting;
   final ValueChanged<String> onSelect;
 
   const StepPackage({
     super.key,
     required this.selectedPackage,
+    this.isSubmitting = false,
     required this.onSelect,
   });
 

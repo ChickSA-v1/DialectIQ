@@ -121,8 +121,8 @@ const translations = {
     "register.uploadAndSubmit": "Upload & Submit",
     "register.uploading": "Uploading...",
     "register.bothDocsRequired": "Both documents are required",
-    "register.successTitle": "Registration Submitted!",
-    "register.successDesc": "Your registration is under review. We'll notify you once approved.",
+    "register.successTitle": "Your account is ready!",
+    "register.successDesc": "You have a 7-day free trial. Sign in now to start analyzing your reviews.",
 
     // Packages
     "package.basic": "Basic",
@@ -590,8 +590,8 @@ const translations = {
     "register.uploadAndSubmit": "رفع وإرسال",
     "register.uploading": "جاري الرفع...",
     "register.bothDocsRequired": "كلا المستندين مطلوبين",
-    "register.successTitle": "تم تقديم الطلب!",
-    "register.successDesc": "طلبك قيد المراجعة. سنخبرك فور الموافقة.",
+    "register.successTitle": "حسابك جاهز!",
+    "register.successDesc": "لديك تجربة مجانية لمدة 7 أيام. سجل دخولك الآن وابدأ بتحليل تقييماتك.",
 
     // Packages
     "package.basic": "أساسي",

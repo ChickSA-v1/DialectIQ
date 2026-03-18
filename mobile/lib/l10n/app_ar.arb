@@ -66,8 +66,8 @@
   "@fileSelected": { "placeholders": { "name": { "type": "String" } } },
   "allowedFormats": "PDF, JPG, PNG (حد أقصى 10 ميجا)",
 
-  "regSuccess": "تم إرسال التسجيل!",
-  "regSuccessMsg": "طلب تسجيلك قيد المراجعة. سيتم إشعارك عبر البريد الإلكتروني عند الموافقة.",
+  "regSuccess": "حسابك جاهز!",
+  "regSuccessMsg": "لديك تجربة مجانية لمدة 7 أيام. سجل دخولك الآن وابدأ بتحليل تقييماتك.",
   "goToLogin": "الذهاب لتسجيل الدخول",
 
   "statusPending": "قيد المراجعة",

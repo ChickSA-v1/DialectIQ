@@ -15,7 +15,7 @@ import {
   Sparkles,
 } from "lucide-react";
 
-const STEPS = ["info", "package", "documents", "done"] as const;
+const STEPS = ["info", "package", "done"] as const;
 type Step = (typeof STEPS)[number];
 
 function RegisterWizard() {
@@ -76,7 +76,7 @@ function RegisterWizard() {
         package: selectedPkg,
       });
       setTenantId(res.tenant_id);
-      setStep("documents");
+      setStep("done");
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -325,67 +325,7 @@ function RegisterWizard() {
           </div>
         )}
 
-        {/* Step 3: Document upload */}
-        {step === "documents" && (
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-4">
-            <div className="flex items-center gap-2 mb-2">
-              <FileText className="w-5 h-5 text-cyan-600" />
-              <h2 className="text-lg font-semibold text-gray-800">{t("register.uploadDocs")}</h2>
-            </div>
-            <p className="text-sm text-gray-500">{t("register.uploadDocsDesc")}</p>
-
-            {/* Commercial Registration */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t("register.commercialReg")} *
-              </label>
-              <label className="flex items-center gap-3 px-4 py-4 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-cyan-400 transition-colors">
-                <Upload className="w-5 h-5 text-gray-400" />
-                <span className="text-sm text-gray-500">
-                  {crFile ? crFile.name : t("register.chooseFile")}
-                </span>
-                <input
-                  type="file"
-                  accept=".pdf,.jpg,.jpeg,.png"
-                  className="hidden"
-                  onChange={(e) => setCrFile(e.target.files?.[0] || null)}
-                />
-              </label>
-            </div>
-
-            {/* Owner ID */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t("register.ownerId")} *
-              </label>
-              <label className="flex items-center gap-3 px-4 py-4 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-cyan-400 transition-colors">
-                <Upload className="w-5 h-5 text-gray-400" />
-                <span className="text-sm text-gray-500">
-                  {idFile ? idFile.name : t("register.chooseFile")}
-                </span>
-                <input
-                  type="file"
-                  accept=".pdf,.jpg,.jpeg,.png"
-                  className="hidden"
-                  onChange={(e) => setIdFile(e.target.files?.[0] || null)}
-                />
-              </label>
-            </div>
-
-            <p className="text-xs text-gray-400">{t("register.fileHint")}</p>
-
-            <button
-              onClick={handleUpload}
-              disabled={uploading || !crFile || !idFile}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-cyan-600 text-white rounded-lg text-sm font-medium hover:bg-cyan-700 transition-colors disabled:opacity-50"
-            >
-              <Upload className="w-4 h-4" />
-              {uploading ? t("register.uploading") : t("register.uploadAndSubmit")}
-            </button>
-          </div>
-        )}
-
-        {/* Step 4: Success */}
+        {/* Step 3: Success */}
         {step === "done" && (
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-8 text-center">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-emerald-100 rounded-full mb-4">

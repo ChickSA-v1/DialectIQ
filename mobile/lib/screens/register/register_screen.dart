@@ -38,7 +38,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   String? _error;
 
   void _nextStep() {
-    if (_currentStep < 3) {
+    if (_currentStep < 2) {
       setState(() => _currentStep++);
       _pageController.animateToPage(
         _currentStep,
@@ -78,25 +78,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       );
 
       tenantId = result['tenant_id'] as String?;
-
-      // Upload documents if available
-      if (tenantId != null) {
-        if (commercialRegFile != null) {
-          await repo.uploadDocument(
-            tenantId: tenantId!,
-            file: commercialRegFile!,
-            docType: 'commercial_registration',
-          );
-        }
-        if (nationalIdFile != null) {
-          await repo.uploadDocument(
-            tenantId: tenantId!,
-            file: nationalIdFile!,
-            docType: 'owner_id',
-          );
-        }
-      }
-
       _nextStep(); // Go to success step
     } catch (e) {
       setState(() => _error = e.toString());
@@ -118,7 +99,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     final stepTitles = [
       l10n.regStepBusiness,
       l10n.regStepPackage,
-      l10n.regStepDocuments,
       l10n.regStepSuccess,
     ];
 
@@ -129,7 +109,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         elevation: 0,
         scrolledUnderElevation: 0,
         title: Text(l10n.register),
-        leading: _currentStep > 0 && _currentStep < 3
+        leading: _currentStep > 0 && _currentStep < 2
             ? IconButton(
                 icon: const Icon(Icons.arrow_back),
                 onPressed: _prevStep,
@@ -146,12 +126,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         child: Column(
           children: [
             // Step indicator
-            if (_currentStep < 3)
+            if (_currentStep < 2)
               Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                 child: Row(
-                  children: List.generate(4, (i) {
+                  children: List.generate(3, (i) {
                     final isActive = i <= _currentStep;
                     return Expanded(
                       child: AnimatedContainer(
@@ -170,7 +150,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   }),
                 ),
               ),
-            if (_currentStep < 3)
+            if (_currentStep < 2)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: Align(
@@ -235,20 +215,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   ),
                   StepPackage(
                     selectedPackage: selectedPackage,
+                    isSubmitting: _isSubmitting,
                     onSelect: (pkg) {
                       setState(() => selectedPackage = pkg);
-                      _nextStep();
+                      _submitRegistration();
                     },
-                  ),
-                  StepDocuments(
-                    commercialRegFile: commercialRegFile,
-                    nationalIdFile: nationalIdFile,
-                    isSubmitting: _isSubmitting,
-                    onCommercialRegSelected: (f) =>
-                        setState(() => commercialRegFile = f),
-                    onNationalIdSelected: (f) =>
-                        setState(() => nationalIdFile = f),
-                    onSubmit: _submitRegistration,
                   ),
                   const StepSuccess(),
                 ],

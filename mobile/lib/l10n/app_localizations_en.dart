@@ -192,11 +192,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get allowedFormats => 'PDF, JPG, PNG (max 10MB)';
 
   @override
-  String get regSuccess => 'Registration Submitted!';
+  String get regSuccess => 'Your account is ready!';
 
   @override
   String get regSuccessMsg =>
-      'Your registration is under review. You will receive an email once it\'s approved.';
+      'You have a 7-day free trial. Sign in now to start analyzing your reviews.';
 
   @override
   String get goToLogin => 'Go to Login';

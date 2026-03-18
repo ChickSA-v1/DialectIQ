@@ -455,13 +455,13 @@ abstract class AppLocalizations {
   /// No description provided for @regSuccess.
   ///
   /// In en, this message translates to:
-  /// **'Registration Submitted!'**
+  /// **'Your account is ready!'**
   String get regSuccess;
 
   /// No description provided for @regSuccessMsg.
   ///
   /// In en, this message translates to:
-  /// **'Your registration is under review. You will receive an email once it\'s approved.'**
+  /// **'You have a 7-day free trial. Sign in now to start analyzing your reviews.'**
   String get regSuccessMsg;
 
   /// No description provided for @goToLogin.

@@ -192,11 +192,11 @@ class AppLocalizationsAr extends AppLocalizations {
   String get allowedFormats => 'PDF, JPG, PNG (حد أقصى 10 ميجا)';
 
   @override
-  String get regSuccess => 'تم إرسال التسجيل!';
+  String get regSuccess => 'حسابك جاهز!';
 
   @override
   String get regSuccessMsg =>
-      'طلب تسجيلك قيد المراجعة. سيتم إشعارك عبر البريد الإلكتروني عند الموافقة.';
+      'لديك تجربة مجانية لمدة 7 أيام. سجل دخولك الآن وابدأ بتحليل تقييماتك.';
 
   @override
   String get goToLogin => 'الذهاب لتسجيل الدخول';

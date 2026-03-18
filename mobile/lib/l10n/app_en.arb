@@ -66,8 +66,8 @@
   "@fileSelected": { "placeholders": { "name": { "type": "String" } } },
   "allowedFormats": "PDF, JPG, PNG (max 10MB)",
 
-  "regSuccess": "Registration Submitted!",
-  "regSuccessMsg": "Your registration is under review. You will receive an email once it's approved.",
+  "regSuccess": "Your account is ready!",
+  "regSuccessMsg": "You have a 7-day free trial. Sign in now to start analyzing your reviews.",
   "goToLogin": "Go to Login",
 
   "statusPending": "Under Review",
