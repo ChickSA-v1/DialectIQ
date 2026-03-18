@@ -9,9 +9,23 @@ const zain = Zain({
 });
 
 export const metadata: Metadata = {
-  title: "DialectIQ — Dashboard",
+  title: "DialectIQ — حلل تقييمات قوقل ورد عليها تلقائياً | تجربة مجانية",
   description:
-    "Saudi dialect-aware sentiment analysis dashboard for Google Business reviews",
+    "DialectIQ يحلل تقييمات قوقل بالذكاء الاصطناعي، يكتشف اللهجات السعودية، ويرد تلقائياً في ثوانٍ. وفّر وقتك وحسّن سمعتك. جرّب 7 أيام مجاناً.",
+  keywords: "تحليل تقييمات قوقل, الرد التلقائي تقييمات, تحليل مشاعر العملاء, اللهجات السعودية, إدارة سمعة المتجر, google reviews analysis, AI sentiment analysis Arabic, auto reply google reviews",
+  openGraph: {
+    title: "DialectIQ — حلل تقييمات قوقل ورد عليها تلقائياً",
+    description: "DialectIQ يحلل تقييمات قوقل بالذكاء الاصطناعي، يكتشف اللهجات السعودية، ويرد تلقائياً في ثوانٍ.",
+    url: "https://d-iq.io",
+    siteName: "DialectIQ",
+    locale: "ar_SA",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "DialectIQ — حلل تقييمات قوقل ورد عليها تلقائياً",
+    description: "DialectIQ يحلل تقييمات قوقل بالذكاء الاصطناعي، يكتشف اللهجات السعودية، ويرد تلقائياً في ثوانٍ.",
+  },
 };
 
 export default function RootLayout({
