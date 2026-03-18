@@ -46,6 +46,17 @@ export default function RootLayout({
             src="https://www.facebook.com/tr?id=1975180017216817&ev=PageView&noscript=1"
           />
         </noscript>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function(c,l,a,r,i,t,y){
+                c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+                t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+                y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+              })(window, document, "clarity", "script", "vxwz6lrq21");
+            `,
+          }}
+        />
       </head>
       <body
         className={`${zain.variable} antialiased bg-gray-50 min-h-screen`}
