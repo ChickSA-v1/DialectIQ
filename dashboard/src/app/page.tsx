@@ -154,6 +154,9 @@ function Navbar() {
           <button onClick={() => scrollTo("faq")} className="text-sm text-gray-600 hover:text-cyan-600 transition-colors">
             {t("landing.nav.faq")}
           </button>
+          <a href="/blog" className="text-sm text-gray-600 hover:text-cyan-600 transition-colors">
+            {locale === "ar" ? "المدونة" : "Blog"}
+          </a>
         </div>
 
         {/* Actions */}
