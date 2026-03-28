@@ -1235,6 +1235,109 @@ async def download_invoice_pdf(
     )
 
 
+@router.post("/invoices/{invoice_id}/regenerate-pdf")
+async def regenerate_invoice_pdf(
+    invoice_id: _uuid.UUID,
+    admin=Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Regenerate the ZATCA PDF for an existing invoice (fixes Arabic font issues)."""
+    result = await db.execute(
+        select(Invoice, Tenant)
+        .join(Tenant, Invoice.tenant_id == Tenant.id)
+        .where(Invoice.id == invoice_id)
+    )
+    row = result.first()
+    if not row:
+        raise HTTPException(status_code=404, detail="Invoice not found")
+    inv, tenant = row
+
+    from app.services.zatca_invoice import generate_zatca_invoice
+    # Keep existing invoice number if it has one
+    if inv.invoice_number:
+        from app.services.zatca_invoice import _build_invoice_pdf, generate_zatca_qr, VAT_RATE, SELLER_NAME_AR, SELLER_VAT_NUMBER
+        from app.services.storage import upload_document as upload_doc
+
+        amount = inv.amount_sar
+        vat = inv.vat_amount or round(amount * VAT_RATE, 2)
+        total = inv.total_with_vat or round(amount + vat, 2)
+        now = datetime.now(timezone.utc)
+
+        package_names = {"basic": "Basic / أساسي", "advanced": "Advanced / متقدم", "enterprise": "Enterprise / مؤسسات"}
+        qr_bytes = generate_zatca_qr(SELLER_NAME_AR, SELLER_VAT_NUMBER, now.isoformat(), f"{total:.2f}", f"{vat:.2f}")
+
+        pdf_bytes = _build_invoice_pdf(
+            invoice_number=inv.invoice_number,
+            invoice_date=now.strftime("%Y-%m-%d %H:%M:%S UTC"),
+            buyer_name_ar=tenant.name_ar,
+            buyer_name_en=tenant.name_en,
+            buyer_email=tenant.email,
+            buyer_phone=tenant.phone,
+            package_name=package_names.get(tenant.package, tenant.package),
+            amount_sar=amount, vat_amount=vat, total_with_vat=total,
+            qr_png_bytes=qr_bytes,
+            payment_method=inv.payment_method,
+        )
+
+        pdf_url = await upload_doc(
+            file_content=pdf_bytes, file_name=f"invoice_{inv.invoice_number}.pdf",
+            content_type="application/pdf", tenant_id=str(tenant.id), doc_type="zatca_invoice",
+        )
+        inv.invoice_pdf_url = pdf_url
+    else:
+        invoice_number, pdf_url = await generate_zatca_invoice(inv, tenant, db)
+
+    await db.commit()
+    return {"message": "Invoice PDF regenerated", "invoice_id": str(inv.id), "pdf_url": inv.invoice_pdf_url}
+
+
+@router.post("/invoices/regenerate-all")
+async def regenerate_all_invoice_pdfs(
+    admin=Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Regenerate ZATCA PDFs for ALL paid invoices (batch fix for Arabic font)."""
+    result = await db.execute(
+        select(Invoice, Tenant)
+        .join(Tenant, Invoice.tenant_id == Tenant.id)
+        .where(Invoice.invoice_number.isnot(None))
+    )
+    rows = result.all()
+
+    from app.services.zatca_invoice import _build_invoice_pdf, generate_zatca_qr, VAT_RATE, SELLER_NAME_AR, SELLER_VAT_NUMBER
+    from app.services.storage import upload_document as upload_doc
+
+    regenerated = 0
+    for inv, tenant in rows:
+        try:
+            amount = inv.amount_sar
+            vat = inv.vat_amount or round(amount * VAT_RATE, 2)
+            total = inv.total_with_vat or round(amount + vat, 2)
+            now = datetime.now(timezone.utc)
+            package_names = {"basic": "Basic / أساسي", "advanced": "Advanced / متقدم", "enterprise": "Enterprise / مؤسسات"}
+            qr_bytes = generate_zatca_qr(SELLER_NAME_AR, SELLER_VAT_NUMBER, now.isoformat(), f"{total:.2f}", f"{vat:.2f}")
+            pdf_bytes = _build_invoice_pdf(
+                invoice_number=inv.invoice_number,
+                invoice_date=(inv.paid_at or inv.created_at).strftime("%Y-%m-%d %H:%M:%S UTC"),
+                buyer_name_ar=tenant.name_ar, buyer_name_en=tenant.name_en,
+                buyer_email=tenant.email, buyer_phone=tenant.phone,
+                package_name=package_names.get(tenant.package, tenant.package),
+                amount_sar=amount, vat_amount=vat, total_with_vat=total,
+                qr_png_bytes=qr_bytes, payment_method=inv.payment_method,
+            )
+            pdf_url = await upload_doc(
+                file_content=pdf_bytes, file_name=f"invoice_{inv.invoice_number}.pdf",
+                content_type="application/pdf", tenant_id=str(tenant.id), doc_type="zatca_invoice",
+            )
+            inv.invoice_pdf_url = pdf_url
+            regenerated += 1
+        except Exception as e:
+            log.warning("regenerate_pdf_failed", invoice_id=str(inv.id), error=str(e))
+
+    await db.commit()
+    return {"message": f"Regenerated {regenerated}/{len(rows)} invoice PDFs", "total": len(rows), "regenerated": regenerated}
+
+
 @router.post("/invoices/create")
 async def create_manual_invoice(
     body: CreateInvoiceRequest,
