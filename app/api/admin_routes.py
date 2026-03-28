@@ -10,7 +10,7 @@ from datetime import datetime, timedelta, timezone
 import structlog
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.responses import Response, StreamingResponse
-from sqlalchemy import func, select, case, extract, and_
+from sqlalchemy import func, literal_column, select, case, extract, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
@@ -1046,8 +1046,8 @@ async def get_admin_dashboard_stats(
             func.count().label("invoice_count"),
         )
         .where(and_(Invoice.status == "paid", Invoice.paid_at >= twelve_months_ago))
-        .group_by(func.to_char(Invoice.paid_at, "YYYY-MM"))
-        .order_by(func.to_char(Invoice.paid_at, "YYYY-MM"))
+        .group_by(literal_column("month"))
+        .order_by(literal_column("month"))
     )
     revenue_trend = [
         RevenueTrendPoint(month=r.month, revenue=float(r.revenue or 0), invoice_count=r.invoice_count)
@@ -1368,8 +1368,8 @@ async def revenue_report(
         query = query.where(Invoice.paid_at <= datetime.fromisoformat(date_to))
 
     query = query.group_by(
-        func.to_char(Invoice.paid_at, "YYYY-MM"), Tenant.package
-    ).order_by(func.to_char(Invoice.paid_at, "YYYY-MM"))
+        literal_column("month"), Tenant.package
+    ).order_by(literal_column("month"))
 
     result = await db.execute(query)
     items = [
@@ -1472,8 +1472,8 @@ async def export_report(
             )
             .join(Tenant, Invoice.tenant_id == Tenant.id)
             .where(Invoice.status == "paid")
-            .group_by(func.to_char(Invoice.paid_at, "YYYY-MM"), Tenant.package)
-            .order_by(func.to_char(Invoice.paid_at, "YYYY-MM"))
+            .group_by(literal_column("month"), Tenant.package)
+            .order_by(literal_column("month"))
         )
         if date_from:
             query = query.where(Invoice.paid_at >= datetime.fromisoformat(date_from))
@@ -1501,8 +1501,8 @@ async def export_report(
                 func.sum(Invoice.total_with_vat).label("total"),
             )
             .where(Invoice.status == "paid")
-            .group_by(func.to_char(Invoice.paid_at, "YYYY-MM"))
-            .order_by(func.to_char(Invoice.paid_at, "YYYY-MM"))
+            .group_by(literal_column("month"))
+            .order_by(literal_column("month"))
         )
         if date_from:
             query = query.where(Invoice.paid_at >= datetime.fromisoformat(date_from))
