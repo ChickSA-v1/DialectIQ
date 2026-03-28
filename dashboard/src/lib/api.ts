@@ -41,6 +41,57 @@ export async function fetchDashboard(
   return res.json();
 }
 
+export interface CompetitorInfo {
+  place_id: string;
+  name: string;
+  rating: number | null;
+  review_count: number | null;
+  avg_sentiment?: number | null;
+  analyzed_reviews?: number;
+  is_own: boolean;
+}
+
+export interface CompetitorComparison {
+  own: CompetitorInfo[];
+  competitors: CompetitorInfo[];
+}
+
+export async function fetchCompetitorComparison(): Promise<CompetitorComparison> {
+  const token = getToken();
+  const headers: Record<string, string> = {};
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+
+  const res = await fetch(`${API_BASE}/api/v1/tenant/competitor-comparison`, { headers });
+  if (!res.ok) throw new Error(`API error: ${res.status}`);
+  return res.json();
+}
+
+export async function addCompetitor(place_id: string): Promise<{ message: string }> {
+  const token = getToken();
+  const res = await fetch(`${API_BASE}/api/v1/tenant/add-competitor`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify({ place_id }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || `API error: ${res.status}`);
+  }
+  return res.json();
+}
+
+export async function removeCompetitor(place_id: string): Promise<void> {
+  const token = getToken();
+  const res = await fetch(`${API_BASE}/api/v1/tenant/remove-competitor/${place_id}`, {
+    method: "DELETE",
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  if (!res.ok) throw new Error(`API error: ${res.status}`);
+}
+
 export async function exportCSV(filters: Filters = {}): Promise<void> {
   const params = new URLSearchParams();
   if (filters.place_id) params.set("place_id", filters.place_id);

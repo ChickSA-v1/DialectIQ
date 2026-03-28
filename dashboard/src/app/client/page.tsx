@@ -16,6 +16,7 @@ import {
 import { UserProfile, InvoiceInfo, FetchReviewsResult } from "@/lib/types";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import DashboardShell from "@/components/DashboardShell";
+import TeamManagement from "@/components/TeamManagement";
 import TutorialOverlay, { useTutorial } from "@/components/TutorialOverlay";
 import {
   Clock,
@@ -833,6 +834,11 @@ function ClientDashboard() {
                   </div>
                 </div>
               )}
+            </div>
+
+            {/* Team Management */}
+            <div className="animate-slide-up" style={{ animationDelay: "275ms" }}>
+              <TeamManagement userRole={profile?.role || "member"} />
             </div>
 
             {/* Fetch Reviews */}

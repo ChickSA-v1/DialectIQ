@@ -9,6 +9,7 @@ import BreakdownCharts from "./BreakdownCharts";
 import FilterBar from "./FilterBar";
 import ReviewCard from "./ReviewCard";
 import SentimentTrendChart from "./SentimentTrendChart";
+import CompetitorComparison from "./CompetitorComparison";
 import Pagination from "./Pagination";
 import {
   RefreshCw,
@@ -18,6 +19,7 @@ import {
   LayoutDashboard,
   Download,
   TrendingUp,
+  Users,
 } from "lucide-react";
 
 function SectionHeader({
@@ -137,8 +139,16 @@ export default function DashboardShell() {
           <BreakdownCharts stats={data.stats} />
 
           {/* Sentiment Trend */}
-          <SectionHeader icon={TrendingUp} titleKey={"section.sentimentTrend" as any} />
-          <SentimentTrendChart stats={data.stats} />
+          <div data-tutorial="sentiment-trend">
+            <SectionHeader icon={TrendingUp} titleKey={"section.sentimentTrend" as any} />
+            <SentimentTrendChart stats={data.stats} />
+          </div>
+
+          {/* Competitor Comparison */}
+          <div data-tutorial="competitors">
+            <SectionHeader icon={Users} titleKey={"section.competitors" as any} />
+            <CompetitorComparison />
+          </div>
 
           {/* Reviews section */}
           <div data-tutorial="reviews-section" className="space-y-4">

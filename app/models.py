@@ -29,7 +29,7 @@ package_enum = Enum(
     name="package_enum", create_constraint=True,
 )
 user_role_enum = Enum(
-    "admin", "owner",
+    "admin", "owner", "member",
     name="user_role_enum", create_constraint=True,
 )
 doc_type_enum = Enum(
@@ -75,6 +75,9 @@ class Tenant(Base):
     pending_place_ids: Mapped[dict | None] = mapped_column(
         JSON, nullable=True, default=list, comment='Place IDs awaiting admin approval',
     )
+    competitor_place_ids: Mapped[dict | None] = mapped_column(
+        JSON, nullable=True, default=list, comment='Competitor Place IDs for comparison',
+    )
     max_businesses: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
     max_reviews_per_month: Mapped[int] = mapped_column(Integer, nullable=False, default=500)
     reviews_used_this_month: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
@@ -114,6 +117,10 @@ class User(Base):
     full_name: Mapped[str] = mapped_column(String(255), nullable=False)
     role: Mapped[str] = mapped_column(user_role_enum, nullable=False, default="owner")
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    allowed_place_ids: Mapped[dict | None] = mapped_column(
+        JSON, nullable=True, default=None,
+        comment="Place IDs this member can see (NULL = all). Only for role=member.",
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )

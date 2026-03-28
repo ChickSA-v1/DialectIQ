@@ -39,6 +39,18 @@ const STEPS: TutorialStep[] = [
     position: "bottom",
   },
   {
+    targetSelector: "[data-tutorial='sentiment-trend']",
+    titleKey: "tutorial.stepTrendTitle",
+    descKey: "tutorial.stepTrendDesc",
+    position: "bottom",
+  },
+  {
+    targetSelector: "[data-tutorial='competitors']",
+    titleKey: "tutorial.stepCompetitorTitle",
+    descKey: "tutorial.stepCompetitorDesc",
+    position: "bottom",
+  },
+  {
     targetSelector: "[data-tutorial='filter-bar']",
     titleKey: "tutorial.step5Title",
     descKey: "tutorial.step5Desc",

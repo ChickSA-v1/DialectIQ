@@ -8,7 +8,7 @@ from datetime import datetime, timedelta, timezone
 
 import structlog
 from fastapi import APIRouter, Body, Depends, File, Form, HTTPException, UploadFile, status
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
@@ -662,3 +662,271 @@ async def fetch_reviews_endpoint(
         ))
 
     return responses
+
+
+# ── Competitor Tracking ──────────────────────────────────────────────
+
+
+@place_router.post("/add-competitor")
+async def add_competitor(
+    req: ConfirmPlaceIdRequest,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Add a competitor's Google Place ID for comparison tracking."""
+    if not user.tenant_id:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "No tenant associated")
+
+    result = await db.execute(select(Tenant).where(Tenant.id == user.tenant_id))
+    tenant = result.scalar_one_or_none()
+    if not tenant:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Tenant not found")
+
+    competitors = list(tenant.competitor_place_ids or [])
+    if req.place_id in competitors:
+        raise HTTPException(status.HTTP_409_CONFLICT, "Competitor already added")
+
+    # Max 3 competitors
+    if len(competitors) >= 3:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Maximum 3 competitors allowed")
+
+    # Check it's not one of their own places
+    own_places = list(tenant.place_ids or [])
+    if req.place_id in own_places:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Cannot add your own business as competitor")
+
+    # Get competitor name
+    place_name = None
+    try:
+        details = await get_place_details(req.place_id)
+        if details:
+            place_name = details.get("name")
+    except Exception:
+        pass
+
+    from sqlalchemy.orm.attributes import flag_modified
+    competitors.append(req.place_id)
+    tenant.competitor_place_ids = competitors
+    flag_modified(tenant, "competitor_place_ids")
+    await db.commit()
+
+    log.info("competitor_added", tenant_id=str(tenant.id), place_id=req.place_id)
+    return {
+        "place_id": req.place_id,
+        "place_name": place_name,
+        "message": "Competitor added successfully",
+        "total_competitors": len(competitors),
+    }
+
+
+@place_router.delete("/remove-competitor/{place_id}")
+async def remove_competitor(
+    place_id: str,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Remove a competitor from tracking."""
+    if not user.tenant_id:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "No tenant associated")
+
+    result = await db.execute(select(Tenant).where(Tenant.id == user.tenant_id))
+    tenant = result.scalar_one_or_none()
+    if not tenant:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Tenant not found")
+
+    competitors = list(tenant.competitor_place_ids or [])
+    if place_id not in competitors:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Competitor not found")
+
+    from sqlalchemy.orm.attributes import flag_modified
+    competitors.remove(place_id)
+    tenant.competitor_place_ids = competitors
+    flag_modified(tenant, "competitor_place_ids")
+    await db.commit()
+
+    return {"message": "Competitor removed", "place_id": place_id}
+
+
+@place_router.get("/competitor-comparison")
+async def competitor_comparison(
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Compare own businesses vs competitors using Google Places data.
+    Returns ratings, review counts, and trends for both sides.
+    """
+    if not user.tenant_id:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "No tenant associated")
+
+    result = await db.execute(select(Tenant).where(Tenant.id == user.tenant_id))
+    tenant = result.scalar_one_or_none()
+    if not tenant:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Tenant not found")
+
+    own_places = list(tenant.place_ids or [])
+    competitor_places = list(tenant.competitor_place_ids or [])
+
+    async def _get_place_info(pid: str) -> dict | None:
+        try:
+            details = await get_place_details(pid)
+            if details:
+                return {
+                    "place_id": pid,
+                    "name": details.get("name", "Unknown"),
+                    "rating": details.get("rating"),
+                    "review_count": details.get("userRatingCount"),
+                }
+        except Exception:
+            pass
+        return None
+
+    from sqlalchemy import func as _func
+    from app.models import AnalysisResult, Review
+
+    own_data = []
+    for pid in own_places:
+        info = await _get_place_info(pid)
+        if info:
+            # Enrich with our own sentiment data
+            avg_q = (
+                select(_func.avg(AnalysisResult.sentiment_score), _func.count(Review.id))
+                .join(Review)
+                .where(Review.tenant_uuid == tenant.id, Review.place_id == pid)
+            )
+            row = (await db.execute(avg_q)).one_or_none()
+            info["avg_sentiment"] = round(float(row[0]), 2) if row and row[0] else None
+            info["analyzed_reviews"] = row[1] if row else 0
+            info["is_own"] = True
+            own_data.append(info)
+
+    competitor_data = []
+    for pid in competitor_places:
+        info = await _get_place_info(pid)
+        if info:
+            info["is_own"] = False
+            competitor_data.append(info)
+
+    return {
+        "own": own_data,
+        "competitors": competitor_data,
+    }
+
+
+# ── Team Management ─────────────────────────────────────────────────
+
+
+@place_router.get("/team")
+async def list_team_members(
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """List all team members for the current tenant."""
+    if not user.tenant_id:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "No tenant associated")
+    if user.role not in ("owner", "admin"):
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Only owners can manage team")
+
+    result = await db.execute(
+        select(User).where(User.tenant_id == user.tenant_id).order_by(User.created_at)
+    )
+    members = result.scalars().all()
+    return [
+        {
+            "id": str(m.id),
+            "email": m.email,
+            "full_name": m.full_name,
+            "role": m.role,
+            "is_active": m.is_active,
+            "allowed_place_ids": m.allowed_place_ids,
+            "created_at": m.created_at.isoformat() if m.created_at else None,
+        }
+        for m in members
+    ]
+
+
+@place_router.post("/team/invite")
+async def invite_team_member(
+    req: dict,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Invite a team member. Owner only."""
+    if not user.tenant_id:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "No tenant associated")
+    if user.role not in ("owner", "admin"):
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Only owners can invite members")
+
+    email = req.get("email", "").strip().lower()
+    full_name = req.get("full_name", "").strip()
+    password = req.get("password", "").strip()
+    allowed_place_ids = req.get("allowed_place_ids")  # list or None
+
+    if not email or not full_name or not password:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "email, full_name, and password are required")
+
+    # Check if email already exists
+    existing = await db.execute(select(User).where(User.email == email))
+    if existing.scalar_one_or_none():
+        raise HTTPException(status.HTTP_409_CONFLICT, "Email already registered")
+
+    # Check team size limit (max 10 members per tenant)
+    count_result = await db.execute(
+        select(func.count(User.id)).where(User.tenant_id == user.tenant_id)
+    )
+    member_count = count_result.scalar() or 0
+    if member_count >= 10:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Maximum 10 team members allowed")
+
+    import hashlib
+    password_hash = hashlib.sha256(password.encode()).hexdigest()
+
+    new_member = User(
+        id=uuid.uuid4(),
+        tenant_id=user.tenant_id,
+        email=email,
+        password_hash=password_hash,
+        full_name=full_name,
+        role="member",
+        is_active=True,
+        allowed_place_ids=allowed_place_ids,
+    )
+    db.add(new_member)
+    await db.commit()
+
+    log.info("team_member_invited", tenant_id=str(user.tenant_id), email=email)
+    return {
+        "id": str(new_member.id),
+        "email": email,
+        "full_name": full_name,
+        "role": "member",
+        "message": "Team member added successfully",
+    }
+
+
+@place_router.delete("/team/{member_id}")
+async def remove_team_member(
+    member_id: str,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Remove a team member. Owner only."""
+    if user.role not in ("owner", "admin"):
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Only owners can remove members")
+
+    mid = uuid.UUID(member_id)
+    result = await db.execute(
+        select(User).where(User.id == mid, User.tenant_id == user.tenant_id)
+    )
+    member = result.scalar_one_or_none()
+    if not member:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Member not found")
+
+    if member.role == "owner":
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Cannot remove the owner")
+
+    await db.delete(member)
+    await db.commit()
+
+    log.info("team_member_removed", tenant_id=str(user.tenant_id), member_id=member_id)
+    return {"message": "Member removed", "id": member_id}
