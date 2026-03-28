@@ -60,17 +60,23 @@ def _ensure_arabic_font():
     global _FONT_REGISTERED
     if _FONT_REGISTERED:
         return
+    regular = str(_FONT_DIR / "Amiri-Regular.ttf")
+    bold = str(_FONT_DIR / "Amiri-Bold.ttf")
+    log.info("arabic_font_check", font_dir=str(_FONT_DIR), regular_exists=os.path.exists(regular), bold_exists=os.path.exists(bold))
     try:
-        regular = str(_FONT_DIR / "Amiri-Regular.ttf")
-        bold = str(_FONT_DIR / "Amiri-Bold.ttf")
         if os.path.exists(regular):
             pdfmetrics.registerFont(TTFont("Amiri", regular))
+            log.info("arabic_font_registered_regular")
+        else:
+            log.error("arabic_font_missing", path=regular)
         if os.path.exists(bold):
             pdfmetrics.registerFont(TTFont("Amiri-Bold", bold))
-        _FONT_REGISTERED = True
-        log.info("arabic_font_registered", font_dir=str(_FONT_DIR))
+            log.info("arabic_font_registered_bold")
+        else:
+            log.error("arabic_font_missing_bold", path=bold)
+        _FONT_REGISTERED = os.path.exists(regular)
     except Exception as e:
-        log.warning("arabic_font_registration_failed", error=str(e))
+        log.error("arabic_font_registration_failed", error=str(e), font_dir=str(_FONT_DIR))
 
 
 def _reshape_arabic(text: str) -> str:
