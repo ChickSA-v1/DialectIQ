@@ -640,62 +640,69 @@ function ClientDashboard() {
               }
 
               return (
-                <div className="glass-card rounded-2xl p-5 animate-slide-up" style={{ animationDelay: "50ms" }}>
-                  <div className="flex items-center gap-2 mb-4">
-                    <div className="p-2 rounded-xl bg-amber-50">
-                      <BarChart3 className="w-4 h-4 text-amber-600" />
+                <div className="glass-card rounded-2xl overflow-hidden animate-slide-up" style={{ animationDelay: "50ms" }}>
+                  {/* Gradient header strip */}
+                  <div className="h-1 gradient-primary" />
+                  <div className="p-5">
+                    <div className="flex items-center gap-2 mb-4">
+                      <div className="p-2 rounded-xl bg-gradient-to-br from-cyan-50 to-cyan-100">
+                        <BarChart3 className="w-4 h-4 text-cyan-600" />
+                      </div>
+                      <h3 className="font-bold text-gray-800">
+                        {t("client.subscriptionUsage" as any)}
+                      </h3>
+                      <span className="ms-auto text-[11px] font-semibold text-cyan-600 bg-cyan-50 px-2.5 py-1 rounded-full capitalize">
+                        {tenant.package}
+                      </span>
                     </div>
-                    <h3 className="font-bold text-gray-800">
-                      {t("client.subscriptionUsage" as any)}
-                    </h3>
-                  </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {/* Days Remaining */}
-                    <div className="bg-gray-50/80 rounded-xl p-4 border border-gray-100/50">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {/* Days Remaining */}
+                      <div className="relative bg-gradient-to-br from-gray-50 to-white rounded-xl p-4 border border-gray-100/80 overflow-hidden">
+                        <div className="absolute top-0 left-0 w-full h-0.5" style={{ background: daysRemaining <= 5 ? "#F43F5E" : daysRemaining <= 10 ? "#FBBF24" : "#00D2DF" }} />
+                        <div className="flex items-center gap-2 mb-1">
                           <CalendarDays className="w-4 h-4 text-cyan-500" />
-                          <span className="text-sm font-medium text-gray-600">
+                          <span className="text-xs font-medium text-gray-500">
                             {t("client.daysRemaining" as any)}
                           </span>
                         </div>
-                        <span className="text-sm font-bold text-gray-900">
-                          {daysRemaining} <span className="text-xs font-normal text-gray-400">{t("client.of" as any)} {totalDays} {t("client.days" as any)}</span>
-                        </span>
+                        <div className="flex items-baseline gap-1 mb-3">
+                          <span className="text-2xl font-extrabold text-gray-900">{daysRemaining}</span>
+                          <span className="text-xs text-gray-400">/ {totalDays} {t("client.days" as any)}</span>
+                        </div>
+                        <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                          <div
+                            className="h-full rounded-full transition-all duration-700"
+                            style={{
+                              width: `${100 - daysPct}%`,
+                              background: daysRemaining <= 5 ? "#F43F5E" : daysRemaining <= 10 ? "#FBBF24" : "#00D2DF",
+                            }}
+                          />
+                        </div>
                       </div>
-                      <div className="h-2.5 bg-gray-200 rounded-full overflow-hidden">
-                        <div
-                          className="h-full rounded-full transition-all duration-500"
-                          style={{
-                            width: `${100 - daysPct}%`,
-                            background: daysRemaining <= 5 ? "#F43F5E" : daysRemaining <= 10 ? "#FBBF24" : "#00D2DF",
-                          }}
-                        />
-                      </div>
-                    </div>
 
-                    {/* Reviews Remaining */}
-                    <div className="bg-gray-50/80 rounded-xl p-4 border border-gray-100/50">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
+                      {/* Reviews Remaining */}
+                      <div className="relative bg-gradient-to-br from-gray-50 to-white rounded-xl p-4 border border-gray-100/80 overflow-hidden">
+                        <div className="absolute top-0 left-0 w-full h-0.5" style={{ background: reviewsRemaining <= 50 ? "#F43F5E" : reviewsRemaining <= 150 ? "#FBBF24" : "#10B981" }} />
+                        <div className="flex items-center gap-2 mb-1">
                           <MessageSquareText className="w-4 h-4 text-emerald-500" />
-                          <span className="text-sm font-medium text-gray-600">
+                          <span className="text-xs font-medium text-gray-500">
                             {t("client.reviewsRemaining" as any)}
                           </span>
                         </div>
-                        <span className="text-sm font-bold text-gray-900">
-                          {reviewsRemaining} <span className="text-xs font-normal text-gray-400">{t("client.of" as any)} {reviewsMax} {t("client.reviews" as any)}</span>
-                        </span>
-                      </div>
-                      <div className="h-2.5 bg-gray-200 rounded-full overflow-hidden">
-                        <div
-                          className="h-full rounded-full transition-all duration-500"
-                          style={{
-                            width: `${100 - reviewsPct}%`,
-                            background: reviewsRemaining <= 50 ? "#F43F5E" : reviewsRemaining <= 150 ? "#FBBF24" : "#10B981",
-                          }}
-                        />
+                        <div className="flex items-baseline gap-1 mb-3">
+                          <span className="text-2xl font-extrabold text-gray-900">{reviewsRemaining}</span>
+                          <span className="text-xs text-gray-400">/ {reviewsMax} {t("client.reviews" as any)}</span>
+                        </div>
+                        <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                          <div
+                            className="h-full rounded-full transition-all duration-700"
+                            style={{
+                              width: `${100 - reviewsPct}%`,
+                              background: reviewsRemaining <= 50 ? "#F43F5E" : reviewsRemaining <= 150 ? "#FBBF24" : "#10B981",
+                            }}
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -703,142 +710,146 @@ function ClientDashboard() {
               );
             })()}
 
-            {/* API Key card */}
-            <div className="glass-card rounded-2xl p-5 animate-slide-up" style={{ animationDelay: "100ms" }}>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="p-2 rounded-xl bg-cyan-50">
-                    <Key className="w-4 h-4 text-cyan-600" />
+            {/* Two-column grid for settings */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 animate-slide-up" style={{ animationDelay: "100ms" }}>
+              {/* Left column */}
+              <div className="space-y-4">
+                {/* API Key card */}
+                <div className="glass-card rounded-2xl p-5 h-full">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <div className="p-2 rounded-xl bg-gradient-to-br from-cyan-50 to-cyan-100">
+                        <Key className="w-4 h-4 text-cyan-600" />
+                      </div>
+                      <h3 className="font-bold text-gray-800">
+                        {t("client.apiKey")}
+                      </h3>
+                    </div>
+                    {tenant?.api_key && (
+                      <button
+                        onClick={copyKey}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-cyan-50 text-cyan-600 rounded-xl text-xs font-semibold hover:bg-cyan-100 transition-colors"
+                      >
+                        <Copy className="w-3.5 h-3.5" />
+                        {copiedKey ? t("admin.copied") : t("client.copy")}
+                      </button>
+                    )}
                   </div>
-                  <h3 className="font-bold text-gray-800">
-                    {t("client.apiKey")}
-                  </h3>
+                  <div className="font-mono text-xs bg-gray-900 rounded-xl p-3.5 text-cyan-400 border border-gray-700/50 break-all">
+                    {tenant?.api_key || "—"}
+                  </div>
+                  <div className="flex items-center gap-2 mt-3">
+                    <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                      <div
+                        className="h-full rounded-full gradient-primary"
+                        style={{
+                          width: `${Math.min(((tenant?.reviews_used_this_month ?? 0) / (tenant?.max_reviews_per_month ?? 1)) * 100, 100)}%`,
+                        }}
+                      />
+                    </div>
+                    <p className="text-[11px] text-gray-400 shrink-0 font-medium">
+                      {tenant?.reviews_used_this_month}/{tenant?.max_reviews_per_month} {t("client.reviews" as any)}
+                    </p>
+                  </div>
                 </div>
-                {tenant?.api_key && (
-                  <button
-                    onClick={copyKey}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-cyan-50 text-cyan-600 rounded-xl text-sm font-medium hover:bg-cyan-100 transition-colors"
-                  >
-                    <Copy className="w-3.5 h-3.5" />
-                    {copiedKey ? t("admin.copied") : t("client.copy")}
-                  </button>
+
+                {/* Place ID management */}
+                <div className="glass-card rounded-2xl p-5">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="p-2 rounded-xl bg-gradient-to-br from-emerald-50 to-emerald-100">
+                      <MapPin className="w-4 h-4 text-emerald-600" />
+                    </div>
+                    <h3 className="font-bold text-gray-800">
+                      {t("client.placeIds")}
+                    </h3>
+                    <span className="text-[11px] text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full font-medium">
+                      {tenant?.place_ids?.length || 0}/{tenant?.max_businesses}
+                    </span>
+                  </div>
+
+                  {tenant?.place_ids && tenant.place_ids.length > 0 ? (
+                    <div className="space-y-1.5">
+                      {tenant.place_ids.map((pid) => (
+                        <div
+                          key={pid}
+                          className="flex items-center gap-2 px-3 py-2 bg-emerald-50/80 text-emerald-700 rounded-xl text-xs font-mono border border-emerald-100/80"
+                        >
+                          <CheckCircle className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                          <span className="truncate">{pid}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-400">{t("client.noPlaceIds")}</p>
+                  )}
+
+                  {tenant?.pending_place_ids && tenant.pending_place_ids.length > 0 && (
+                    <div className="mt-3 pt-3 border-t border-gray-100">
+                      <p className="text-[11px] text-amber-600 font-semibold mb-1.5">{t("client.pendingApproval" as any)}</p>
+                      <div className="space-y-1.5">
+                        {tenant.pending_place_ids.map((pid) => (
+                          <div
+                            key={pid}
+                            className="flex items-center gap-2 px-3 py-2 bg-amber-50/80 text-amber-700 rounded-xl text-xs font-mono border border-amber-200/80"
+                          >
+                            <Clock className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                            <span className="truncate">{pid}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Right column */}
+              <div className="space-y-4">
+                {/* Team Management */}
+                <TeamManagement userRole={profile?.role || "member"} />
+
+                {/* Invoices */}
+                {profile?.invoices && profile.invoices.length > 0 && (
+                  <div className="glass-card rounded-2xl p-5">
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="p-2 rounded-xl bg-gradient-to-br from-violet-50 to-violet-100">
+                        <FileText className="w-4 h-4 text-violet-600" />
+                      </div>
+                      <h3 className="font-bold text-gray-800">
+                        {t("client.invoices" as any)}
+                      </h3>
+                    </div>
+                    <div className="space-y-2">
+                      {profile.invoices.filter((inv: InvoiceInfo) => inv.status === "paid").map((inv: InvoiceInfo) => (
+                        <div key={inv.id} className="flex items-center justify-between p-3 bg-gray-50/80 rounded-xl border border-gray-100/50 hover:shadow-sm transition-shadow">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-emerald-50">
+                              <FileText className="w-3.5 h-3.5 text-emerald-600" />
+                            </div>
+                            <div>
+                              <p className="text-sm font-semibold text-gray-800">
+                                {inv.invoice_number || `INV-${inv.id.slice(0, 8)}`}
+                              </p>
+                              <p className="text-[11px] text-gray-500">
+                                {inv.total_with_vat?.toLocaleString() || inv.amount_sar.toLocaleString()} {t("register.sarMonth" as any)}
+                                {inv.paid_at && ` • ${new Date(inv.paid_at).toLocaleDateString("ar-SA")}`}
+                              </p>
+                            </div>
+                          </div>
+                          {inv.invoice_pdf_url && (
+                            <button
+                              onClick={() => downloadInvoicePdf(inv.id).catch(() => alert("Failed to download"))}
+                              className="flex items-center gap-1 px-2.5 py-1.5 bg-cyan-50 text-cyan-600 rounded-lg text-[11px] font-semibold hover:bg-cyan-100 transition-colors"
+                            >
+                              <Download className="w-3 h-3" />
+                              PDF
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 )}
               </div>
-              <div className="mt-3 font-mono text-sm bg-gray-50/80 rounded-xl p-3 text-gray-700 border border-gray-100/50">
-                {tenant?.api_key || "—"}
-              </div>
-              <div className="flex items-center gap-1.5 mt-2">
-                <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                  <div
-                    className="h-full rounded-full gradient-primary"
-                    style={{
-                      width: `${Math.min(((tenant?.reviews_used_this_month ?? 0) / (tenant?.max_reviews_per_month ?? 1)) * 100, 100)}%`,
-                    }}
-                  />
-                </div>
-                <p className="text-xs text-gray-400 shrink-0">
-                  {tenant?.reviews_used_this_month} / {tenant?.max_reviews_per_month}
-                </p>
-              </div>
-            </div>
-
-            {/* Invoices */}
-            {profile?.invoices && profile.invoices.length > 0 && (
-              <div className="glass-card rounded-2xl p-5 animate-slide-up" style={{ animationDelay: "250ms" }}>
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="p-2 rounded-xl bg-cyan-50">
-                    <FileText className="w-4 h-4 text-cyan-600" />
-                  </div>
-                  <h3 className="font-bold text-gray-800">
-                    {t("client.invoices" as any)}
-                  </h3>
-                </div>
-                <div className="space-y-2">
-                  {profile.invoices.filter((inv: InvoiceInfo) => inv.status === "paid").map((inv: InvoiceInfo) => (
-                    <div key={inv.id} className="flex items-center justify-between bg-gray-50/80 rounded-xl p-3 border border-gray-100/50">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-lg bg-emerald-50">
-                          <FileText className="w-4 h-4 text-emerald-600" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-semibold text-gray-800">
-                            {inv.invoice_number || `INV-${inv.id.slice(0, 8)}`}
-                          </p>
-                          <p className="text-xs text-gray-500">
-                            {inv.total_with_vat?.toLocaleString() || inv.amount_sar.toLocaleString()} {t("register.sarMonth" as any)}
-                            {inv.paid_at && ` • ${new Date(inv.paid_at).toLocaleDateString("ar-SA")}`}
-                          </p>
-                        </div>
-                      </div>
-                      {inv.invoice_pdf_url && (
-                        <button
-                          onClick={() => downloadInvoicePdf(inv.id).catch(() => alert("Failed to download"))}
-                          className="flex items-center gap-1.5 px-3 py-1.5 bg-cyan-50 text-cyan-600 rounded-lg text-xs font-medium hover:bg-cyan-100 transition-colors"
-                        >
-                          <Download className="w-3.5 h-3.5" />
-                          {t("client.downloadInvoice" as any)}
-                        </button>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Place ID management */}
-            <div className="glass-card rounded-2xl p-5 animate-slide-up" style={{ animationDelay: "200ms" }}>
-              <div className="flex items-center gap-2 mb-3">
-                <div className="p-2 rounded-xl bg-emerald-50">
-                  <MapPin className="w-4 h-4 text-emerald-600" />
-                </div>
-                <h3 className="font-bold text-gray-800">
-                  {t("client.placeIds")}
-                </h3>
-                <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
-                  {tenant?.place_ids?.length || 0} / {tenant?.max_businesses}
-                </span>
-              </div>
-
-              {tenant?.place_ids && tenant.place_ids.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
-                  {tenant.place_ids.map((pid) => (
-                    <span
-                      key={pid}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-xl text-xs font-mono border border-emerald-100"
-                    >
-                      <CheckCircle className="w-3 h-3" />
-                      {pid.length > 30 ? pid.slice(0, 30) + "..." : pid}
-                    </span>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-gray-400">
-                  {t("client.noPlaceIds")}
-                </p>
-              )}
-
-              {/* Pending place IDs */}
-              {tenant?.pending_place_ids && tenant.pending_place_ids.length > 0 && (
-                <div className="mt-3">
-                  <p className="text-xs text-amber-600 font-medium mb-1.5">{t("client.pendingApproval" as any)}</p>
-                  <div className="flex flex-wrap gap-2">
-                    {tenant.pending_place_ids.map((pid) => (
-                      <span
-                        key={pid}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 text-amber-700 rounded-xl text-xs font-mono border border-amber-200"
-                      >
-                        <Clock className="w-3 h-3" />
-                        {pid.length > 30 ? pid.slice(0, 30) + "..." : pid}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Team Management */}
-            <div className="animate-slide-up" style={{ animationDelay: "275ms" }}>
-              <TeamManagement userRole={profile?.role || "member"} />
             </div>
 
             {/* Fetch Reviews */}
