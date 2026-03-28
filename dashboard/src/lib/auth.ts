@@ -541,3 +541,151 @@ export function logout(): void {
     window.location.href = "/login";
   }
 }
+
+// ── Admin Dashboard Stats ───────────────────────────────────────────
+
+import type {
+  AdminDashboardStats,
+  AdminInvoiceItem,
+  AdminInvoiceListResponse,
+  RevenueReportResponse,
+  TenantActivityResponse,
+} from "./types";
+
+export async function fetchAdminDashboardStats(): Promise<AdminDashboardStats> {
+  const res = await authFetch("/api/v1/admin/dashboard/stats");
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || "Failed to fetch dashboard stats");
+  }
+  return res.json();
+}
+
+// ── Admin Invoice Management ────────────────────────────────────────
+
+export async function fetchAdminInvoices(params?: {
+  status?: string;
+  tenant_id?: string;
+  date_from?: string;
+  date_to?: string;
+  page?: number;
+}): Promise<AdminInvoiceListResponse> {
+  const sp = new URLSearchParams();
+  if (params?.status) sp.set("status", params.status);
+  if (params?.tenant_id) sp.set("tenant_id", params.tenant_id);
+  if (params?.date_from) sp.set("date_from", params.date_from);
+  if (params?.date_to) sp.set("date_to", params.date_to);
+  if (params?.page) sp.set("page", String(params.page));
+  const qs = sp.toString();
+  const res = await authFetch(`/api/v1/admin/invoices${qs ? `?${qs}` : ""}`);
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || "Failed to fetch invoices");
+  }
+  return res.json();
+}
+
+export async function fetchAdminInvoiceDetail(
+  invoiceId: string
+): Promise<AdminInvoiceItem> {
+  const res = await authFetch(`/api/v1/admin/invoices/${invoiceId}`);
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || "Failed to fetch invoice detail");
+  }
+  return res.json();
+}
+
+export async function downloadAdminInvoicePdf(invoiceId: string): Promise<void> {
+  const res = await authFetch(`/api/v1/admin/invoices/${invoiceId}/pdf`);
+  if (!res.ok) throw new Error("Failed to download invoice PDF");
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `invoice-${invoiceId}.pdf`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+export async function createManualInvoice(data: {
+  tenant_id: string;
+  package: string;
+  amount_sar?: number;
+}): Promise<{ invoice_id: string; invoice_number: string; message: string }> {
+  const res = await authFetch("/api/v1/admin/invoices/create", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || "Failed to create invoice");
+  }
+  return res.json();
+}
+
+// ── Delete Tenant ───────────────────────────────────────────────────
+
+export async function deleteTenant(
+  tenantId: string
+): Promise<{ message: string }> {
+  const res = await authFetch(`/api/v1/admin/tenants/${tenantId}`, {
+    method: "DELETE",
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || "Failed to delete tenant");
+  }
+  return res.json();
+}
+
+// ── Admin Reports ───────────────────────────────────────────────────
+
+export async function fetchRevenueReport(params?: {
+  date_from?: string;
+  date_to?: string;
+}): Promise<RevenueReportResponse> {
+  const sp = new URLSearchParams();
+  if (params?.date_from) sp.set("date_from", params.date_from);
+  if (params?.date_to) sp.set("date_to", params.date_to);
+  const qs = sp.toString();
+  const res = await authFetch(`/api/v1/admin/reports/revenue${qs ? `?${qs}` : ""}`);
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || "Failed to fetch revenue report");
+  }
+  return res.json();
+}
+
+export async function fetchTenantActivityReport(params?: {
+  page?: number;
+}): Promise<TenantActivityResponse> {
+  const sp = new URLSearchParams();
+  if (params?.page) sp.set("page", String(params.page));
+  const qs = sp.toString();
+  const res = await authFetch(`/api/v1/admin/reports/tenants${qs ? `?${qs}` : ""}`);
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || "Failed to fetch tenant activity report");
+  }
+  return res.json();
+}
+
+export async function exportReport(
+  reportType: "revenue" | "tenants" | "vat",
+  params?: { date_from?: string; date_to?: string }
+): Promise<void> {
+  const sp = new URLSearchParams();
+  sp.set("report_type", reportType);
+  if (params?.date_from) sp.set("date_from", params.date_from);
+  if (params?.date_to) sp.set("date_to", params.date_to);
+  const res = await authFetch(`/api/v1/admin/reports/export?${sp.toString()}`);
+  if (!res.ok) throw new Error("Failed to export report");
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `report_${reportType}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}

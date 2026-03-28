@@ -349,3 +349,104 @@ class ResetPasswordRequest(BaseModel):
     email: str = Field(..., max_length=255)
     code: str = Field(..., min_length=6, max_length=6)
     new_password: str = Field(..., min_length=8, max_length=128)
+
+
+# ── Admin Dashboard schemas ─────────────────────────────────────────
+
+class RevenueTrendPoint(BaseModel):
+    month: str  # YYYY-MM
+    revenue: float
+    invoice_count: int
+
+
+class PackageDistribution(BaseModel):
+    package: str
+    count: int
+
+
+class RecentActivity(BaseModel):
+    type: str  # "registration", "payment", "activation"
+    tenant_name: str
+    detail: str
+    timestamp: datetime
+
+
+class AdminDashboardStats(BaseModel):
+    total_revenue: float
+    active_tenants: int
+    total_reviews: int
+    active_subscriptions: int
+    pending_registrations: int
+    pending_bank_transfers: int
+    revenue_trend: list[RevenueTrendPoint] = []
+    package_distribution: list[PackageDistribution] = []
+    recent_activity: list[RecentActivity] = []
+
+
+# ── Admin Invoice schemas ────────────────────────────────────────────
+
+class AdminInvoiceItem(BaseModel):
+    id: UUID
+    invoice_number: str | None = None
+    tenant_id: UUID
+    tenant_name: str
+    tenant_email: str
+    package: str
+    amount_sar: float
+    vat_amount: float | None = None
+    total_with_vat: float | None = None
+    status: str
+    payment_method: str | None = None
+    invoice_pdf_url: str | None = None
+    paid_at: datetime | None = None
+    created_at: datetime
+
+
+class AdminInvoiceListResponse(BaseModel):
+    invoices: list[AdminInvoiceItem]
+    total: int
+    page: int
+    total_pages: int
+
+
+class CreateInvoiceRequest(BaseModel):
+    tenant_id: UUID
+    package: str = Field(..., pattern=r"^(basic|advanced|enterprise)$")
+    amount_sar: float | None = None  # auto-calculate from package if None
+
+
+# ── Admin Reports schemas ────────────────────────────────────────────
+
+class RevenueReportItem(BaseModel):
+    month: str
+    package: str
+    invoice_count: int
+    revenue: float
+    vat: float
+    total_with_vat: float
+
+
+class TenantActivityItem(BaseModel):
+    id: UUID
+    name_ar: str
+    email: str
+    package: str
+    status: str
+    reviews_used: int
+    max_reviews: int
+    subscription_status: str | None = None
+    subscription_expires_at: datetime | None = None
+
+
+class RevenueReportResponse(BaseModel):
+    items: list[RevenueReportItem]
+    total_revenue: float
+    total_vat: float
+    total_with_vat: float
+
+
+class TenantActivityResponse(BaseModel):
+    tenants: list[TenantActivityItem]
+    total: int
+    page: int
+    total_pages: int

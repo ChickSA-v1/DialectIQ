@@ -186,3 +186,98 @@ export interface FetchReviewsResult {
   reviews_analyzed: number;
   message: string;
 }
+
+// ── Admin Dashboard types ───────────────────────────────────────────
+
+export interface RevenueTrendPoint {
+  month: string;
+  revenue: number;
+  invoice_count: number;
+}
+
+export interface PackageDistribution {
+  package: string;
+  count: number;
+}
+
+export interface RecentActivity {
+  type: string;
+  tenant_name: string;
+  detail: string;
+  timestamp: string;
+}
+
+export interface AdminDashboardStats {
+  total_revenue: number;
+  active_tenants: number;
+  total_reviews: number;
+  active_subscriptions: number;
+  pending_registrations: number;
+  pending_bank_transfers: number;
+  revenue_trend: RevenueTrendPoint[];
+  package_distribution: PackageDistribution[];
+  recent_activity: RecentActivity[];
+}
+
+// ── Admin Invoice types ─────────────────────────────────────────────
+
+export interface AdminInvoiceItem {
+  id: string;
+  invoice_number: string | null;
+  tenant_id: string;
+  tenant_name: string;
+  tenant_email: string;
+  package: string;
+  amount_sar: number;
+  vat_amount: number | null;
+  total_with_vat: number | null;
+  status: string;
+  payment_method: string | null;
+  invoice_pdf_url: string | null;
+  paid_at: string | null;
+  created_at: string;
+}
+
+export interface AdminInvoiceListResponse {
+  invoices: AdminInvoiceItem[];
+  total: number;
+  page: number;
+  total_pages: number;
+}
+
+// ── Admin Reports types ─────────────────────────────────────────────
+
+export interface RevenueReportItem {
+  month: string;
+  package: string;
+  invoice_count: number;
+  revenue: number;
+  vat: number;
+  total_with_vat: number;
+}
+
+export interface RevenueReportResponse {
+  items: RevenueReportItem[];
+  total_revenue: number;
+  total_vat: number;
+  total_with_vat: number;
+}
+
+export interface TenantActivityItem {
+  id: string;
+  name_ar: string;
+  email: string;
+  package: string;
+  status: string;
+  reviews_used: number;
+  max_reviews: number;
+  subscription_status: string | null;
+  subscription_expires_at: string | null;
+}
+
+export interface TenantActivityResponse {
+  tenants: TenantActivityItem[];
+  total: number;
+  page: number;
+  total_pages: number;
+}

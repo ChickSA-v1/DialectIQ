@@ -8,6 +8,7 @@ import {
   deactivateTenant,
   reactivateTenant,
   editTenant,
+  deleteTenant,
   adminSearchPlaces,
   adminAddPlaceId,
   adminRemovePlaceId,
@@ -62,6 +63,10 @@ export default function TenantsPage() {
   const [confirmDeactivate, setConfirmDeactivate] = useState<string | null>(
     null
   );
+
+  // Delete state
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [showDeleted, setShowDeleted] = useState(false);
 
   // Place ID management state
   const [expandedTenant, setExpandedTenant] = useState<string | null>(null);
@@ -142,6 +147,20 @@ export default function TenantsPage() {
     try {
       const res = await reactivateTenant(tenantId);
       alert(`${t("admin.reactivated" as any)} — API Key: ${res.api_key}`);
+      await load();
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleDelete = async (tenantId: string) => {
+    setActionLoading(tenantId);
+    try {
+      await deleteTenant(tenantId);
+      alert(t("admin.deleted" as any));
+      setConfirmDelete(null);
       await load();
     } catch (err: any) {
       alert(err.message);
@@ -266,6 +285,7 @@ export default function TenantsPage() {
       pending_review: "bg-amber-100 text-amber-700",
       rejected: "bg-red-100 text-red-700",
       suspended: "bg-gray-100 text-gray-700",
+      deleted: "bg-red-50 text-red-400 line-through",
     };
     return colors[status] || "bg-gray-100 text-gray-500";
   };
@@ -276,18 +296,29 @@ export default function TenantsPage() {
         <h1 className="text-xl font-bold text-gray-900">
           {t("admin.tenants")}
         </h1>
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-cyan-500 outline-none"
-        >
-          <option value="">{t("admin.allStatuses")}</option>
-          <option value="active">{t("tenant.active")}</option>
-          <option value="approved">{t("tenant.approved")}</option>
-          <option value="pending_review">{t("tenant.pending_review")}</option>
-          <option value="rejected">{t("tenant.rejected")}</option>
-          <option value="suspended">{t("tenant.suspended")}</option>
-        </select>
+        <div className="flex items-center gap-3">
+          <label className="flex items-center gap-2 text-sm text-gray-500">
+            <input
+              type="checkbox"
+              checked={showDeleted}
+              onChange={(e) => setShowDeleted(e.target.checked)}
+              className="rounded border-gray-300"
+            />
+            {t("admin.showDeleted" as any)}
+          </label>
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-cyan-500 outline-none"
+          >
+            <option value="">{t("admin.allStatuses")}</option>
+            <option value="active">{t("tenant.active")}</option>
+            <option value="approved">{t("tenant.approved")}</option>
+            <option value="pending_review">{t("tenant.pending_review")}</option>
+            <option value="rejected">{t("tenant.rejected")}</option>
+            <option value="suspended">{t("tenant.suspended")}</option>
+          </select>
+        </div>
       </div>
 
       {loading ? (
@@ -300,7 +331,7 @@ export default function TenantsPage() {
         </div>
       ) : (
         <div className="space-y-3">
-          {tenants.map((tenant) => (
+          {tenants.filter((t) => showDeleted || t.status !== "deleted").map((tenant) => (
             <div
               key={tenant.id}
               className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden"
@@ -474,6 +505,42 @@ export default function TenantsPage() {
                       )}
                       {t("admin.reactivate" as any)}
                     </button>
+                  )}
+
+                  {/* Delete */}
+                  {tenant.status !== "deleted" && (
+                    <>
+                      {confirmDelete === tenant.id ? (
+                        <div className="flex items-center gap-1">
+                          <button
+                            onClick={() => handleDelete(tenant.id)}
+                            disabled={actionLoading === tenant.id}
+                            className="flex items-center gap-1 px-2.5 py-1.5 bg-red-600 text-white rounded-lg text-xs font-medium hover:bg-red-700 transition-colors disabled:opacity-50"
+                          >
+                            {actionLoading === tenant.id ? (
+                              <Loader2 className="w-3 h-3 animate-spin" />
+                            ) : (
+                              <Trash2 className="w-3 h-3" />
+                            )}
+                            {t("admin.delete" as any)}
+                          </button>
+                          <button
+                            onClick={() => setConfirmDelete(null)}
+                            className="px-2 py-1.5 text-gray-500 border border-gray-200 rounded-lg text-xs hover:bg-gray-50"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => setConfirmDelete(tenant.id)}
+                          className="flex items-center gap-1 px-2.5 py-1.5 text-red-500 border border-red-200 rounded-lg text-xs font-medium hover:bg-red-50 transition-colors"
+                          title={t("admin.confirmDelete" as any)}
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      )}
+                    </>
                   )}
                 </div>
               </div>

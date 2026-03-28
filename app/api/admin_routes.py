@@ -1,31 +1,44 @@
 """
-Admin endpoints: manage registrations, tenants, and activations.
+Admin endpoints: manage registrations, tenants, activations, invoices, reports, and dashboard.
 """
 
+import io
 import math
 import uuid as _uuid
+from datetime import datetime, timedelta, timezone
 
 import structlog
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from fastapi.responses import Response
-from sqlalchemy import func, select
+from fastapi.responses import Response, StreamingResponse
+from sqlalchemy import func, select, case, extract, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
 from app.deps import require_admin
-from app.models import Document, Invoice, Subscription, Tenant, User
+from app.models import AnalysisResult, Document, Invoice, Review, Subscription, Tenant, User
 from app.schemas import (
+    AdminDashboardStats,
+    AdminInvoiceItem,
+    AdminInvoiceListResponse,
     ConfirmPlaceIdRequest,
+    CreateInvoiceRequest,
     DocumentInfo,
     EditTenantRequest,
     InvoiceInfo,
+    PackageDistribution,
     PlaceSearchRequest,
     PlaceSearchResponse,
     PlaceSearchResult,
+    RecentActivity,
     RegistrationDetail,
     RegistrationListResponse,
     RejectRequest,
+    RevenueReportItem,
+    RevenueReportResponse,
+    RevenueTrendPoint,
     SubscriptionInfo,
+    TenantActivityItem,
+    TenantActivityResponse,
     TenantInfo,
     TenantListResponse,
     UserProfile,
@@ -974,3 +987,534 @@ async def trigger_all_weekly_reports(
         except Exception as e:
             log.error("weekly_report_failed", tenant_id=str(tenant.id), error=str(e))
     return {"status": "completed", "sent": sent, "total": len(tenants)}
+
+
+# ══════════════════════════════════════════════════════════════════════
+#  ADMIN DASHBOARD STATS
+# ══════════════════════════════════════════════════════════════════════
+
+@router.get("/dashboard/stats", response_model=AdminDashboardStats)
+async def get_admin_dashboard_stats(
+    admin=Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Aggregate KPIs for the admin overview dashboard."""
+
+    # Total revenue (paid invoices)
+    rev_result = await db.execute(
+        select(func.coalesce(func.sum(Invoice.total_with_vat), 0.0))
+        .where(Invoice.status == "paid")
+    )
+    total_revenue = float(rev_result.scalar() or 0)
+
+    # Active tenants
+    active_result = await db.execute(
+        select(func.count()).where(Tenant.status == "active")
+    )
+    active_tenants = active_result.scalar() or 0
+
+    # Total reviews analyzed
+    reviews_result = await db.execute(select(func.count()).select_from(Review))
+    total_reviews = reviews_result.scalar() or 0
+
+    # Active subscriptions
+    sub_result = await db.execute(
+        select(func.count()).where(Subscription.status == "active")
+    )
+    active_subscriptions = sub_result.scalar() or 0
+
+    # Pending registrations
+    pending_reg_result = await db.execute(
+        select(func.count()).where(Tenant.status == "pending_review")
+    )
+    pending_registrations = pending_reg_result.scalar() or 0
+
+    # Pending bank transfers
+    pending_bt_result = await db.execute(
+        select(func.count()).where(
+            and_(Invoice.payment_method == "bank_transfer", Invoice.status == "pending")
+        )
+    )
+    pending_bank_transfers = pending_bt_result.scalar() or 0
+
+    # Monthly revenue trend (last 12 months)
+    twelve_months_ago = datetime.now(timezone.utc) - timedelta(days=365)
+    trend_result = await db.execute(
+        select(
+            func.to_char(Invoice.paid_at, "YYYY-MM").label("month"),
+            func.sum(Invoice.total_with_vat).label("revenue"),
+            func.count().label("invoice_count"),
+        )
+        .where(and_(Invoice.status == "paid", Invoice.paid_at >= twelve_months_ago))
+        .group_by(func.to_char(Invoice.paid_at, "YYYY-MM"))
+        .order_by(func.to_char(Invoice.paid_at, "YYYY-MM"))
+    )
+    revenue_trend = [
+        RevenueTrendPoint(month=r.month, revenue=float(r.revenue or 0), invoice_count=r.invoice_count)
+        for r in trend_result.all()
+    ]
+
+    # Package distribution
+    pkg_result = await db.execute(
+        select(Tenant.package, func.count().label("count"))
+        .where(Tenant.status.in_(["active", "approved"]))
+        .group_by(Tenant.package)
+    )
+    package_distribution = [
+        PackageDistribution(package=r.package, count=r.count)
+        for r in pkg_result.all()
+    ]
+
+    # Recent activity (last 10 events)
+    recent_tenants = await db.execute(
+        select(Tenant).order_by(Tenant.created_at.desc()).limit(5)
+    )
+    recent_invoices = await db.execute(
+        select(Invoice, Tenant.name_ar)
+        .join(Tenant, Invoice.tenant_id == Tenant.id)
+        .where(Invoice.status == "paid")
+        .order_by(Invoice.paid_at.desc())
+        .limit(5)
+    )
+
+    activities: list[RecentActivity] = []
+    for t in recent_tenants.scalars().all():
+        activities.append(RecentActivity(
+            type="registration",
+            tenant_name=t.name_ar or t.name_en or "",
+            detail=f"تسجيل جديد - باقة {t.package}",
+            timestamp=t.created_at,
+        ))
+    for row in recent_invoices.all():
+        inv, tenant_name = row
+        activities.append(RecentActivity(
+            type="payment",
+            tenant_name=tenant_name or "",
+            detail=f"دفعة {inv.total_with_vat or inv.amount_sar:.2f} ر.س",
+            timestamp=inv.paid_at or inv.created_at,
+        ))
+    activities.sort(key=lambda a: a.timestamp, reverse=True)
+    activities = activities[:10]
+
+    return AdminDashboardStats(
+        total_revenue=total_revenue,
+        active_tenants=active_tenants,
+        total_reviews=total_reviews,
+        active_subscriptions=active_subscriptions,
+        pending_registrations=pending_registrations,
+        pending_bank_transfers=pending_bank_transfers,
+        revenue_trend=revenue_trend,
+        package_distribution=package_distribution,
+        recent_activity=activities,
+    )
+
+
+# ══════════════════════════════════════════════════════════════════════
+#  ADMIN INVOICE MANAGEMENT
+# ══════════════════════════════════════════════════════════════════════
+
+@router.get("/invoices", response_model=AdminInvoiceListResponse)
+async def list_invoices(
+    admin=Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+    invoice_status: str | None = Query(None, alias="status"),
+    tenant_id: str | None = None,
+    date_from: str | None = None,
+    date_to: str | None = None,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+):
+    """List all invoices with filters."""
+    query = select(Invoice, Tenant.name_ar, Tenant.email, Tenant.package).join(
+        Tenant, Invoice.tenant_id == Tenant.id
+    )
+    count_query = select(func.count()).select_from(Invoice)
+
+    if invoice_status:
+        query = query.where(Invoice.status == invoice_status)
+        count_query = count_query.where(Invoice.status == invoice_status)
+    if tenant_id:
+        tid = _uuid.UUID(tenant_id)
+        query = query.where(Invoice.tenant_id == tid)
+        count_query = count_query.where(Invoice.tenant_id == tid)
+    if date_from:
+        dt_from = datetime.fromisoformat(date_from)
+        query = query.where(Invoice.created_at >= dt_from)
+        count_query = count_query.where(Invoice.created_at >= dt_from)
+    if date_to:
+        dt_to = datetime.fromisoformat(date_to)
+        query = query.where(Invoice.created_at <= dt_to)
+        count_query = count_query.where(Invoice.created_at <= dt_to)
+
+    total_result = await db.execute(count_query)
+    total = total_result.scalar() or 0
+    total_pages = max(1, math.ceil(total / page_size))
+
+    query = query.order_by(Invoice.created_at.desc()).offset((page - 1) * page_size).limit(page_size)
+    result = await db.execute(query)
+
+    invoices = []
+    for row in result.all():
+        inv, tenant_name, tenant_email, pkg = row
+        invoices.append(AdminInvoiceItem(
+            id=inv.id,
+            invoice_number=inv.invoice_number,
+            tenant_id=inv.tenant_id,
+            tenant_name=tenant_name or "",
+            tenant_email=tenant_email or "",
+            package=pkg or "",
+            amount_sar=inv.amount_sar,
+            vat_amount=inv.vat_amount,
+            total_with_vat=inv.total_with_vat,
+            status=inv.status,
+            payment_method=inv.payment_method,
+            invoice_pdf_url=inv.invoice_pdf_url,
+            paid_at=inv.paid_at,
+            created_at=inv.created_at,
+        ))
+
+    return AdminInvoiceListResponse(
+        invoices=invoices, total=total, page=page, total_pages=total_pages,
+    )
+
+
+@router.get("/invoices/{invoice_id}")
+async def get_invoice_detail(
+    invoice_id: _uuid.UUID,
+    admin=Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Get full invoice detail with tenant info."""
+    result = await db.execute(
+        select(Invoice, Tenant.name_ar, Tenant.email, Tenant.package)
+        .join(Tenant, Invoice.tenant_id == Tenant.id)
+        .where(Invoice.id == invoice_id)
+    )
+    row = result.first()
+    if not row:
+        raise HTTPException(status_code=404, detail="Invoice not found")
+    inv, tenant_name, tenant_email, pkg = row
+    return AdminInvoiceItem(
+        id=inv.id,
+        invoice_number=inv.invoice_number,
+        tenant_id=inv.tenant_id,
+        tenant_name=tenant_name or "",
+        tenant_email=tenant_email or "",
+        package=pkg or "",
+        amount_sar=inv.amount_sar,
+        vat_amount=inv.vat_amount,
+        total_with_vat=inv.total_with_vat,
+        status=inv.status,
+        payment_method=inv.payment_method,
+        invoice_pdf_url=inv.invoice_pdf_url,
+        paid_at=inv.paid_at,
+        created_at=inv.created_at,
+    )
+
+
+@router.get("/invoices/{invoice_id}/pdf")
+async def download_invoice_pdf(
+    invoice_id: _uuid.UUID,
+    admin=Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Download the ZATCA-compliant invoice PDF."""
+    result = await db.execute(select(Invoice).where(Invoice.id == invoice_id))
+    inv = result.scalar_one_or_none()
+    if not inv:
+        raise HTTPException(status_code=404, detail="Invoice not found")
+    if not inv.invoice_pdf_url:
+        raise HTTPException(status_code=404, detail="Invoice PDF not available")
+
+    content, content_type = download_blob(inv.invoice_pdf_url)
+    filename = f"{inv.invoice_number or 'invoice'}.pdf"
+    return Response(
+        content=content,
+        media_type=content_type or "application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+@router.post("/invoices/create")
+async def create_manual_invoice(
+    body: CreateInvoiceRequest,
+    admin=Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Create a manual invoice for a tenant and generate ZATCA PDF."""
+    result = await db.execute(select(Tenant).where(Tenant.id == body.tenant_id))
+    tenant = result.scalar_one_or_none()
+    if not tenant:
+        raise HTTPException(status_code=404, detail="Tenant not found")
+
+    amount = body.amount_sar if body.amount_sar else PACKAGE_PRICES.get(body.package, 500.0)
+    vat = round(amount * 0.15, 2)
+    total = round(amount + vat, 2)
+
+    # Create subscription
+    sub = Subscription(
+        tenant_id=tenant.id,
+        package=body.package,
+        status="pending_payment",
+    )
+    db.add(sub)
+    await db.flush()
+
+    # Create invoice
+    inv = Invoice(
+        tenant_id=tenant.id,
+        subscription_id=sub.id,
+        amount_sar=amount,
+        status="pending",
+        payment_method="bank_transfer",
+        vat_amount=vat,
+        total_with_vat=total,
+    )
+    db.add(inv)
+    await db.flush()
+
+    # Generate ZATCA PDF
+    try:
+        from app.services.zatca_invoice import generate_zatca_invoice
+        invoice_number, pdf_url = await generate_zatca_invoice(inv, tenant, db)
+        inv.invoice_number = invoice_number
+        inv.invoice_pdf_url = pdf_url
+    except Exception as e:
+        log.warning("zatca_pdf_generation_failed", error=str(e))
+
+    await db.commit()
+    await db.refresh(inv)
+
+    return {
+        "invoice_id": str(inv.id),
+        "invoice_number": inv.invoice_number,
+        "amount_sar": amount,
+        "vat_amount": vat,
+        "total_with_vat": total,
+        "status": inv.status,
+        "message": "Invoice created successfully",
+    }
+
+
+# ══════════════════════════════════════════════════════════════════════
+#  DELETE TENANT (SOFT DELETE)
+# ══════════════════════════════════════════════════════════════════════
+
+@router.delete("/tenants/{tenant_id}")
+async def delete_tenant(
+    tenant_id: _uuid.UUID,
+    admin=Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Soft-delete a tenant: set status to 'deleted', revoke API key, deactivate users."""
+    result = await db.execute(select(Tenant).where(Tenant.id == tenant_id))
+    tenant = result.scalar_one_or_none()
+    if not tenant:
+        raise HTTPException(status_code=404, detail="Tenant not found")
+    if tenant.status == "deleted":
+        raise HTTPException(status_code=400, detail="Tenant already deleted")
+
+    tenant.status = "deleted"
+    tenant.api_key = None
+
+    # Deactivate all users
+    users_result = await db.execute(select(User).where(User.tenant_id == tenant_id))
+    for user in users_result.scalars().all():
+        user.is_active = False
+
+    # Cancel active subscriptions
+    subs_result = await db.execute(
+        select(Subscription).where(
+            and_(Subscription.tenant_id == tenant_id, Subscription.status == "active")
+        )
+    )
+    for sub in subs_result.scalars().all():
+        sub.status = "cancelled"
+
+    await db.commit()
+    log.info("tenant_deleted", tenant_id=str(tenant_id), name=tenant.name_ar)
+
+    return {"message": f"Tenant '{tenant.name_ar}' has been deleted", "tenant_id": str(tenant_id)}
+
+
+# ══════════════════════════════════════════════════════════════════════
+#  ADMIN REPORTS
+# ══════════════════════════════════════════════════════════════════════
+
+@router.get("/reports/revenue", response_model=RevenueReportResponse)
+async def revenue_report(
+    admin=Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+    date_from: str | None = None,
+    date_to: str | None = None,
+):
+    """Monthly revenue breakdown by package with VAT totals."""
+    query = (
+        select(
+            func.to_char(Invoice.paid_at, "YYYY-MM").label("month"),
+            Tenant.package.label("package"),
+            func.count().label("invoice_count"),
+            func.sum(Invoice.amount_sar).label("revenue"),
+            func.sum(Invoice.vat_amount).label("vat"),
+            func.sum(Invoice.total_with_vat).label("total_with_vat"),
+        )
+        .join(Tenant, Invoice.tenant_id == Tenant.id)
+        .where(Invoice.status == "paid")
+    )
+
+    if date_from:
+        query = query.where(Invoice.paid_at >= datetime.fromisoformat(date_from))
+    if date_to:
+        query = query.where(Invoice.paid_at <= datetime.fromisoformat(date_to))
+
+    query = query.group_by(
+        func.to_char(Invoice.paid_at, "YYYY-MM"), Tenant.package
+    ).order_by(func.to_char(Invoice.paid_at, "YYYY-MM"))
+
+    result = await db.execute(query)
+    items = [
+        RevenueReportItem(
+            month=r.month,
+            package=r.package,
+            invoice_count=r.invoice_count,
+            revenue=float(r.revenue or 0),
+            vat=float(r.vat or 0),
+            total_with_vat=float(r.total_with_vat or 0),
+        )
+        for r in result.all()
+    ]
+
+    total_revenue = sum(i.revenue for i in items)
+    total_vat = sum(i.vat for i in items)
+    total_with_vat = sum(i.total_with_vat for i in items)
+
+    return RevenueReportResponse(
+        items=items,
+        total_revenue=total_revenue,
+        total_vat=total_vat,
+        total_with_vat=total_with_vat,
+    )
+
+
+@router.get("/reports/tenants", response_model=TenantActivityResponse)
+async def tenant_activity_report(
+    admin=Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+):
+    """Tenant activity: reviews used, subscription status."""
+    count_result = await db.execute(
+        select(func.count()).where(Tenant.status != "deleted")
+    )
+    total = count_result.scalar() or 0
+    total_pages = max(1, math.ceil(total / page_size))
+
+    result = await db.execute(
+        select(Tenant)
+        .where(Tenant.status != "deleted")
+        .order_by(Tenant.created_at.desc())
+        .offset((page - 1) * page_size)
+        .limit(page_size)
+    )
+    tenants_list = result.scalars().all()
+
+    items = []
+    for t in tenants_list:
+        # Get latest subscription
+        sub_result = await db.execute(
+            select(Subscription)
+            .where(Subscription.tenant_id == t.id)
+            .order_by(Subscription.created_at.desc())
+            .limit(1)
+        )
+        sub = sub_result.scalar_one_or_none()
+
+        items.append(TenantActivityItem(
+            id=t.id,
+            name_ar=t.name_ar or "",
+            email=t.email,
+            package=t.package,
+            status=t.status,
+            reviews_used=t.reviews_used_this_month,
+            max_reviews=t.max_reviews_per_month,
+            subscription_status=sub.status if sub else None,
+            subscription_expires_at=sub.expires_at if sub else None,
+        ))
+
+    return TenantActivityResponse(
+        tenants=items, total=total, page=page, total_pages=total_pages,
+    )
+
+
+@router.get("/reports/export")
+async def export_report(
+    report_type: str = Query(..., pattern=r"^(revenue|tenants|vat)$"),
+    admin=Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+    date_from: str | None = None,
+    date_to: str | None = None,
+):
+    """Export report data as CSV (Arabic-safe with BOM)."""
+    output = io.StringIO()
+    output.write("\ufeff")  # UTF-8 BOM for Excel Arabic support
+
+    if report_type == "revenue":
+        output.write("الشهر,الباقة,عدد الفواتير,الإيرادات (ر.س),الضريبة (ر.س),الإجمالي (ر.س)\n")
+        query = (
+            select(
+                func.to_char(Invoice.paid_at, "YYYY-MM").label("month"),
+                Tenant.package,
+                func.count().label("cnt"),
+                func.sum(Invoice.amount_sar).label("rev"),
+                func.sum(Invoice.vat_amount).label("vat"),
+                func.sum(Invoice.total_with_vat).label("total"),
+            )
+            .join(Tenant, Invoice.tenant_id == Tenant.id)
+            .where(Invoice.status == "paid")
+            .group_by(func.to_char(Invoice.paid_at, "YYYY-MM"), Tenant.package)
+            .order_by(func.to_char(Invoice.paid_at, "YYYY-MM"))
+        )
+        if date_from:
+            query = query.where(Invoice.paid_at >= datetime.fromisoformat(date_from))
+        if date_to:
+            query = query.where(Invoice.paid_at <= datetime.fromisoformat(date_to))
+        result = await db.execute(query)
+        for r in result.all():
+            output.write(f"{r.month},{r.package},{r.cnt},{r.rev or 0:.2f},{r.vat or 0:.2f},{r.total or 0:.2f}\n")
+
+    elif report_type == "tenants":
+        output.write("المنشأة,البريد,الباقة,الحالة,المراجعات المستخدمة,الحد الأقصى\n")
+        result = await db.execute(
+            select(Tenant).where(Tenant.status != "deleted").order_by(Tenant.created_at.desc())
+        )
+        for t in result.scalars().all():
+            output.write(f"{t.name_ar},{t.email},{t.package},{t.status},{t.reviews_used_this_month},{t.max_reviews_per_month}\n")
+
+    elif report_type == "vat":
+        output.write("الشهر,إجمالي الإيرادات (ر.س),ضريبة القيمة المضافة (ر.س),الإجمالي شامل الضريبة (ر.س)\n")
+        query = (
+            select(
+                func.to_char(Invoice.paid_at, "YYYY-MM").label("month"),
+                func.sum(Invoice.amount_sar).label("rev"),
+                func.sum(Invoice.vat_amount).label("vat"),
+                func.sum(Invoice.total_with_vat).label("total"),
+            )
+            .where(Invoice.status == "paid")
+            .group_by(func.to_char(Invoice.paid_at, "YYYY-MM"))
+            .order_by(func.to_char(Invoice.paid_at, "YYYY-MM"))
+        )
+        if date_from:
+            query = query.where(Invoice.paid_at >= datetime.fromisoformat(date_from))
+        if date_to:
+            query = query.where(Invoice.paid_at <= datetime.fromisoformat(date_to))
+        result = await db.execute(query)
+        for r in result.all():
+            output.write(f"{r.month},{r.rev or 0:.2f},{r.vat or 0:.2f},{r.total or 0:.2f}\n")
+
+    csv_bytes = output.getvalue().encode("utf-8")
+    return Response(
+        content=csv_bytes,
+        media_type="text/csv; charset=utf-8",
+        headers={"Content-Disposition": f'attachment; filename="report_{report_type}.csv"'},
+    )

@@ -95,6 +95,10 @@ async def run_migrations():
         await conn.execute(text(
             "ALTER TYPE user_role_enum ADD VALUE IF NOT EXISTS 'member'"
         ))
+        # Add 'deleted' to tenant_status_enum if not exists
+        await conn.execute(text(
+            "ALTER TYPE tenant_status_enum ADD VALUE IF NOT EXISTS 'deleted'"
+        ))
 
 
 @app.get("/health", tags=["infra"])

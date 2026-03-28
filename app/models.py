@@ -21,7 +21,7 @@ from app.database import Base
 
 # ── Enums ──────────────────────────────────────────────────────────────
 tenant_status_enum = Enum(
-    "pending_review", "approved", "rejected", "active", "suspended",
+    "pending_review", "approved", "rejected", "active", "suspended", "deleted",
     name="tenant_status_enum", create_constraint=True,
 )
 package_enum = Enum(
