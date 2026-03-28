@@ -999,24 +999,12 @@ async def reset_data(
     db: AsyncSession = Depends(get_db),
 ):
     """
-    Delete all data EXCEPT:
-    - Admin users (role='admin', tenant_id=NULL)
-    - Tenant 'الحبيب' and all its related data
+    Delete ALL tenants and their data. Keep only admin users.
     """
     from sqlalchemy import delete
 
-    # 1. Find the tenant to keep (الحبيب)
-    keep_result = await db.execute(
-        select(Tenant).where(Tenant.name_ar == "الحبيب")
-    )
-    keep_tenant = keep_result.scalar_one_or_none()
-    keep_tenant_id = keep_tenant.id if keep_tenant else None
-
-    # 2. Find all tenants to delete
-    delete_query = select(Tenant)
-    if keep_tenant_id:
-        delete_query = delete_query.where(Tenant.id != keep_tenant_id)
-    tenants_to_delete = await db.execute(delete_query)
+    # Find all tenants to delete
+    tenants_to_delete = await db.execute(select(Tenant))
     tenants_list = tenants_to_delete.scalars().all()
 
     deleted_tenants = []
@@ -1042,8 +1030,7 @@ async def reset_data(
     await db.commit()
 
     return {
-        "message": f"Reset complete. Deleted {len(deleted_tenants)} tenants. Kept: الحبيب + admin.",
-        "kept_tenant": keep_tenant.name_ar if keep_tenant else None,
+        "message": f"Reset complete. Deleted {len(deleted_tenants)} tenants. Kept: admin only.",
         "deleted": deleted_tenants,
     }
 
