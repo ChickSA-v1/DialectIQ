@@ -240,8 +240,8 @@ def _build_invoice_pdf(
 
     header_data = [
         [
-            Table([[logo_img, Paragraph("DialectIQ", style_title)]], colWidths=[18 * mm, None],
-                  style=TableStyle([("VALIGN", (0, 0), (-1, -1), "MIDDLE"), ("LEFTPADDING", (0, 0), (-1, -1), 0)])),
+            Table([[logo_img, Paragraph("DialectIQ", style_title)]], colWidths=[16 * mm, None],
+                  style=TableStyle([("VALIGN", (0, 0), (-1, -1), "MIDDLE"), ("LEFTPADDING", (0, 0), (-1, -1), 0), ("RIGHTPADDING", (0, 0), (0, 0), 0)])),
             Paragraph(f"Invoice / {ar_invoice_title}", ParagraphStyle(
                 "HeaderRight", parent=style_heading, fontSize=12, alignment=TA_RIGHT)),
         ],
