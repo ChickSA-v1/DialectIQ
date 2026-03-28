@@ -15,6 +15,18 @@ import {
   Sparkles,
 } from "lucide-react";
 
+/* ── Pixel helper ── */
+declare global {
+  interface Window {
+    fbq?: (...args: any[]) => void;
+  }
+}
+function trackPixel(event: string, params?: Record<string, any>) {
+  if (typeof window !== "undefined" && window.fbq) {
+    window.fbq("track", event, params);
+  }
+}
+
 const STEPS = ["info", "package", "done"] as const;
 type Step = (typeof STEPS)[number];
 
@@ -76,6 +88,12 @@ function RegisterWizard() {
         package: selectedPkg,
       });
       setTenantId(res.tenant_id);
+      // Track successful registration with Meta Pixel
+      trackPixel("CompleteRegistration", {
+        content_name: selectedPkg,
+        currency: "SAR",
+        value: selectedPkg === "basic" ? 500 : selectedPkg === "advanced" ? 1500 : 2500,
+      });
       setStep("done");
     } catch (err: any) {
       setError(err.message);
@@ -237,7 +255,10 @@ function RegisterWizard() {
             </div>
 
             <button
-              onClick={() => setStep("package")}
+              onClick={() => {
+                trackPixel("Lead", { content_name: "register_step1" });
+                setStep("package");
+              }}
               disabled={!form.business_name_ar || !form.email || !form.password || !form.full_name || !form.phone}
               className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-cyan-600 text-white rounded-lg text-sm font-medium hover:bg-cyan-700 transition-colors disabled:opacity-50"
             >
