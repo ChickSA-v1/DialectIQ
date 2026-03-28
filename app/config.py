@@ -49,6 +49,10 @@ class Settings(BaseSettings):
     smtp_password: str = ""  # Gmail App Password
     admin_notification_email: str = "aalmahlasi@gmail.com"
 
+    # --- Apify ---
+    apify_api_token: str = ""
+    apify_google_reviews_actor: str = "compass/google-maps-reviews-scraper"
+
     # --- Limits ---
     max_batch_size: int = 50
 

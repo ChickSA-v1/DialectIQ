@@ -754,6 +754,208 @@ async def trigger_weekly_report(
     return {"status": "sent", "tenant_id": tenant_id}
 
 
+@router.get("/active-tenants-places")
+async def get_active_tenants_places(
+    admin=Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Return all active tenants with their place_ids and quota info.
+    Used by n8n to orchestrate Apify review fetching.
+    """
+    result = await db.execute(select(Tenant).where(Tenant.status == "active"))
+    tenants = result.scalars().all()
+
+    data = []
+    for t in tenants:
+        places = list(t.place_ids or [])
+        if not places:
+            continue
+
+        # Determine if tenant is on trial or paid
+        is_trial = False
+        if t.subscriptions:
+            latest_sub = max(t.subscriptions, key=lambda s: s.created_at)
+            is_trial = latest_sub.status == "trial"
+
+        data.append({
+            "tenant_id": str(t.id),
+            "name": t.name_ar or t.name_en,
+            "package": t.package,
+            "place_ids": places,
+            "is_trial": is_trial,
+            "reviews_used": t.reviews_used_this_month,
+            "reviews_max": t.max_reviews_per_month,
+            "reviews_remaining": max(0, t.max_reviews_per_month - t.reviews_used_this_month),
+            "use_apify": not is_trial,  # Trial = Google Places API, Paid = Apify
+        })
+
+    return {"tenants": data, "total": len(data)}
+
+
+@router.post("/scrape-reviews")
+async def trigger_scrape_reviews(
+    admin=Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Trigger review scraping for all active PAID tenants via Apify.
+    Trial tenants are skipped (they use Google Places API manually).
+    Called by n8n on a schedule (every 6 hours).
+    """
+    from app.services.apify import fetch_reviews_apify, calculate_reviews_to_fetch
+    from app.services.sentiment import analyze_reviews
+    from app.services.reply import generate_reply
+    from app.models import Review, AnalysisResult
+    import uuid as _uuid
+
+    result = await db.execute(select(Tenant).where(Tenant.status == "active"))
+    tenants = result.scalars().all()
+
+    summary = []
+    for tenant in tenants:
+        places = list(tenant.place_ids or [])
+        if not places:
+            continue
+
+        # Skip trial tenants — they use Google Places API
+        is_trial = False
+        if tenant.subscriptions:
+            latest_sub = max(tenant.subscriptions, key=lambda s: s.created_at)
+            is_trial = latest_sub.status == "trial"
+
+        if is_trial:
+            summary.append({
+                "tenant": tenant.name_ar or tenant.name_en,
+                "status": "skipped_trial",
+                "reviews": 0,
+            })
+            continue
+
+        # Check remaining quota
+        remaining = max(0, tenant.max_reviews_per_month - tenant.reviews_used_this_month)
+        if remaining <= 0:
+            summary.append({
+                "tenant": tenant.name_ar or tenant.name_en,
+                "status": "quota_exhausted",
+                "reviews": 0,
+            })
+            continue
+
+        reviews_per_place = await calculate_reviews_to_fetch(
+            tenant.max_reviews_per_month,
+            tenant.reviews_used_this_month,
+            len(places),
+        )
+
+        tenant_total = 0
+        for place_id in places:
+            if tenant.reviews_used_this_month >= tenant.max_reviews_per_month:
+                break
+
+            raw_reviews = await fetch_reviews_apify(place_id, max_reviews=reviews_per_place)
+
+            for rev in raw_reviews:
+                if not rev.get("text"):
+                    continue
+
+                # Check if review already exists (dedup by author + text hash)
+                review_text = rev["text"]
+                existing = await db.execute(
+                    select(Review.id).where(
+                        Review.tenant_uuid == tenant.id,
+                        Review.place_id == place_id,
+                        Review.raw_text == review_text,
+                    ).limit(1)
+                )
+                if existing.scalar_one_or_none():
+                    continue
+
+                # Persist review
+                review_row = Review(
+                    id=_uuid.uuid4(),
+                    business_name=tenant.name_ar or tenant.name_en or place_id,
+                    place_id=place_id,
+                    source="google_maps",
+                    author=rev.get("author_name", "Anonymous"),
+                    raw_text=review_text,
+                    rating=rev.get("rating"),
+                    tenant_id=str(tenant.id),
+                    tenant_uuid=tenant.id,
+                )
+                db.add(review_row)
+                await db.flush()
+
+                # Sentiment analysis
+                try:
+                    analyses, latency = await analyze_reviews([review_text])
+                    sentiment = analyses[0]
+
+                    suggested_reply = None
+                    try:
+                        suggested_reply, _ = await generate_reply(
+                            review_text=review_text,
+                            sentiment_score=sentiment.sentiment_score,
+                            category=sentiment.category,
+                            urgency_level=sentiment.urgency_level,
+                            dialect_detected=sentiment.dialect_detected,
+                            translated_intent=sentiment.translated_intent,
+                            author_name=rev.get("author_name", ""),
+                            business_name=tenant.name_ar or "",
+                        )
+                    except Exception:
+                        pass
+
+                    analysis_row = AnalysisResult(
+                        review_id=review_row.id,
+                        sentiment_score=sentiment.sentiment_score,
+                        category=sentiment.category,
+                        urgency_level=sentiment.urgency_level,
+                        dialect_detected=sentiment.dialect_detected,
+                        translated_intent=sentiment.translated_intent,
+                        suggested_reply=suggested_reply,
+                        model_version="gpt-4o",
+                        latency_ms=latency,
+                    )
+                    db.add(analysis_row)
+
+                    # Send alert for high urgency
+                    if sentiment.urgency_level == "High":
+                        try:
+                            from app.services.email import send_negative_review_alert
+                            owner_result = await db.execute(
+                                select(User).where(User.tenant_id == tenant.id, User.role == "owner")
+                            )
+                            owner = owner_result.scalar_one_or_none()
+                            if owner:
+                                await send_negative_review_alert(
+                                    to_email=owner.email,
+                                    business_name=tenant.name_ar or "",
+                                    author=rev.get("author_name", ""),
+                                    review_text=review_text,
+                                    sentiment_score=sentiment.sentiment_score,
+                                    category=sentiment.category,
+                                    suggested_reply=suggested_reply,
+                                )
+                        except Exception:
+                            pass
+
+                except Exception as e:
+                    log.warning("scrape_analysis_failed", error=str(e))
+
+                tenant.reviews_used_this_month += 1
+                tenant_total += 1
+
+        await db.commit()
+        summary.append({
+            "tenant": tenant.name_ar or tenant.name_en,
+            "status": "completed",
+            "reviews": tenant_total,
+        })
+
+    return {"summary": summary, "total_tenants": len(summary)}
+
+
 @router.post("/weekly-reports/send-all")
 async def trigger_all_weekly_reports(
     admin=Depends(require_admin),
