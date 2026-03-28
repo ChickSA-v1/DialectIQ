@@ -235,23 +235,12 @@ def _build_invoice_pdf(
     header_data = [
         [
             Paragraph("DialectIQ", style_title),
-            Paragraph(
-                f'<font name="{AR_FONT_BOLD}" size="12">Invoice / {ar_invoice_title}</font>',
-                ParagraphStyle("HeaderRight", parent=style_normal, fontSize=12,
-                               textColor=BRAND_NAVY, alignment=TA_RIGHT, fontName=AR_FONT_BOLD),
-            ),
+            Paragraph(f"Invoice / {ar_invoice_title}", ParagraphStyle(
+                "HeaderRight", parent=style_heading, fontSize=12, alignment=TA_RIGHT)),
         ],
         [
-            Paragraph(
-                f'<font name="{AR_FONT}">{ar_seller_name}</font><br/>'
-                f'<font name="Helvetica">{SELLER_NAME_EN}</font>',
-                style_normal,
-            ),
-            Paragraph(
-                f'<font name="Helvetica"><b>Invoice #:</b> {invoice_number}<br/>'
-                f'<b>Date:</b> {invoice_date}</font>',
-                style_right,
-            ),
+            Paragraph(f"{ar_seller_name}<br/>{SELLER_NAME_EN}", style_normal),
+            Paragraph(f"<b>Invoice #:</b> {invoice_number}<br/><b>Date:</b> {invoice_date}", style_right),
         ],
     ]
     header_table = Table(header_data, colWidths=[doc.width * 0.55, doc.width * 0.45])
@@ -272,23 +261,23 @@ def _build_invoice_pdf(
 
     info_data = [
         [
-            Paragraph(f'<font name="{AR_FONT_BOLD}"><b>Seller / {ar_seller}</b></font>', style_heading),
-            Paragraph(f'<font name="{AR_FONT_BOLD}"><b>Buyer / {ar_buyer}</b></font>', style_heading),
+            Paragraph(f"<b>Seller / {ar_seller}</b>", style_heading),
+            Paragraph(f"<b>Buyer / {ar_buyer}</b>", style_heading),
         ],
         [
             Paragraph(
-                f'<font name="{AR_FONT}">{ar_seller_name}</font><br/>'
-                f'<font name="Helvetica">{SELLER_NAME_EN}</font><br/>'
-                f'<font name="Helvetica">VAT/{ar_vat_label}: {SELLER_VAT_NUMBER}</font><br/>'
-                f'<font name="Helvetica">CR/{ar_cr_label}: {SELLER_CR_NUMBER}</font><br/>'
-                f'<font name="{AR_FONT}">{ar_address}</font>',
+                f"{ar_seller_name}<br/>"
+                f"{SELLER_NAME_EN}<br/>"
+                f"VAT/{ar_vat_label}: {SELLER_VAT_NUMBER}<br/>"
+                f"CR/{ar_cr_label}: {SELLER_CR_NUMBER}<br/>"
+                f"{ar_address}",
                 style_normal,
             ),
             Paragraph(
-                f'<font name="{AR_FONT}">{ar_buyer_name}</font><br/>'
-                f'<font name="Helvetica">{buyer_name_en or ""}</font><br/>'
-                f'<font name="Helvetica">{buyer_email}</font><br/>'
-                f'<font name="Helvetica">{buyer_phone}</font>',
+                f"{ar_buyer_name}<br/>"
+                f"{buyer_name_en or ''}<br/>"
+                f"{buyer_email}<br/>"
+                f"{buyer_phone}",
                 style_normal,
             ),
         ],
@@ -308,10 +297,7 @@ def _build_invoice_pdf(
     ar_unit_price = _ar("سعر الوحدة")
     ar_total_label = _ar("المجموع")
 
-    elements.append(Paragraph(
-        f'<font name="{AR_FONT_BOLD}"><b>Invoice Details / {ar_details}</b></font>',
-        style_heading,
-    ))
+    elements.append(Paragraph(f"<b>Invoice Details / {ar_details}</b>", style_heading))
 
     # Package name in Arabic
     pkg_ar_names = {
@@ -344,8 +330,7 @@ def _build_invoice_pdf(
     items_table.setStyle(TableStyle([
         ("BACKGROUND", (0, 0), (-1, 0), BRAND_NAVY),
         ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-        ("FONTNAME", (0, 0), (-1, 0), AR_FONT_BOLD),
-        ("FONTNAME", (0, 1), (-1, -1), AR_FONT),
+        ("FONTNAME", (0, 0), (-1, -1), AR_FONT),
         ("FONTSIZE", (0, 0), (-1, 0), 8),
         ("FONTSIZE", (0, 1), (-1, -1), 9),
         ("ALIGN", (0, 0), (-1, 0), "CENTER"),
@@ -393,11 +378,7 @@ def _build_invoice_pdf(
     ar_bank = _ar("تحويل بنكي")
     ar_card = _ar("بطاقة")
     method_text = f"Bank Transfer / {ar_bank}" if payment_method == "bank_transfer" else f"Card / {ar_card}"
-    elements.append(Paragraph(
-        f'<font name="{AR_FONT_BOLD}"><b>Payment Method / {ar_payment}:</b></font> '
-        f'<font name="{AR_FONT}">{method_text}</font>',
-        style_normal,
-    ))
+    elements.append(Paragraph(f"<b>Payment Method / {ar_payment}:</b> {method_text}", style_normal))
     elements.append(Spacer(1, 8 * mm))
 
     # ── QR Code + Footer ──
@@ -408,10 +389,10 @@ def _build_invoice_pdf(
         [
             Image(io.BytesIO(qr_png_bytes), width=35 * mm, height=35 * mm),
             Paragraph(
-                f'<font name="{AR_FONT_BOLD}"><b>ZATCA QR Code / {ar_zatca_title}</b></font><br/><br/>'
-                f'<font name="Helvetica" size="8">This is a simplified tax invoice issued in compliance with '
-                f'ZATCA e-invoicing regulations.</font><br/>'
-                f'<font name="{AR_FONT}" size="8">{ar_zatca_note}</font>',
+                f"<b>ZATCA QR Code / {ar_zatca_title}</b><br/><br/>"
+                f"This is a simplified tax invoice issued in compliance with "
+                f"ZATCA e-invoicing regulations.<br/>"
+                f"{ar_zatca_note}",
                 style_small,
             ),
         ],
@@ -434,8 +415,7 @@ def _build_invoice_pdf(
 
     ar_auto_note = _ar("هذه الفاتورة صادرة آلياً ولا تحتاج إلى توقيع")
     elements.append(Paragraph(
-        f'<font name="Helvetica" size="7">This invoice is computer-generated and does not require a signature. </font>'
-        f'<font name="{AR_FONT}" size="8">{ar_auto_note}</font>',
+        f"This invoice is computer-generated and does not require a signature. {ar_auto_note}",
         style_small,
     ))
 
