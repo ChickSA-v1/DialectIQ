@@ -83,6 +83,18 @@ async def run_migrations():
             "ALTER TABLE tenants ADD COLUMN IF NOT EXISTS "
             "card_payment_enabled BOOLEAN NOT NULL DEFAULT FALSE"
         ))
+        await conn.execute(text(
+            "ALTER TABLE tenants ADD COLUMN IF NOT EXISTS "
+            "competitor_place_ids JSONB DEFAULT '[]'"
+        ))
+        await conn.execute(text(
+            "ALTER TABLE users ADD COLUMN IF NOT EXISTS "
+            "allowed_place_ids JSONB DEFAULT NULL"
+        ))
+        # Add 'member' to user_role_enum if not exists
+        await conn.execute(text(
+            "ALTER TYPE user_role_enum ADD VALUE IF NOT EXISTS 'member'"
+        ))
 
 
 @app.get("/health", tags=["infra"])
