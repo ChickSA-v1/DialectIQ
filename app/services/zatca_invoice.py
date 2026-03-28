@@ -50,8 +50,10 @@ BRAND_NAVY = colors.HexColor("#0B1B3D")
 BRAND_CYAN = colors.HexColor("#00D2DF")
 BRAND_GOLD = colors.HexColor("#FBBF24")
 
-# ── Register Arabic font ──────────────────────────────────────────────
-_FONT_DIR = Path(__file__).resolve().parent.parent / "assets" / "fonts"
+# ── Assets paths ─────────────────────────────────────────────────────
+_ASSETS_DIR = Path(__file__).resolve().parent.parent / "assets"
+_FONT_DIR = _ASSETS_DIR / "fonts"
+_LOGO_PATH = _ASSETS_DIR / "logo.png"
 _FONT_REGISTERED = False
 
 
@@ -232,9 +234,14 @@ def _build_invoice_pdf(
     ar_invoice_title = _ar("فاتورة ضريبية مبسطة")
     ar_seller_name = _ar(SELLER_NAME_AR)
 
+    # Logo
+    logo_path = str(_LOGO_PATH)
+    logo_img = Image(logo_path, width=14 * mm, height=14 * mm) if os.path.exists(logo_path) else Paragraph("", style_normal)
+
     header_data = [
         [
-            Paragraph("DialectIQ", style_title),
+            Table([[logo_img, Paragraph("DialectIQ", style_title)]], colWidths=[18 * mm, None],
+                  style=TableStyle([("VALIGN", (0, 0), (-1, -1), "MIDDLE"), ("LEFTPADDING", (0, 0), (-1, -1), 0)])),
             Paragraph(f"Invoice / {ar_invoice_title}", ParagraphStyle(
                 "HeaderRight", parent=style_heading, fontSize=12, alignment=TA_RIGHT)),
         ],
