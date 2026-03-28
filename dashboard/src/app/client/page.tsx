@@ -710,20 +710,18 @@ function ClientDashboard() {
               );
             })()}
 
-            {/* Two-column grid for settings */}
+            {/* Row 1: API Key + Team */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 animate-slide-up" style={{ animationDelay: "100ms" }}>
-              {/* Left column */}
-              <div className="space-y-4">
-                {/* API Key card */}
-                <div className="glass-card rounded-2xl p-5 h-full">
+              {/* API Key card */}
+              <div className="glass-card rounded-2xl overflow-hidden">
+                <div className="h-1 bg-gradient-to-r from-cyan-400 to-cyan-600" />
+                <div className="p-5">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
                       <div className="p-2 rounded-xl bg-gradient-to-br from-cyan-50 to-cyan-100">
                         <Key className="w-4 h-4 text-cyan-600" />
                       </div>
-                      <h3 className="font-bold text-gray-800">
-                        {t("client.apiKey")}
-                      </h3>
+                      <h3 className="font-bold text-gray-800">{t("client.apiKey")}</h3>
                     </div>
                     {tenant?.api_key && (
                       <button
@@ -735,45 +733,67 @@ function ClientDashboard() {
                       </button>
                     )}
                   </div>
-                  <div className="font-mono text-xs bg-gray-900 rounded-xl p-3.5 text-cyan-400 border border-gray-700/50 break-all">
+                  <div className="font-mono text-xs bg-gray-900 rounded-xl p-3.5 text-cyan-400 border border-gray-700/50 break-all select-all">
                     {tenant?.api_key || "—"}
                   </div>
                   <div className="flex items-center gap-2 mt-3">
                     <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                      <div
-                        className="h-full rounded-full gradient-primary"
-                        style={{
-                          width: `${Math.min(((tenant?.reviews_used_this_month ?? 0) / (tenant?.max_reviews_per_month ?? 1)) * 100, 100)}%`,
-                        }}
-                      />
+                      <div className="h-full rounded-full gradient-primary" style={{ width: `${Math.min(((tenant?.reviews_used_this_month ?? 0) / (tenant?.max_reviews_per_month ?? 1)) * 100, 100)}%` }} />
                     </div>
                     <p className="text-[11px] text-gray-400 shrink-0 font-medium">
                       {tenant?.reviews_used_this_month}/{tenant?.max_reviews_per_month} {t("client.reviews" as any)}
                     </p>
                   </div>
                 </div>
+              </div>
 
-                {/* Place ID management */}
-                <div className="glass-card rounded-2xl p-5">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="p-2 rounded-xl bg-gradient-to-br from-emerald-50 to-emerald-100">
-                      <MapPin className="w-4 h-4 text-emerald-600" />
+              {/* Team Management */}
+              <TeamManagement userRole={profile?.role || "member"} />
+            </div>
+
+            {/* Row 2: Places + Fetch + Invoices */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 animate-slide-up" style={{ animationDelay: "200ms" }}>
+              {/* Places + Fetch (spans 2 cols) */}
+              <div className="lg:col-span-2 glass-card rounded-2xl overflow-hidden">
+                <div className="h-1 bg-gradient-to-r from-emerald-400 to-emerald-600" />
+                <div className="p-5">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <div className="p-2 rounded-xl bg-gradient-to-br from-emerald-50 to-emerald-100">
+                        <MapPin className="w-4 h-4 text-emerald-600" />
+                      </div>
+                      <h3 className="font-bold text-gray-800">{t("client.placeIds")}</h3>
+                      <span className="text-[11px] text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full font-medium">
+                        {tenant?.place_ids?.length || 0}/{tenant?.max_businesses}
+                      </span>
                     </div>
-                    <h3 className="font-bold text-gray-800">
-                      {t("client.placeIds")}
-                    </h3>
-                    <span className="text-[11px] text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full font-medium">
-                      {tenant?.place_ids?.length || 0}/{tenant?.max_businesses}
-                    </span>
+                    <button
+                      onClick={async () => {
+                        setFetchLoading(true);
+                        setFetchError(null);
+                        setFetchResults(null);
+                        try {
+                          const results = await fetchReviews();
+                          setFetchResults(results);
+                          loadProfile();
+                        } catch (err: any) {
+                          setFetchError(err.message || "Failed to fetch reviews");
+                        } finally {
+                          setFetchLoading(false);
+                        }
+                      }}
+                      disabled={fetchLoading || !tenant?.place_ids?.length}
+                      className="flex items-center gap-2 px-4 py-2 gradient-primary text-white rounded-xl hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed text-sm font-semibold transition-all shadow-sm"
+                    >
+                      {fetchLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+                      {fetchLoading ? t("client.fetchingReviews") : t("client.fetchReviews")}
+                    </button>
                   </div>
 
                   {tenant?.place_ids && tenant.place_ids.length > 0 ? (
-                    <div className="space-y-1.5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       {tenant.place_ids.map((pid) => (
-                        <div
-                          key={pid}
-                          className="flex items-center gap-2 px-3 py-2 bg-emerald-50/80 text-emerald-700 rounded-xl text-xs font-mono border border-emerald-100/80"
-                        >
+                        <div key={pid} className="flex items-center gap-2 px-3 py-2.5 bg-emerald-50/80 text-emerald-700 rounded-xl text-xs font-mono border border-emerald-100/80">
                           <CheckCircle className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
                           <span className="truncate">{pid}</span>
                         </div>
@@ -786,12 +806,9 @@ function ClientDashboard() {
                   {tenant?.pending_place_ids && tenant.pending_place_ids.length > 0 && (
                     <div className="mt-3 pt-3 border-t border-gray-100">
                       <p className="text-[11px] text-amber-600 font-semibold mb-1.5">{t("client.pendingApproval" as any)}</p>
-                      <div className="space-y-1.5">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                         {tenant.pending_place_ids.map((pid) => (
-                          <div
-                            key={pid}
-                            className="flex items-center gap-2 px-3 py-2 bg-amber-50/80 text-amber-700 rounded-xl text-xs font-mono border border-amber-200/80"
-                          >
+                          <div key={pid} className="flex items-center gap-2 px-3 py-2.5 bg-amber-50/80 text-amber-700 rounded-xl text-xs font-mono border border-amber-200/80">
                             <Clock className="w-3.5 h-3.5 text-amber-500 shrink-0" />
                             <span className="truncate">{pid}</span>
                           </div>
@@ -799,34 +816,46 @@ function ClientDashboard() {
                       </div>
                     </div>
                   )}
+
+                  {fetchError && (
+                    <div className="mt-3 p-3 bg-red-50/80 text-red-700 rounded-xl text-sm border border-red-100">{fetchError}</div>
+                  )}
+
+                  {fetchResults && (
+                    <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {fetchResults.map((r) => (
+                        <div key={r.place_id} className="p-3 bg-emerald-50/60 border border-emerald-100 rounded-xl text-sm">
+                          <p className="font-semibold text-emerald-800">{r.business_name}</p>
+                          <p className="text-emerald-600 text-xs mt-1">
+                            {r.reviews_fetched} {t("client.reviewsFetched")} &bull; {r.reviews_analyzed} {t("client.newAnalyzed")}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
 
-              {/* Right column */}
-              <div className="space-y-4">
-                {/* Team Management */}
-                <TeamManagement userRole={profile?.role || "member"} />
-
-                {/* Invoices */}
-                {profile?.invoices && profile.invoices.length > 0 && (
-                  <div className="glass-card rounded-2xl p-5">
+              {/* Invoices (1 col) */}
+              {profile?.invoices && profile.invoices.length > 0 && (
+                <div className="glass-card rounded-2xl overflow-hidden">
+                  <div className="h-1 bg-gradient-to-r from-violet-400 to-violet-600" />
+                  <div className="p-5">
                     <div className="flex items-center gap-2 mb-3">
                       <div className="p-2 rounded-xl bg-gradient-to-br from-violet-50 to-violet-100">
                         <FileText className="w-4 h-4 text-violet-600" />
                       </div>
-                      <h3 className="font-bold text-gray-800">
-                        {t("client.invoices" as any)}
-                      </h3>
+                      <h3 className="font-bold text-gray-800">{t("client.invoices" as any)}</h3>
                     </div>
                     <div className="space-y-2">
                       {profile.invoices.filter((inv: InvoiceInfo) => inv.status === "paid").map((inv: InvoiceInfo) => (
                         <div key={inv.id} className="flex items-center justify-between p-3 bg-gray-50/80 rounded-xl border border-gray-100/50 hover:shadow-sm transition-shadow">
-                          <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-emerald-50">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="p-2 rounded-lg bg-emerald-50 shrink-0">
                               <FileText className="w-3.5 h-3.5 text-emerald-600" />
                             </div>
-                            <div>
-                              <p className="text-sm font-semibold text-gray-800">
+                            <div className="min-w-0">
+                              <p className="text-sm font-semibold text-gray-800 truncate">
                                 {inv.invoice_number || `INV-${inv.id.slice(0, 8)}`}
                               </p>
                               <p className="text-[11px] text-gray-500">
@@ -838,7 +867,7 @@ function ClientDashboard() {
                           {inv.invoice_pdf_url && (
                             <button
                               onClick={() => downloadInvoicePdf(inv.id).catch(() => alert("Failed to download"))}
-                              className="flex items-center gap-1 px-2.5 py-1.5 bg-cyan-50 text-cyan-600 rounded-lg text-[11px] font-semibold hover:bg-cyan-100 transition-colors"
+                              className="flex items-center gap-1 px-2.5 py-1.5 bg-cyan-50 text-cyan-600 rounded-lg text-[11px] font-semibold hover:bg-cyan-100 transition-colors shrink-0"
                             >
                               <Download className="w-3 h-3" />
                               PDF
@@ -848,72 +877,6 @@ function ClientDashboard() {
                       ))}
                     </div>
                   </div>
-                )}
-              </div>
-            </div>
-
-            {/* Fetch Reviews */}
-            <div className="glass-card rounded-2xl p-5 animate-slide-up" style={{ animationDelay: "300ms" }}>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="p-2 rounded-xl bg-amber-50">
-                    <MessageSquareText className="w-4 h-4 text-amber-600" />
-                  </div>
-                  <h3 className="font-bold text-gray-800">
-                    {t("client.fetchReviews")}
-                  </h3>
-                </div>
-                <button
-                  onClick={async () => {
-                    setFetchLoading(true);
-                    setFetchError(null);
-                    setFetchResults(null);
-                    try {
-                      const results = await fetchReviews();
-                      setFetchResults(results);
-                      loadProfile();
-                    } catch (err: any) {
-                      setFetchError(err.message || "Failed to fetch reviews");
-                    } finally {
-                      setFetchLoading(false);
-                    }
-                  }}
-                  disabled={fetchLoading || !tenant?.place_ids?.length}
-                  className="flex items-center gap-2 px-4 py-2 gradient-primary text-white rounded-xl hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed text-sm font-semibold transition-all shadow-md"
-                >
-                  {fetchLoading ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <RefreshCw className="w-4 h-4" />
-                  )}
-                  {fetchLoading ? t("client.fetchingReviews") : t("client.fetchReviews")}
-                </button>
-              </div>
-
-              {!tenant?.place_ids?.length && (
-                <p className="text-xs text-gray-400 mt-2">{t("client.noPlaceIds")}</p>
-              )}
-
-              {fetchError && (
-                <div className="mt-3 p-3 bg-red-50/80 text-red-700 rounded-xl text-sm border border-red-100">
-                  {fetchError}
-                </div>
-              )}
-
-              {fetchResults && (
-                <div className="mt-3 space-y-2">
-                  {fetchResults.map((r) => (
-                    <div
-                      key={r.place_id}
-                      className="p-4 bg-emerald-50/60 border border-emerald-100 rounded-xl text-sm"
-                    >
-                      <p className="font-semibold text-emerald-800">{r.business_name}</p>
-                      <p className="text-emerald-600 text-xs mt-1">
-                        {r.reviews_fetched} {t("client.reviewsFetched")} &bull;{" "}
-                        {r.reviews_analyzed} {t("client.newAnalyzed")}
-                      </p>
-                    </div>
-                  ))}
                 </div>
               )}
             </div>
