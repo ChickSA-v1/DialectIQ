@@ -101,6 +101,20 @@ async def run_migrations():
         ))
 
 
+@app.get("/debug/fonts", tags=["infra"])
+async def debug_fonts():
+    """Check if Arabic fonts are available."""
+    import os
+    from pathlib import Path
+    font_dir = Path(__file__).resolve().parent / "assets" / "fonts"
+    files = list(font_dir.glob("*")) if font_dir.exists() else []
+    return {
+        "font_dir": str(font_dir),
+        "exists": font_dir.exists(),
+        "files": [{"name": f.name, "size": f.stat().st_size} for f in files],
+    }
+
+
 @app.get("/health", tags=["infra"])
 async def health_check() -> dict[str, str]:
     return {"status": "ok", "service": "dialectiq"}
