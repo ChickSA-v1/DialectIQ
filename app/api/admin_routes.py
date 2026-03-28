@@ -990,6 +990,65 @@ async def trigger_all_weekly_reports(
 
 
 # ══════════════════════════════════════════════════════════════════════
+#  RESET DATA (keep admin + specific tenant)
+# ══════════════════════════════════════════════════════════════════════
+
+@router.post("/reset-data")
+async def reset_data(
+    admin=Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Delete all data EXCEPT:
+    - Admin users (role='admin', tenant_id=NULL)
+    - Tenant 'الحبيب' and all its related data
+    """
+    from sqlalchemy import delete
+
+    # 1. Find the tenant to keep (الحبيب)
+    keep_result = await db.execute(
+        select(Tenant).where(Tenant.name_ar == "الحبيب")
+    )
+    keep_tenant = keep_result.scalar_one_or_none()
+    keep_tenant_id = keep_tenant.id if keep_tenant else None
+
+    # 2. Find all tenants to delete
+    delete_query = select(Tenant)
+    if keep_tenant_id:
+        delete_query = delete_query.where(Tenant.id != keep_tenant_id)
+    tenants_to_delete = await db.execute(delete_query)
+    tenants_list = tenants_to_delete.scalars().all()
+
+    deleted_tenants = []
+    for t in tenants_list:
+        deleted_tenants.append({"name": t.name_ar, "email": t.email})
+        # Cascade will handle: users, documents, subscriptions, invoices
+        # Reviews have ON DELETE SET NULL so handle separately
+        await db.execute(
+            delete(Review).where(Review.tenant_uuid == t.id)
+        )
+        await db.delete(t)
+
+    # 3. Delete orphan reviews (no tenant_uuid)
+    await db.execute(
+        delete(Review).where(Review.tenant_uuid.is_(None))
+    )
+
+    # 4. Delete non-admin users without tenant (shouldn't exist but cleanup)
+    await db.execute(
+        delete(User).where(and_(User.tenant_id.is_(None), User.role != "admin"))
+    )
+
+    await db.commit()
+
+    return {
+        "message": f"Reset complete. Deleted {len(deleted_tenants)} tenants. Kept: الحبيب + admin.",
+        "kept_tenant": keep_tenant.name_ar if keep_tenant else None,
+        "deleted": deleted_tenants,
+    }
+
+
+# ══════════════════════════════════════════════════════════════════════
 #  ADMIN DASHBOARD STATS
 # ══════════════════════════════════════════════════════════════════════
 
