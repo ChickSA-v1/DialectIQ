@@ -15,6 +15,12 @@ export interface ReviewDetail {
   created_at: string;
 }
 
+export interface SentimentTrendPoint {
+  date: string;
+  avg_sentiment: number;
+  count: number;
+}
+
 export interface DashboardStats {
   total_reviews: number;
   avg_sentiment: number | null;
@@ -22,6 +28,7 @@ export interface DashboardStats {
   urgency_breakdown: Record<string, number>;
   category_breakdown: Record<string, number>;
   dialect_breakdown: Record<string, number>;
+  sentiment_trend: SentimentTrendPoint[];
 }
 
 export interface DashboardResponse {

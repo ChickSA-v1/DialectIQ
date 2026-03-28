@@ -9,6 +9,7 @@ from app.config import get_settings
 from app.database import get_db
 from app.models import AnalysisResult, Review
 from app.schemas import GoogleReviewInput, GoogleReviewResponse
+from app.services.email import send_negative_review_alert
 from app.services.reply import generate_reply
 from app.services.sentiment import AnalysisError, analyze_reviews
 
@@ -144,6 +145,28 @@ async def receive_google_review(
         has_reply=suggested_reply is not None,
         latency_ms=sentiment_latency,
     )
+
+    # --- Send email alert for high-urgency reviews (non-blocking) ---
+    if sentiment.urgency_level == "High" and tenant_uuid:
+        try:
+            from app.models import User
+
+            owner_result = await db.execute(
+                _select(User).where(User.tenant_id == tenant_uuid, User.role == "owner")
+            )
+            owner = owner_result.scalar_one_or_none()
+            if owner:
+                await send_negative_review_alert(
+                    to_email=owner.email,
+                    business_name=payload.business_name,
+                    author=payload.author_name,
+                    review_text=review_text,
+                    sentiment_score=sentiment.sentiment_score,
+                    category=sentiment.category,
+                    suggested_reply=suggested_reply,
+                )
+        except Exception as e:
+            logger.warning("negative_review_email_failed", error=str(e))
 
     return GoogleReviewResponse(
         status="analyzed",

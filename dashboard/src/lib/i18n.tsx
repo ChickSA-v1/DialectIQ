@@ -52,6 +52,7 @@ const translations = {
     "reviews.title": "Reviews",
     "reviews.total": "total",
     "reviews.refresh": "Refresh",
+    "reviews.export": "Export CSV",
     "reviews.noResults": "No reviews found. Adjust your filters or send reviews through the API.",
     "reviews.anonymous": "Anonymous",
     "reviews.showDetails": "Show intent & reply",
@@ -312,6 +313,8 @@ const translations = {
     // Section headers
     "section.overview": "Overview",
     "section.analytics": "Analytics",
+    "section.sentimentTrend": "Sentiment Trend",
+    "trend.noData": "Not enough data to show trend. At least 2 days of reviews are needed.",
     "section.reviews": "Customer Reviews",
 
     // Welcome banner
@@ -521,6 +524,7 @@ const translations = {
     "reviews.title": "التقييمات",
     "reviews.total": "إجمالي",
     "reviews.refresh": "تحديث",
+    "reviews.export": "تصدير CSV",
     "reviews.noResults": "لا توجد تقييمات. عدّل الفلاتر أو أرسل تقييمات عبر الـ API.",
     "reviews.anonymous": "مجهول",
     "reviews.showDetails": "عرض التحليل والرد",
@@ -781,6 +785,8 @@ const translations = {
     // Section headers
     "section.overview": "نظرة عامة",
     "section.analytics": "التحليلات",
+    "section.sentimentTrend": "اتجاه المشاعر",
+    "trend.noData": "لا توجد بيانات كافية لعرض الاتجاه. يحتاج يومين على الأقل من التقييمات.",
     "section.reviews": "تقييمات العملاء",
 
     // Welcome banner

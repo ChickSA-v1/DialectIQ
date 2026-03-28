@@ -84,6 +84,12 @@ class ReviewDetail(BaseModel):
     created_at: datetime
 
 
+class SentimentTrendPoint(BaseModel):
+    date: str
+    avg_sentiment: float
+    count: int
+
+
 class DashboardStats(BaseModel):
     total_reviews: int
     avg_sentiment: float | None
@@ -91,6 +97,7 @@ class DashboardStats(BaseModel):
     urgency_breakdown: dict[str, int]
     category_breakdown: dict[str, int]
     dialect_breakdown: dict[str, int]
+    sentiment_trend: list[SentimentTrendPoint] = []
 
 
 class DashboardResponse(BaseModel):

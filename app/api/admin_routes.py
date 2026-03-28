@@ -735,3 +735,40 @@ async def reject_pending_place(
 
     log.info("pending_place_rejected", tenant_id=tenant_id, place_id=place_id)
     return {"message": "Place ID rejected", "place_id": place_id}
+
+
+# ── Weekly Reports ───────────────────────────────────────────────────
+
+
+@router.post("/tenants/{tenant_id}/weekly-report")
+async def trigger_weekly_report(
+    tenant_id: str,
+    admin=Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Send a weekly report to a specific tenant's owner."""
+    from app.services.report import send_weekly_report
+
+    tid = _uuid.UUID(tenant_id)
+    await send_weekly_report(tid, db)
+    return {"status": "sent", "tenant_id": tenant_id}
+
+
+@router.post("/weekly-reports/send-all")
+async def trigger_all_weekly_reports(
+    admin=Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Send weekly reports to all active tenants. Trigger via n8n cron."""
+    from app.services.report import send_weekly_report
+
+    result = await db.execute(select(Tenant).where(Tenant.status == "active"))
+    tenants = result.scalars().all()
+    sent = 0
+    for tenant in tenants:
+        try:
+            await send_weekly_report(tenant.id, db)
+            sent += 1
+        except Exception as e:
+            log.error("weekly_report_failed", tenant_id=str(tenant.id), error=str(e))
+    return {"status": "completed", "sent": sent, "total": len(tenants)}

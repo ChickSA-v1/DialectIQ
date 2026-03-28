@@ -1,15 +1,19 @@
+import csv
+import io
 import math
+from datetime import datetime, timedelta
 
 import structlog
 from fastapi import APIRouter, Depends, Query, Request
+from fastapi.responses import Response
 from fastapi.security import APIKeyHeader
-from sqlalchemy import func, select
+from sqlalchemy import Date, cast, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth import verify_api_key
 from app.database import get_db
 from app.models import AnalysisResult, Review, User
-from app.schemas import DashboardResponse, DashboardStats, ReviewDetail
+from app.schemas import DashboardResponse, DashboardStats, ReviewDetail, SentimentTrendPoint
 from app.security import decode_access_token
 
 logger = structlog.get_logger()
@@ -129,6 +133,29 @@ async def get_dashboard(
     dialect_rows = (await db.execute(dialect_q)).all()
     dialect_breakdown = {row[0]: row[1] for row in dialect_rows}
 
+    # Sentiment trend (last 30 days)
+    thirty_days_ago = datetime.utcnow() - timedelta(days=30)
+    trend_q = (
+        select(
+            cast(Review.created_at, Date).label("day"),
+            func.avg(AnalysisResult.sentiment_score).label("avg_sent"),
+            func.count().label("cnt"),
+        )
+        .join(AnalysisResult)
+        .where(*base_filter, Review.created_at >= thirty_days_ago)
+        .group_by(cast(Review.created_at, Date))
+        .order_by(cast(Review.created_at, Date))
+    )
+    trend_rows = (await db.execute(trend_q)).all()
+    sentiment_trend = [
+        SentimentTrendPoint(
+            date=str(r.day),
+            avg_sentiment=round(float(r.avg_sent), 2),
+            count=r.cnt,
+        )
+        for r in trend_rows
+    ]
+
     # --- Paginated reviews ---
     offset = (page - 1) * page_size
     reviews_q = (
@@ -174,9 +201,73 @@ async def get_dashboard(
             urgency_breakdown=urgency_breakdown,
             category_breakdown=category_breakdown,
             dialect_breakdown=dialect_breakdown,
+            sentiment_trend=sentiment_trend,
         ),
         reviews=reviews,
         page=page,
         page_size=page_size,
         total_pages=max(1, math.ceil(total_reviews / page_size)),
+    )
+
+
+@router.get("/export")
+async def export_reviews(
+    request: Request,
+    place_id: str | None = Query(None),
+    business_name: str | None = Query(None),
+    category: str | None = Query(None),
+    urgency: str | None = Query(None),
+    db: AsyncSession = Depends(get_db),
+) -> Response:
+    """Export all filtered reviews as a CSV file."""
+    tenant_id = await _resolve_tenant_id(request, db)
+
+    base_filter = [Review.tenant_id == tenant_id]
+    if place_id:
+        base_filter.append(Review.place_id == place_id)
+    if business_name:
+        base_filter.append(Review.business_name.ilike(f"%{business_name}%"))
+
+    reviews_q = (
+        select(Review)
+        .join(AnalysisResult)
+        .where(*base_filter)
+        .order_by(Review.created_at.desc())
+        .limit(10000)
+    )
+    if category:
+        reviews_q = reviews_q.where(AnalysisResult.category == category)
+    if urgency:
+        reviews_q = reviews_q.where(AnalysisResult.urgency_level == urgency)
+
+    result = await db.execute(reviews_q)
+    rows = result.scalars().all()
+
+    output = io.StringIO()
+    # Add BOM for Excel Arabic support
+    output.write("\ufeff")
+    writer = csv.writer(output)
+    writer.writerow([
+        "Date", "Author", "Business", "Rating", "Review Text",
+        "Sentiment Score", "Category", "Urgency", "Dialect", "Suggested Reply",
+    ])
+    for r in rows:
+        a = r.analysis
+        writer.writerow([
+            r.created_at.strftime("%Y-%m-%d %H:%M") if r.created_at else "",
+            r.author or "",
+            r.business_name or "",
+            r.rating or "",
+            r.raw_text or "",
+            a.sentiment_score if a else "",
+            a.category if a else "",
+            a.urgency_level if a else "",
+            a.dialect_detected if a else "",
+            a.suggested_reply if a else "",
+        ])
+
+    return Response(
+        content=output.getvalue(),
+        media_type="text/csv; charset=utf-8",
+        headers={"Content-Disposition": "attachment; filename=reviews_export.csv"},
     )

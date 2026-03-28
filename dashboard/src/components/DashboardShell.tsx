@@ -3,11 +3,12 @@
 import { useCallback, useEffect, useState } from "react";
 import { DashboardResponse, Filters } from "@/lib/types";
 import { useI18n } from "@/lib/i18n";
-import { fetchDashboard } from "@/lib/api";
+import { fetchDashboard, exportCSV } from "@/lib/api";
 import StatsCards from "./StatsCards";
 import BreakdownCharts from "./BreakdownCharts";
 import FilterBar from "./FilterBar";
 import ReviewCard from "./ReviewCard";
+import SentimentTrendChart from "./SentimentTrendChart";
 import Pagination from "./Pagination";
 import {
   RefreshCw,
@@ -15,6 +16,8 @@ import {
   BarChart3,
   MessageSquare,
   LayoutDashboard,
+  Download,
+  TrendingUp,
 } from "lucide-react";
 
 function SectionHeader({
@@ -55,6 +58,7 @@ export default function DashboardShell() {
   const [filters, setFilters] = useState<Filters>({});
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [exporting, setExporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
@@ -132,6 +136,10 @@ export default function DashboardShell() {
           <SectionHeader icon={BarChart3} titleKey="section.analytics" />
           <BreakdownCharts stats={data.stats} />
 
+          {/* Sentiment Trend */}
+          <SectionHeader icon={TrendingUp} titleKey={"section.sentimentTrend" as any} />
+          <SentimentTrendChart stats={data.stats} />
+
           {/* Reviews section */}
           <div data-tutorial="reviews-section" className="space-y-4">
             <div className="flex items-center justify-between">
@@ -140,16 +148,29 @@ export default function DashboardShell() {
                 titleKey="section.reviews"
                 badge={`${data.stats.total_reviews}`}
               />
-              <button
-                onClick={load}
-                disabled={loading}
-                className="flex items-center gap-1.5 px-4 py-2 text-sm text-gray-600 hover:text-gray-800 glass-card rounded-xl hover:shadow-md transition-all disabled:opacity-50"
-              >
-                <RefreshCw
-                  className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`}
-                />
-                {t("reviews.refresh")}
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={async () => {
+                    setExporting(true);
+                    try { await exportCSV(filters); } catch {} finally { setExporting(false); }
+                  }}
+                  disabled={exporting}
+                  className="flex items-center gap-1.5 px-4 py-2 text-sm text-gray-600 hover:text-gray-800 glass-card rounded-xl hover:shadow-md transition-all disabled:opacity-50"
+                >
+                  <Download className={`w-3.5 h-3.5 ${exporting ? "animate-pulse" : ""}`} />
+                  {t("reviews.export" as any)}
+                </button>
+                <button
+                  onClick={load}
+                  disabled={loading}
+                  className="flex items-center gap-1.5 px-4 py-2 text-sm text-gray-600 hover:text-gray-800 glass-card rounded-xl hover:shadow-md transition-all disabled:opacity-50"
+                >
+                  <RefreshCw
+                    className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`}
+                  />
+                  {t("reviews.refresh")}
+                </button>
+              </div>
             </div>
 
             {data.reviews.length === 0 ? (

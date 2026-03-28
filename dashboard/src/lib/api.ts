@@ -40,3 +40,33 @@ export async function fetchDashboard(
 
   return res.json();
 }
+
+export async function exportCSV(filters: Filters = {}): Promise<void> {
+  const params = new URLSearchParams();
+  if (filters.place_id) params.set("place_id", filters.place_id);
+  if (filters.business_name) params.set("business_name", filters.business_name);
+  if (filters.category) params.set("category", filters.category);
+  if (filters.urgency) params.set("urgency", filters.urgency);
+
+  const token = getToken();
+  const headers: Record<string, string> = {};
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  } else if (API_KEY) {
+    headers["X-API-Key"] = API_KEY;
+  }
+
+  const res = await fetch(`${API_BASE}/api/v1/dashboard/export?${params.toString()}`, {
+    headers,
+  });
+
+  if (!res.ok) throw new Error(`Export failed: ${res.status}`);
+
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "reviews_export.csv";
+  a.click();
+  URL.revokeObjectURL(url);
+}
