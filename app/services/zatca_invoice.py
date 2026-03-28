@@ -42,7 +42,8 @@ SELLER_VAT_NUMBER = "310000000000003"
 SELLER_CR_NUMBER = "7052772485"
 SELLER_ADDRESS_AR = "الرياض، المملكة العربية السعودية"
 SELLER_ADDRESS_EN = "Riyadh, Saudi Arabia"
-VAT_RATE = 0.15  # 15% VAT
+VAT_RATE = 0.0  # VAT exempt until activated (was 0.15 = 15%)
+VAT_EXEMPT = True  # Set to False when VAT registration is activated
 
 # Brand colors
 BRAND_NAVY = colors.HexColor("#0B1B3D")
@@ -60,12 +61,12 @@ def _ensure_arabic_font():
     if _FONT_REGISTERED:
         return
     try:
-        regular = str(_FONT_DIR / "Amiri-Regular.ttf")
-        bold = str(_FONT_DIR / "Amiri-Bold.ttf")
+        regular = str(_FONT_DIR / "Zain-Regular.ttf")
+        bold = str(_FONT_DIR / "Zain-Bold.ttf")
         if os.path.exists(regular):
-            pdfmetrics.registerFont(TTFont("Amiri", regular))
+            pdfmetrics.registerFont(TTFont("Zain", regular))
         if os.path.exists(bold):
-            pdfmetrics.registerFont(TTFont("Amiri-Bold", bold))
+            pdfmetrics.registerFont(TTFont("Zain-Bold", bold))
         _FONT_REGISTERED = True
         log.info("arabic_font_registered", font_dir=str(_FONT_DIR))
     except Exception as e:
@@ -181,8 +182,8 @@ def _build_invoice_pdf(
     styles = getSampleStyleSheet()
 
     # Font names
-    AR_FONT = "Amiri" if _FONT_REGISTERED else "Helvetica"
-    AR_FONT_BOLD = "Amiri-Bold" if _FONT_REGISTERED else "Helvetica-Bold"
+    AR_FONT = "Zain" if _FONT_REGISTERED else "Helvetica"
+    AR_FONT_BOLD = "Zain-Bold" if _FONT_REGISTERED else "Helvetica-Bold"
 
     # Custom styles
     style_title = ParagraphStyle(
@@ -356,10 +357,12 @@ def _build_invoice_pdf(
     ar_subtotal = _ar("المجموع الفرعي")
     ar_vat_text = _ar("ضريبة القيمة المضافة")
     ar_grand_total = _ar("الإجمالي")
+    ar_exempt = _ar("معفاة")
 
+    vat_label = f"VAT / {ar_vat_text} ({ar_exempt} / Exempt):" if VAT_EXEMPT else f"VAT / {ar_vat_text} ({int(VAT_RATE * 100)}%):"
     totals_data = [
         ["", "", "", f"Subtotal / {ar_subtotal}:", f"{amount_sar:,.2f} SAR"],
-        ["", "", "", f"VAT / {ar_vat_text} ({int(VAT_RATE * 100)}%):", f"{vat_amount:,.2f} SAR"],
+        ["", "", "", vat_label, f"{vat_amount:,.2f} SAR"],
         ["", "", "", f"Total / {ar_grand_total}:", f"{total_with_vat:,.2f} SAR"],
     ]
     totals_table = Table(totals_data, colWidths=[
