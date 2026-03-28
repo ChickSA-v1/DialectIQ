@@ -1259,8 +1259,8 @@ async def regenerate_invoice_pdf(
         from app.services.storage import upload_document as upload_doc
 
         amount = inv.amount_sar
-        vat = inv.vat_amount or round(amount * VAT_RATE, 2)
-        total = inv.total_with_vat or round(amount + vat, 2)
+        vat = round(amount * VAT_RATE, 2)  # Recalculate with current rate
+        total = round(amount + vat, 2)
         now = datetime.now(timezone.utc)
 
         package_names = {"basic": "Basic / أساسي", "advanced": "Advanced / متقدم", "enterprise": "Enterprise / مؤسسات"}
@@ -1268,7 +1268,7 @@ async def regenerate_invoice_pdf(
 
         pdf_bytes = _build_invoice_pdf(
             invoice_number=inv.invoice_number,
-            invoice_date=now.strftime("%Y-%m-%d %H:%M:%S UTC"),
+            invoice_date=(inv.paid_at or inv.created_at).strftime("%Y-%m-%d %H:%M:%S UTC"),
             buyer_name_ar=tenant.name_ar,
             buyer_name_en=tenant.name_en,
             buyer_email=tenant.email,
@@ -1284,6 +1284,8 @@ async def regenerate_invoice_pdf(
             content_type="application/pdf", tenant_id=str(tenant.id), doc_type="zatca_invoice",
         )
         inv.invoice_pdf_url = pdf_url
+        inv.vat_amount = vat
+        inv.total_with_vat = total
     else:
         invoice_number, pdf_url = await generate_zatca_invoice(inv, tenant, db)
 
@@ -1311,8 +1313,8 @@ async def regenerate_all_invoice_pdfs(
     for inv, tenant in rows:
         try:
             amount = inv.amount_sar
-            vat = inv.vat_amount or round(amount * VAT_RATE, 2)
-            total = inv.total_with_vat or round(amount + vat, 2)
+            vat = round(amount * VAT_RATE, 2)  # Recalculate with current rate
+            total = round(amount + vat, 2)
             now = datetime.now(timezone.utc)
             package_names = {"basic": "Basic / أساسي", "advanced": "Advanced / متقدم", "enterprise": "Enterprise / مؤسسات"}
             qr_bytes = generate_zatca_qr(SELLER_NAME_AR, SELLER_VAT_NUMBER, now.isoformat(), f"{total:.2f}", f"{vat:.2f}")
@@ -1330,6 +1332,8 @@ async def regenerate_all_invoice_pdfs(
                 content_type="application/pdf", tenant_id=str(tenant.id), doc_type="zatca_invoice",
             )
             inv.invoice_pdf_url = pdf_url
+            inv.vat_amount = vat
+            inv.total_with_vat = total
             regenerated += 1
         except Exception as e:
             log.warning("regenerate_pdf_failed", invoice_id=str(inv.id), error=str(e))

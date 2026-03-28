@@ -61,12 +61,12 @@ def _ensure_arabic_font():
     if _FONT_REGISTERED:
         return
     try:
-        regular = str(_FONT_DIR / "Zain-Regular.ttf")
-        bold = str(_FONT_DIR / "Zain-Bold.ttf")
+        regular = str(_FONT_DIR / "Amiri-Regular.ttf")
+        bold = str(_FONT_DIR / "Amiri-Bold.ttf")
         if os.path.exists(regular):
-            pdfmetrics.registerFont(TTFont("Zain", regular))
+            pdfmetrics.registerFont(TTFont("Amiri", regular))
         if os.path.exists(bold):
-            pdfmetrics.registerFont(TTFont("Zain-Bold", bold))
+            pdfmetrics.registerFont(TTFont("Amiri-Bold", bold))
         _FONT_REGISTERED = True
         log.info("arabic_font_registered", font_dir=str(_FONT_DIR))
     except Exception as e:
@@ -182,8 +182,8 @@ def _build_invoice_pdf(
     styles = getSampleStyleSheet()
 
     # Font names
-    AR_FONT = "Zain" if _FONT_REGISTERED else "Helvetica"
-    AR_FONT_BOLD = "Zain-Bold" if _FONT_REGISTERED else "Helvetica-Bold"
+    AR_FONT = "Amiri" if _FONT_REGISTERED else "Helvetica"
+    AR_FONT_BOLD = "Amiri-Bold" if _FONT_REGISTERED else "Helvetica-Bold"
 
     # Custom styles
     style_title = ParagraphStyle(
