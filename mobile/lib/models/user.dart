@@ -68,6 +68,7 @@ class TenantInfo {
   final String package;
   final List<String> placeIds;
   final List<String> pendingPlaceIds;
+  final List<String> competitorPlaceIds;
   final int maxBusinesses;
   final int maxReviewsPerMonth;
   final int reviewsUsedThisMonth;
@@ -89,6 +90,7 @@ class TenantInfo {
     required this.package,
     required this.placeIds,
     this.pendingPlaceIds = const [],
+    this.competitorPlaceIds = const [],
     required this.maxBusinesses,
     required this.maxReviewsPerMonth,
     required this.reviewsUsedThisMonth,
@@ -111,6 +113,7 @@ class TenantInfo {
     package: json['package'] as String,
     placeIds: (json['place_ids'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
     pendingPlaceIds: (json['pending_place_ids'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
+    competitorPlaceIds: (json['competitor_place_ids'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
     maxBusinesses: json['max_businesses'] as int? ?? 1,
     maxReviewsPerMonth: json['max_reviews_per_month'] as int? ?? 500,
     reviewsUsedThisMonth: json['reviews_used_this_month'] as int? ?? 0,
@@ -156,6 +159,33 @@ class InvoiceInfo {
     transferReceiptUrl: json['transfer_receipt_url'] as String?,
     transferReceiptName: json['transfer_receipt_name'] as String?,
     paidAt: json['paid_at'] as String?,
+    createdAt: json['created_at'] as String?,
+  );
+}
+
+class TeamMember {
+  final String id;
+  final String email;
+  final String fullName;
+  final String role;
+  final bool isActive;
+  final String? createdAt;
+
+  TeamMember({
+    required this.id,
+    required this.email,
+    required this.fullName,
+    required this.role,
+    required this.isActive,
+    this.createdAt,
+  });
+
+  factory TeamMember.fromJson(Map<String, dynamic> json) => TeamMember(
+    id: json['id'] as String,
+    email: json['email'] as String,
+    fullName: json['full_name'] as String,
+    role: json['role'] as String,
+    isActive: json['is_active'] as bool? ?? true,
     createdAt: json['created_at'] as String?,
   );
 }

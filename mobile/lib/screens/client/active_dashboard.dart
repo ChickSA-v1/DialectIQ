@@ -19,6 +19,9 @@ import '../../widgets/chart_widgets.dart';
 import '../../widgets/filter_bar.dart';
 import '../../widgets/loading_shimmer.dart';
 import '../../widgets/locale_switcher.dart';
+import '../../widgets/competitor_widget.dart';
+import '../../widgets/team_management_widget.dart';
+import '../../widgets/invoices_widget.dart';
 
 class ActiveDashboard extends ConsumerStatefulWidget {
   const ActiveDashboard({super.key});
@@ -311,6 +314,7 @@ class _ActiveDashboardState extends ConsumerState<ActiveDashboard> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final profile = ref.watch(profileProvider);
     final tenant = ref.watch(tenantProvider);
     final dashboard = ref.watch(dashboardProvider);
     final stats = dashboard.data?.stats;
@@ -784,6 +788,25 @@ class _ActiveDashboardState extends ConsumerState<ActiveDashboard> {
                       ),
                     ),
                   const SizedBox(height: 16),
+
+                  // Competitors section
+                  CompetitorWidget(
+                    competitorPlaceIds: tenant.competitorPlaceIds,
+                    onChanged: () => ref.read(authProvider.notifier).refreshProfile(),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Team management section
+                  TeamManagementWidget(
+                    currentUserRole: profile?.role ?? 'member',
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Invoices section
+                  if (profile?.invoices != null && profile!.invoices!.isNotEmpty)
+                    InvoicesWidget(invoices: profile.invoices!),
+                  if (profile?.invoices != null && profile!.invoices!.isNotEmpty)
+                    const SizedBox(height: 16),
                 ],
 
                 // Stats cards
