@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   MessageSquareReply,
@@ -131,6 +132,20 @@ function TopBar() {
 /* ─────────────── Hero ─────────────── */
 function Hero() {
   const { hours, minutes, seconds } = useCountdown();
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+
+  const handleLeadSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    trackEvent("Lead", { content_name: "hero_inline_form" });
+    const params = new URLSearchParams({
+      email,
+      phone,
+      from: "ads",
+    });
+    router.push(`/register?${params.toString()}`);
+  };
 
   return (
     <section className="relative overflow-hidden bg-gradient-to-bl from-slate-900 via-slate-800 to-cyan-900 text-white">
@@ -160,16 +175,42 @@ function Hero() {
           تقييمات قوقل ويرد عليها بلهجة عميلك — تلقائياً.
         </p>
 
-        <Link
-          href="/register"
-          onClick={() => trackEvent("Lead", { content_name: "hero_cta" })}
-          className="inline-flex items-center gap-2 px-10 py-4 bg-gradient-to-l from-cyan-500 to-blue-500 text-white font-bold text-lg rounded-2xl hover:scale-105 transition-transform shadow-2xl shadow-cyan-500/30"
+        {/* Inline lead capture form */}
+        <form
+          onSubmit={handleLeadSubmit}
+          className="max-w-md mx-auto bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-5 mb-6"
         >
-          جرّب 7 أيام مجاناً — بدون بطاقة
-          <ArrowLeft className="w-5 h-5" />
-        </Link>
+          <div className="space-y-3">
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="البريد الإلكتروني للعمل"
+              required
+              dir="ltr"
+              className="w-full px-4 py-3 bg-white/90 text-gray-900 rounded-xl text-sm placeholder-gray-500 outline-none focus:ring-2 focus:ring-cyan-400"
+            />
+            <input
+              type="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="+966 5xxxxxxxx"
+              required
+              dir="ltr"
+              className="w-full px-4 py-3 bg-white/90 text-gray-900 rounded-xl text-sm placeholder-gray-500 outline-none focus:ring-2 focus:ring-cyan-400"
+            />
+            <button
+              type="submit"
+              disabled={!email || !phone}
+              className="w-full flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-l from-cyan-500 to-blue-500 text-white font-bold text-base rounded-xl hover:scale-[1.02] transition-transform shadow-2xl shadow-cyan-500/30 disabled:opacity-50 disabled:hover:scale-100"
+            >
+              ابدأ التجربة مجاناً — 7 أيام
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+          </div>
+        </form>
 
-        <div className="flex items-center justify-center gap-6 mt-8 text-sm text-gray-400">
+        <div className="flex items-center justify-center gap-6 text-sm text-gray-400">
           <span className="flex items-center gap-1">
             <CheckCircle className="w-4 h-4 text-emerald-400" />
             بدون بطاقة ائتمانية

@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 import { I18nProvider, useI18n } from "@/lib/i18n";
 import { register, uploadDocument } from "@/lib/auth";
 import {
@@ -13,6 +14,7 @@ import {
   FileText,
   CreditCard,
   Sparkles,
+  ArrowLeft,
 } from "lucide-react";
 
 /* ── Pixel helper ── */
@@ -33,9 +35,14 @@ type Step = (typeof STEPS)[number];
 function RegisterWizard() {
   const { t, dir, locale } = useI18n();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const isRTL = dir === "rtl";
 
-  const [step, setStep] = useState<Step>("info");
+  const fromAds = searchParams.get("from") === "ads";
+  const prefillEmail = searchParams.get("email") || "";
+  const prefillPhone = searchParams.get("phone") || "";
+
+  const [step, setStep] = useState<Step>(fromAds ? "info" : "info");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [tenantId, setTenantId] = useState("");
@@ -44,14 +51,14 @@ function RegisterWizard() {
   const [form, setForm] = useState({
     business_name_ar: "",
     business_name_en: "",
-    email: "",
-    phone: "",
+    email: prefillEmail,
+    phone: prefillPhone,
     password: "",
     full_name: "",
   });
 
-  // Step 2: Package
-  const [selectedPkg, setSelectedPkg] = useState("basic");
+  // Step 2: Package (auto-select basic for ads visitors)
+  const [selectedPkg, setSelectedPkg] = useState(fromAds ? "basic" : "basic");
 
   // Step 3: Documents
   const [crFile, setCrFile] = useState<File | null>(null);
@@ -132,29 +139,31 @@ function RegisterWizard() {
           <p className="text-sm text-gray-500 mt-1">{t("register.subtitle")}</p>
         </div>
 
-        {/* Progress bar */}
-        <div className="flex items-center gap-2 mb-8 justify-center">
-          {STEPS.map((s, i) => (
-            <div key={s} className="flex items-center gap-2">
-              <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${
-                  STEPS.indexOf(step) >= i
-                    ? "bg-cyan-600 text-white"
-                    : "bg-gray-200 text-gray-500"
-                }`}
-              >
-                {i + 1}
-              </div>
-              {i < STEPS.length - 1 && (
+        {/* Progress bar (hidden for ads flow) */}
+        {!fromAds && (
+          <div className="flex items-center gap-2 mb-8 justify-center">
+            {STEPS.map((s, i) => (
+              <div key={s} className="flex items-center gap-2">
                 <div
-                  className={`w-12 h-0.5 ${
-                    STEPS.indexOf(step) > i ? "bg-cyan-600" : "bg-gray-200"
+                  className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${
+                    STEPS.indexOf(step) >= i
+                      ? "bg-cyan-600 text-white"
+                      : "bg-gray-200 text-gray-500"
                   }`}
-                />
-              )}
-            </div>
-          ))}
-        </div>
+                >
+                  {i + 1}
+                </div>
+                {i < STEPS.length - 1 && (
+                  <div
+                    className={`w-12 h-0.5 ${
+                      STEPS.indexOf(step) > i ? "bg-cyan-600" : "bg-gray-200"
+                    }`}
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+        )}
 
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg p-3 mb-4">
@@ -162,8 +171,103 @@ function RegisterWizard() {
           </div>
         )}
 
-        {/* Step 1: Business Info */}
-        {step === "info" && (
+        {/* Simplified Ads Registration (single step) */}
+        {fromAds && step === "info" && (
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-4">
+            <div className="text-center mb-2">
+              <h2 className="text-lg font-semibold text-gray-800">أكمل بياناتك وابدأ التجربة</h2>
+              <p className="text-sm text-gray-500 mt-1">خطوة أخيرة — 30 ثانية فقط</p>
+            </div>
+
+            {/* Pre-filled email & phone (read-only display) */}
+            <div className="bg-gray-50 rounded-lg p-3 space-y-1">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-gray-500">البريد:</span>
+                <span className="text-gray-800 font-medium" dir="ltr">{form.email}</span>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-gray-500">الجوال:</span>
+                <span className="text-gray-800 font-medium" dir="ltr">{form.phone}</span>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                الاسم الكامل *
+              </label>
+              <input
+                value={form.full_name}
+                onChange={(e) => setForm({ ...form, full_name: e.target.value })}
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-cyan-500 outline-none"
+                placeholder="مثال: محمد أحمد"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                اسم المنشأة *
+              </label>
+              <input
+                value={form.business_name_ar}
+                onChange={(e) => setForm({ ...form, business_name_ar: e.target.value })}
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-cyan-500 outline-none"
+                placeholder="مثال: مطعم الديرة"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                كلمة المرور *
+              </label>
+              <input
+                type="password"
+                value={form.password}
+                onChange={(e) => setForm({ ...form, password: e.target.value })}
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-cyan-500 outline-none"
+                dir="ltr"
+                minLength={8}
+                placeholder="8 أحرف على الأقل"
+                required
+              />
+            </div>
+
+            <button
+              onClick={handleRegister}
+              disabled={loading || !form.full_name || !form.business_name_ar || !form.password}
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-l from-cyan-600 to-blue-600 text-white rounded-xl text-sm font-bold hover:opacity-90 transition-opacity shadow-lg shadow-cyan-500/20 disabled:opacity-50"
+            >
+              {loading ? "جاري التسجيل..." : "ابدأ التجربة المجانية — 7 أيام"}
+              {!loading && <ArrowLeft className="w-4 h-4" />}
+            </button>
+
+            <div className="flex items-center justify-center gap-4 text-xs text-gray-400">
+              <span className="flex items-center gap-1">
+                <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />
+                بدون بطاقة
+              </span>
+              <span className="flex items-center gap-1">
+                <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />
+                تفعيل فوري
+              </span>
+              <span className="flex items-center gap-1">
+                <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />
+                إلغاء بأي وقت
+              </span>
+            </div>
+
+            <p className="text-center text-sm text-gray-500">
+              لديك حساب بالفعل؟{" "}
+              <a href="/login" className="text-cyan-600 hover:text-cyan-700 font-medium">
+                تسجيل الدخول
+              </a>
+            </p>
+          </div>
+        )}
+
+        {/* Step 1: Business Info (original wizard) */}
+        {!fromAds && step === "info" && (
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-4">
             <div className="flex items-center gap-2 mb-2">
               <Building2 className="w-5 h-5 text-cyan-600" />
@@ -274,8 +378,8 @@ function RegisterWizard() {
           </div>
         )}
 
-        {/* Step 2: Package selection */}
-        {step === "package" && (
+        {/* Step 2: Package selection (skipped for ads flow) */}
+        {!fromAds && step === "package" && (
           <div className="space-y-4">
             <div className="flex items-center gap-2 mb-2">
               <CreditCard className="w-5 h-5 text-cyan-600" />
@@ -372,7 +476,9 @@ function RegisterWizard() {
 export default function RegisterPage() {
   return (
     <I18nProvider>
-      <RegisterWizard />
+      <Suspense fallback={<div className="min-h-screen bg-gray-50" />}>
+        <RegisterWizard />
+      </Suspense>
     </I18nProvider>
   );
 }
