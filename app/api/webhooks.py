@@ -1,7 +1,9 @@
 import uuid
+from typing import Any
 
 import structlog
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
+from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth import verify_api_key
@@ -9,7 +11,7 @@ from app.config import get_settings
 from app.database import get_db
 from app.models import AnalysisResult, Review
 from app.schemas import GoogleReviewInput, GoogleReviewResponse
-from app.services.email import send_negative_review_alert
+from app.services.email import send_lead_notification_email, send_negative_review_alert
 from app.services.reply import generate_reply
 from app.services.sentiment import AnalysisError, analyze_reviews
 
@@ -179,3 +181,61 @@ async def receive_google_review(
         suggested_reply=suggested_reply,
         latency_ms=sentiment_latency,
     )
+
+
+# ── Google Ads Lead Form Webhook ──────────────────────────────────────
+
+
+class GoogleAdsColumnData(BaseModel):
+    column_id: str
+    string_value: str
+
+
+class GoogleAdsLeadPayload(BaseModel):
+    google_key: str
+    lead_id: str | None = None
+    campaign_id: str | None = None
+    gcl_id: str | None = None
+    adgroup_id: str | None = None
+    creative_id: str | None = None
+    user_column_data: list[GoogleAdsColumnData] = []
+
+
+@router.post("/google-ads-lead")
+async def receive_google_ads_lead(payload: GoogleAdsLeadPayload) -> dict[str, str]:
+    """
+    Receive a lead from Google Ads lead form extension.
+    Verifies the google_key and sends an email notification.
+    """
+    # Verify the webhook key
+    if not settings.google_ads_webhook_key or payload.google_key != settings.google_ads_webhook_key:
+        logger.warning("google_ads_lead_invalid_key", key=payload.google_key)
+        raise HTTPException(status_code=403, detail="Invalid webhook key")
+
+    # Extract user fields from column data
+    fields: dict[str, str] = {}
+    for col in payload.user_column_data:
+        fields[col.column_id] = col.string_value
+
+    name = fields.pop("FULL_NAME", "") or fields.pop("FIRST_NAME", "")
+    email = fields.pop("EMAIL", "")
+    phone = fields.pop("PHONE_NUMBER", "")
+
+    logger.info(
+        "google_ads_lead_received",
+        lead_id=payload.lead_id,
+        campaign_id=payload.campaign_id,
+        name=name,
+        email=email,
+    )
+
+    # Send email notification (non-blocking — never raises)
+    await send_lead_notification_email(
+        name=name,
+        email=email,
+        phone=phone,
+        campaign_id=payload.campaign_id,
+        extra_fields={k: v for k, v in fields.items() if v},
+    )
+
+    return {"status": "ok"}

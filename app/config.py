@@ -53,6 +53,9 @@ class Settings(BaseSettings):
     apify_api_token: str = ""
     apify_google_reviews_actor: str = "compass/google-maps-reviews-scraper"
 
+    # --- Google Ads Webhook ---
+    google_ads_webhook_key: str = ""
+
     # --- Limits ---
     max_batch_size: int = 50
 

@@ -331,6 +331,110 @@ async def send_negative_review_alert(
         log.error("negative_review_alert_failed", error=str(e), to=to_email)
 
 
+def _build_lead_notification_html(
+    name: str,
+    email: str,
+    phone: str,
+    campaign_id: str | None,
+    extra_fields: dict[str, str],
+) -> str:
+    """Build a styled HTML email for Google Ads lead notification."""
+    extra_rows = ""
+    for label, value in extra_fields.items():
+        if value:
+            extra_rows += f"""
+            <tr>
+              <td style="padding: 10px 0; color: #64748b; font-size: 13px; border-top: 1px solid #f1f5f9;">{label}</td>
+              <td style="padding: 10px 0; color: #1e293b; font-size: 14px; border-top: 1px solid #f1f5f9;">{value}</td>
+            </tr>"""
+
+    return f"""
+    <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 560px; margin: 0 auto; background: #f8fafc; padding: 24px;">
+      <div style="background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+        <div style="background: linear-gradient(135deg, #059669, #10b981); padding: 28px 24px; text-align: center;">
+          <div style="width: 44px; height: 44px; background: rgba(255,255,255,0.2); border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px;">
+            <span style="color: white; font-weight: bold; font-size: 20px;">L</span>
+          </div>
+          <h1 style="color: white; margin: 0; font-size: 20px; font-weight: 700;">New Lead from Google Ads</h1>
+          <p style="color: rgba(255,255,255,0.8); margin: 4px 0 0; font-size: 13px;">A potential customer submitted their info</p>
+        </div>
+
+        <div style="padding: 24px;">
+          <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+              <td style="padding: 10px 0; color: #64748b; font-size: 13px; width: 140px;">Name</td>
+              <td style="padding: 10px 0; color: #1e293b; font-size: 14px; font-weight: 600;">{name or "—"}</td>
+            </tr>
+            <tr>
+              <td style="padding: 10px 0; color: #64748b; font-size: 13px; border-top: 1px solid #f1f5f9;">Email</td>
+              <td style="padding: 10px 0; color: #1e293b; font-size: 14px; border-top: 1px solid #f1f5f9;">{email or "—"}</td>
+            </tr>
+            <tr>
+              <td style="padding: 10px 0; color: #64748b; font-size: 13px; border-top: 1px solid #f1f5f9;">Phone</td>
+              <td style="padding: 10px 0; color: #1e293b; font-size: 14px; border-top: 1px solid #f1f5f9;">{phone or "—"}</td>
+            </tr>
+            <tr>
+              <td style="padding: 10px 0; color: #64748b; font-size: 13px; border-top: 1px solid #f1f5f9;">Campaign ID</td>
+              <td style="padding: 10px 0; color: #1e293b; font-size: 14px; border-top: 1px solid #f1f5f9;">{campaign_id or "—"}</td>
+            </tr>
+            {extra_rows}
+          </table>
+        </div>
+
+        <div style="padding: 16px 24px; background: #f8fafc; border-top: 1px solid #e2e8f0; text-align: center;">
+          <p style="margin: 0; color: #94a3b8; font-size: 11px;">DialectIQ Lead Notification &mdash; d-iq.io</p>
+        </div>
+      </div>
+    </div>
+    """
+
+
+async def send_lead_notification_email(
+    name: str,
+    email: str,
+    phone: str,
+    campaign_id: str | None = None,
+    extra_fields: dict[str, str] | None = None,
+) -> None:
+    """Send email notification when a Google Ads lead arrives."""
+    settings = get_settings()
+
+    if not settings.smtp_username or not settings.smtp_password:
+        log.warning("email_skipped_no_smtp", reason="SMTP credentials not configured")
+        return
+
+    try:
+        html = _build_lead_notification_html(
+            name=name,
+            email=email,
+            phone=phone,
+            campaign_id=campaign_id,
+            extra_fields=extra_fields or {},
+        )
+
+        plain = (
+            f"New Lead from Google Ads\n\n"
+            f"Name: {name}\n"
+            f"Email: {email}\n"
+            f"Phone: {phone}\n"
+            f"Campaign ID: {campaign_id or '—'}\n"
+        )
+        if extra_fields:
+            for label, value in extra_fields.items():
+                plain += f"{label}: {value}\n"
+
+        await _send_email(
+            to=settings.admin_notification_email,
+            subject=f"New Google Ads Lead: {name or email or phone}",
+            plain=plain,
+            html=html,
+        )
+        log.info("lead_notification_sent", name=name, email=email)
+
+    except Exception as e:
+        log.error("lead_notification_failed", error=str(e))
+
+
 async def send_password_reset_email(email: str, code: str) -> None:
     """Send a password reset verification code to the user."""
     settings = get_settings()
