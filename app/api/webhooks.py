@@ -189,15 +189,21 @@ async def receive_google_review(
 class GoogleAdsColumnData(BaseModel):
     column_id: str
     string_value: str
+    column_name: str | None = None
 
 
 class GoogleAdsLeadPayload(BaseModel):
+    model_config = {"extra": "ignore"}
+
     google_key: str
     lead_id: str | None = None
-    campaign_id: str | None = None
+    campaign_id: int | str | None = None
     gcl_id: str | None = None
-    adgroup_id: str | None = None
-    creative_id: str | None = None
+    adgroup_id: int | str | None = None
+    creative_id: int | str | None = None
+    form_id: int | str | None = None
+    api_version: str | None = None
+    is_test: bool | None = None
     user_column_data: list[GoogleAdsColumnData] = []
 
 
